@@ -17,7 +17,7 @@ namespace ei_back.Application.Api.User
         private readonly ISignInUseCase _signInUseCase;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IStringLocalizer<AuthController> _stringLocalizer;
-        private readonly ILogger<FunTranslateController> _logger;
+        private readonly ILogger<AuthController> _logger;
         private readonly IChangePasswordUseCase _changePasswordUseCase;
 
 
@@ -25,7 +25,7 @@ namespace ei_back.Application.Api.User
             ISignInUseCase signInUseCase,
             IUnitOfWork unitOfWork,
             IStringLocalizer<AuthController> stringLocalizer,
-            ILogger<FunTranslateController> logger,
+            ILogger<AuthController> logger,
             IChangePasswordUseCase changePasswordUseCase)
         {
             _signInUseCase = signInUseCase;

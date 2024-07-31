@@ -1,5 +1,5 @@
 ﻿using ei_back.Infrastructure.Services.Client.Core;
-using ei_back.Infrastructure.Services.Dtos;
+using ei_back.Infrastructure.Services.Dtos.Response;
 
 namespace ei_back.Infrastructure.Services.Client.FunTranslateApiClient
 {

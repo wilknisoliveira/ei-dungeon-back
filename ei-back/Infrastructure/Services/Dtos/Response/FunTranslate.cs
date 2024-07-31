@@ -1,4 +1,4 @@
-﻿namespace ei_back.Infrastructure.Services.Dtos
+﻿namespace ei_back.Infrastructure.Services.Dtos.Response
 {
     public class FunTranslate
     {

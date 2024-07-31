@@ -20,6 +20,7 @@ namespace ei_back.Infrastructure.Exceptions
                 BadGatewayException badGatewayException => (StatusCodes.Status502BadGateway, badGatewayException.Message),
                 BadRequestException badRequestException => (StatusCodes.Status400BadRequest, badRequestException.Message),
                 NotFoundException notFoundException => (StatusCodes.Status404NotFound, notFoundException.Message),
+                NoContentException noContentException => (StatusCodes.Status204NoContent, noContentException.Message),
                 _ => (StatusCodes.Status500InternalServerError, "Something went wrong")
             };
 
