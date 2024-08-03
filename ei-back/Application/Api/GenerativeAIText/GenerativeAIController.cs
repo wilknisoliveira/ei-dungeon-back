@@ -1,5 +1,5 @@
-﻿using ei_back.Application.Api.Role;
-using ei_back.Application.Api.Role.Dtos;
+﻿using ei_back.Application.Api.GenerativeAIText.Dtos;
+using ei_back.Application.Api.Role;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;

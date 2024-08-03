@@ -1,4 +1,4 @@
-﻿namespace ei_back.Application.Api.Role.Dtos
+﻿namespace ei_back.Application.Api.GenerativeAIText.Dtos
 {
     public record PromptDto
     {
