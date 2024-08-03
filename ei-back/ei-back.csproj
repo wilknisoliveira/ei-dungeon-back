@@ -39,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Application\Api\GenerativeAIText\Dtos\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

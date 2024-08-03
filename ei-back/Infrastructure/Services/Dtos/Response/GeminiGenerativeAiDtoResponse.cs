@@ -1,14 +1,14 @@
-﻿namespace ei_back.Infrastructure.Services.Dtos.Request
+﻿namespace ei_back.Infrastructure.Services.Dtos.Response
 {
-    public record GeminiGenerativeAiRequest
+    public record GeminiGenerativeAiDtoResponse
     {
-        public List<Candidate> candidates;
-        public MetaData usageMetaData;
+        public List<Candidate> candidates {  get; set; }
+        public MetaData usageMetadata { get; set; }
     }
 
     public record Candidate
     {
-        public Content content {  get; set; }
+        public Content content { get; set; }
         public string finishReason { get; set; }
         public int index { get; set; }
         public List<SafetyRating> safetyRatings { get; set; }
@@ -16,7 +16,7 @@
 
     public record Content
     {
-        public List<Part> parts {  get; set; } 
+        public List<Part> parts { get; set; }
         public string role { get; set; }
     }
 

@@ -2,6 +2,6 @@
 {
     public interface IFunTranslateApiHttpService
     {
-        Task<string> GetValyrianTranslate(string request);
+        Task<string> GetValyrianTranslate(string request, CancellationToken cancellationToken);
     }
 }

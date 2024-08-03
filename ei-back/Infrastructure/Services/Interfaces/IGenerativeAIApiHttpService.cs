@@ -2,6 +2,6 @@
 {
     public interface IGenerativeAIApiHttpService
     {
-        Task<string> GenerateSimpleResponse(string prompt);
+        Task<string> GenerateSimpleResponse(string prompt, CancellationToken cancellationToken);
     }
 }

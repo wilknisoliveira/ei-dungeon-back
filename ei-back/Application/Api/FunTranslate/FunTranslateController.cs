@@ -29,7 +29,7 @@ namespace ei_back.Application.Api.FunTranslate
 
             _logger.LogInformation("API: Requesting translation to FunTranslate.");
 
-            return Ok(await _externalApiHttpService.GetValyrianTranslate(textRequest));
+            return Ok(await _externalApiHttpService.GetValyrianTranslate(textRequest, cancellationToken));
         }
     }
 }

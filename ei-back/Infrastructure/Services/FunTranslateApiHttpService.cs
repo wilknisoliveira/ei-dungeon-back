@@ -12,9 +12,9 @@ namespace ei_back.Infrastructure.Services
             _externalApiClient = new FunTranslateApiClient(httpClient);
         }
 
-        public async Task<string> GetValyrianTranslate(string request)
+        public async Task<string> GetValyrianTranslate(string request, CancellationToken cancellationToken)
         {
-            var response = await _externalApiClient.GetValyrianTranslate(request);
+            var response = await _externalApiClient.GetValyrianTranslate(request, cancellationToken);
             return response.contents.translated;
         }
     }

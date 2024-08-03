@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ei_back.Infrastructure.Services.Client.Core
 {
@@ -7,29 +6,25 @@ namespace ei_back.Infrastructure.Services.Client.Core
     {
         private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
 
-        public async Task<T?> Get<T>(string uri)
+        public async Task<T?> Get<T>(string uri, CancellationToken cancellationToken)
         {
-            var response = await _httpClient.GetAsync(uri);
-            response.EnsureSuccessStatusCode();
+            var response = await _httpClient.GetAsync(uri, cancellationToken);
 
-            var content = await response.Content.ReadAsStringAsync();
-            var deserialized = JsonSerializer.Deserialize<T>(content);
-
-            return deserialized;
+            return await Deserialize<T>(response, cancellationToken);
         }
 
-        public async Task<T?> Post<T, A>(string uri, A data)
+        public async Task<T?> Post<T, A>(string uri, A data, CancellationToken cancellationToken)
         {
-            var response = await _httpClient.PostAsJsonAsync(uri, data);
+            var response = await _httpClient.PostAsJsonAsync(uri, data, cancellationToken);
             
-            return await Deserialize<T>(response);
+            return await Deserialize<T>(response, cancellationToken);
         }
 
-        private static async Task<T?> Deserialize<T>(HttpResponseMessage response)
+        private static async Task<T?> Deserialize<T>(HttpResponseMessage response, CancellationToken cancellationToken)
         {
-            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            var content = await response.Content.ReadAsStringAsync();
+            response.EnsureSuccessStatusCode();
             var deserialized = JsonSerializer.Deserialize<T>(content);
 
             return deserialized;

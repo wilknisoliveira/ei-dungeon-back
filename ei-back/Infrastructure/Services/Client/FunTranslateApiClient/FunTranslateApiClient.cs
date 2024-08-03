@@ -9,9 +9,9 @@ namespace ei_back.Infrastructure.Services.Client.FunTranslateApiClient
         {
         }
 
-        public async Task<FunTranslate> GetValyrianTranslate(string request)
+        public async Task<FunTranslate> GetValyrianTranslate(string request, CancellationToken cancellationToken)
         {
-            return await Get<FunTranslate>($"https://api.funtranslations.com/translate/valyrian.json?text={request}");
+            return await Get<FunTranslate>($"https://api.funtranslations.com/translate/valyrian.json?text={request}", cancellationToken);
         }
     }
 }
