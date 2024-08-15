@@ -4,6 +4,7 @@ using ei_back.Infrastructure.Token;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 namespace ei_back.Domain.User
 {
@@ -40,10 +41,14 @@ namespace ei_back.Domain.User
 
             if (user.Roles != null)
             {
+                List<string> roles = new();
                 foreach (var role in user.Roles)
                 {
+                    roles.Add(role.Name);
                     claims.Add(new Claim(ClaimTypes.Role, role.Name.ToString()));
                 }
+
+                claims.Add(new Claim("roles", JsonSerializer.Serialize(roles)));
             }
 
             var accessToken = _tokenService.GenerateAccessToken(claims);
