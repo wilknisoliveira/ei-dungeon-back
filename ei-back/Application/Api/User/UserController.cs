@@ -13,8 +13,8 @@ namespace ei_back.Application.Api.User
     {
         private readonly ILogger<UserController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private ICreateUserUseCase _createUserUseCase;
-        private IGetUserUseCase _getUserUseCase;
+        private readonly ICreateUserUseCase _createUserUseCase;
+        private readonly IGetUserUseCase _getUserUseCase;
 
         public UserController(
             ILogger<UserController> logger,
@@ -31,7 +31,6 @@ namespace ei_back.Application.Api.User
         [HttpPost]
         [ProducesResponseType(typeof(UserDtoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] UserDtoRequest userDtoRequest, CancellationToken cancellationToken = default)
         {
             if (userDtoRequest == null) return BadRequest();

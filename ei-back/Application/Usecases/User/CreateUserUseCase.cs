@@ -26,11 +26,11 @@ namespace ei_back.Application.Usecases.User
         {
             var user = _mapper.Map<UserEntity>(userDtoRequest);
 
-            if (userDtoRequest.Roles != null)
-            {
-                var selectedRoles = await _roleService.FindSelectedRoles(userDtoRequest.Roles);
-                user.Roles.AddRange(selectedRoles);
-            }
+            var selectedRoles = await _roleService.FindSelectedRoles(
+            [
+                "CommonUser"
+            ]);
+            user.Roles.AddRange(selectedRoles);
 
             var userResponse = await _userService.CreateAsync(user);
 
