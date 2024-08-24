@@ -24,6 +24,6 @@ namespace ei_back.Domain.User
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
 
-        public List<GameEntity> Games { get; set; }
+        public List<GameEntity> Games { get; set; } = new();
     }
 }

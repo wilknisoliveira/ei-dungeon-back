@@ -17,5 +17,6 @@ namespace ei_back.Domain.User.Interfaces
         Task<UserEntity> FindByIdAsync(Guid userId);
         Task<UserEntity> FindUserAndRoles(Guid userId);
         UserEntity Update(UserEntity user);
+        Task<UserEntity?> FindByUserName(string userName);
     }
 }

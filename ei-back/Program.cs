@@ -1,4 +1,6 @@
 using ei_back.Application.Hubs;
+using ei_back.Application.Usecases.Game;
+using ei_back.Application.Usecases.Game.Interfaces;
 using ei_back.Application.Usecases.Role;
 using ei_back.Application.Usecases.Role.Interfaces;
 using ei_back.Application.Usecases.User;
@@ -7,6 +9,8 @@ using ei_back.Domain.Base;
 using ei_back.Domain.Base.Interfaces;
 using ei_back.Domain.Game;
 using ei_back.Domain.Game.Interfaces;
+using ei_back.Domain.Play;
+using ei_back.Domain.Play.Interfaces;
 using ei_back.Domain.Player;
 using ei_back.Domain.Player.Interfaces;
 using ei_back.Domain.Role;
@@ -177,6 +181,7 @@ builder.Services.AddScoped<ICreateUserUseCase,  CreateUserUseCase>();
 builder.Services.AddScoped<IGetUserUseCase, GetUserUseCase>();
 builder.Services.AddScoped<ISignInUseCase, SigninUseCase>();
 builder.Services.AddScoped<IChangePasswordUseCase, ChangePasswordUseCase>();
+builder.Services.AddScoped<IGetUserNameUseCase, GetUserNameUseCase>();
 //Role
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IRoleService, RoleService>();
@@ -189,6 +194,12 @@ builder.Services.AddScoped<IPlayerService, PlayerService>();
 //Game
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
+
+//Play
+builder.Services.AddScoped<IPlayRepository, PlayRepository>();
+builder.Services.AddScoped<IPlayService, PlayService>();
+
 
 
 

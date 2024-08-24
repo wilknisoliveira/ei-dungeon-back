@@ -13,5 +13,12 @@ namespace ei_back.Domain.Game
             _gameRepository = gameRepository;
             _mapper = mapper;
         }
+
+        public async Task<GameEntity> CreateAsync(GameEntity game)
+        {
+            game.SetCreatedDate(DateTime.Now);
+
+            return await _gameRepository.CreateAsync(game);
+        }
     }
 }

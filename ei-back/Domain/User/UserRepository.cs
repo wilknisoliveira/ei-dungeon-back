@@ -36,12 +36,17 @@ namespace ei_back.Domain.User
             return result;
         }
 
-        public async Task<UserEntity> GetUserAndRolesAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<UserEntity?> GetUserAndRolesAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _context.Users
                 .Include(u => u.Roles)
                 .SingleOrDefaultAsync(u => u.Id.Equals(userId), cancellationToken);
         }
 
+        public async Task<UserEntity?> FindByUserName(string userName, CancellationToken cancellationToken = default)
+        {
+            return await _context.Users
+                .SingleOrDefaultAsync(x => x.UserName.Equals(userName), cancellationToken);
+        }
     }
 }

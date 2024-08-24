@@ -83,5 +83,10 @@ namespace ei_back.Domain.User
             user.UpdatedAt = DateTime.Now;
             return _userRepository.Update(user);
         }
+
+        public async Task<UserEntity?> FindByUserName(string userName)
+        {
+            return await _userRepository.FindByUserName(userName);
+        }
     }
 }

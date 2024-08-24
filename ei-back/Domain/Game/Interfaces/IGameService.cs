@@ -2,5 +2,6 @@
 {
     public interface IGameService
     {
+        Task<GameEntity> CreateAsync(GameEntity game);
     }
 }

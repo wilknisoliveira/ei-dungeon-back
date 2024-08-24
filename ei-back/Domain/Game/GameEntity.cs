@@ -14,6 +14,12 @@ namespace ei_back.Domain.Game
             Name = name;
         }
 
+        public GameEntity(string name, string systemGame)
+        {
+            Name = name;
+            SystemGame = systemGame;
+        }
+
         public string Name { get; private set; }
         public UserEntity OwnerUser { get; private set; }
         public Guid OwnerUserId { get; private set; }
@@ -22,5 +28,22 @@ namespace ei_back.Domain.Game
 
         public List<PlayerEntity> Players { get; private set; }
         public List<PlayEntity> Plays { get; private set; }
+
+        public void SetOwnerUser(UserEntity user)
+        {
+            OwnerUser = user;
+            OwnerUserId = user.Id;
+        }
+
+        public void SetPlayers(List<PlayerEntity> players)
+        {
+            Players = players;
+        }
+
+        public void SetCreatedDate(DateTime createdDate)
+        {
+            CreatedAt = createdDate;
+            UpdatedAt = createdDate;
+        }
     }
 }

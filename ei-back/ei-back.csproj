@@ -39,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Application\Api\Play\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
