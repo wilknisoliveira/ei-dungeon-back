@@ -1,5 +1,6 @@
 ﻿using ei_back.Domain.Base;
 using ei_back.Domain.Game;
+using ei_back.Domain.Play;
 
 namespace ei_back.Domain.Player
 {
@@ -19,11 +20,14 @@ namespace ei_back.Domain.Player
         public GameEntity Game { get; private set; }
         public Guid GameId { get; private set; }
 
+
+        public List<PlayEntity> Plays { get; private set; }
     }
 
     public enum PlayerType
     {
         RealPlayer = 0,
-        ArtificialPlayer = 1
+        ArtificialPlayer = 1,
+        Master = 2
     }
 }

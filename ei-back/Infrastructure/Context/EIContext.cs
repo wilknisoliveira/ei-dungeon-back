@@ -1,4 +1,5 @@
 ﻿using ei_back.Domain.Game;
+using ei_back.Domain.Play;
 using ei_back.Domain.Player;
 using ei_back.Domain.Role;
 using ei_back.Domain.User;
@@ -16,6 +17,7 @@ namespace ei_back.Infrastructure.Context
         public DbSet<RoleEntity> Roles { get; set; }
         public DbSet<PlayerEntity> Players { get; set; }
         public DbSet<GameEntity> Games { get; set; }
+        public DbSet<PlayEntity> Plays { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
