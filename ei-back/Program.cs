@@ -5,6 +5,8 @@ using ei_back.Application.Usecases.User;
 using ei_back.Application.Usecases.User.Interfaces;
 using ei_back.Domain.Base;
 using ei_back.Domain.Base.Interfaces;
+using ei_back.Domain.Game;
+using ei_back.Domain.Game.Interfaces;
 using ei_back.Domain.Player;
 using ei_back.Domain.Player.Interfaces;
 using ei_back.Domain.Role;
@@ -184,6 +186,10 @@ builder.Services.AddScoped<IGetAllRoleUseCase, GetAllRoleUseCase>();
 //Player
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
+//Game
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<IGameService, GameService>();
+
 
 
 var app = builder.Build();

@@ -1,4 +1,5 @@
 ﻿using ei_back.Domain.Base;
+using ei_back.Domain.Game;
 using ei_back.Domain.Role;
 using System.ComponentModel.DataAnnotations;
 
@@ -21,5 +22,8 @@ namespace ei_back.Domain.User
         public List<RoleEntity> Roles { get; } = new();
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
+
+
+        public List<GameEntity> Games { get; set; }
     }
 }

@@ -15,6 +15,12 @@ namespace ei_back.Infrastructure.Context.Map
             builder.Property(x => x.Name).HasColumnName("name");
             builder.Property(x => x.Description).HasColumnName("description");
             builder.Property(x => x.Type).HasColumnName("type");
+            builder.Property(x => x.GameId).HasColumnName("game_id");
+
+            builder.HasOne(x => x.Game)
+                .WithMany(x => x.Players)
+                .HasForeignKey(x => x.GameId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
