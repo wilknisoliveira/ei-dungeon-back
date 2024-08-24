@@ -5,6 +5,8 @@ using ei_back.Application.Usecases.User;
 using ei_back.Application.Usecases.User.Interfaces;
 using ei_back.Domain.Base;
 using ei_back.Domain.Base.Interfaces;
+using ei_back.Domain.Player;
+using ei_back.Domain.Player.Interfaces;
 using ei_back.Domain.Role;
 using ei_back.Domain.Role.Interfaces;
 using ei_back.Domain.User;
@@ -179,7 +181,9 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IApplyRolesUseCase, ApplyRolesUseCase>();
 builder.Services.AddScoped<ICreateRoleUseCase, CreateRoleUseCase>();
 builder.Services.AddScoped<IGetAllRoleUseCase, GetAllRoleUseCase>();
-
+//Player
+builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
 
 
 var app = builder.Build();

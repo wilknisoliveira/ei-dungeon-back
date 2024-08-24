@@ -1,7 +1,7 @@
-﻿using ei_back.Domain.Role;
+﻿using ei_back.Domain.Player;
+using ei_back.Domain.Role;
 using ei_back.Domain.User;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 
 namespace ei_back.Infrastructure.Context
 {
@@ -13,6 +13,7 @@ namespace ei_back.Infrastructure.Context
 
         public DbSet<UserEntity> Users { get; set; }
         public DbSet<RoleEntity> Roles { get; set; }
+        public DbSet<PlayerEntity> Players { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
