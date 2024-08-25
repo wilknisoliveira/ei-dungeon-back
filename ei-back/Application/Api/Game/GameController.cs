@@ -46,7 +46,7 @@ namespace ei_back.Application.Api.Game
 
             _logger.LogInformation($"Creating {gameDtoRequest.Name} game to user {userName}...");
 
-            var gameDtoResponse = await _createGameUseCase.Handler(gameDtoRequest, userName);
+            var gameDtoResponse = await _createGameUseCase.Handler(gameDtoRequest, userName, cancellationToken);
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
 
             if (changedItems == 0)

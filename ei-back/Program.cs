@@ -191,6 +191,7 @@ builder.Services.AddScoped<IGetAllRoleUseCase, GetAllRoleUseCase>();
 //Player
 builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
+builder.Services.AddScoped<IPlayerFactory, PlayerFactory>();
 //Game
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGameService, GameService>();

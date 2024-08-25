@@ -14,6 +14,13 @@ namespace ei_back.Domain.Player
             GameId = gameId;
         }
 
+        public PlayerEntity(string name, string description, PlayerType type)
+        {
+            Name = name;
+            Description = description;
+            Type = type;
+        }
+
         public string Name { get; private set; }
         public string Description { get; private set; }
         public PlayerType Type { get; private set; }
@@ -22,6 +29,13 @@ namespace ei_back.Domain.Player
 
 
         public List<PlayEntity> Plays { get; private set; }
+
+
+        public void SetGame(GameEntity game)
+        {
+            Game = game;
+            GameId = game.Id;
+        }
     }
 
     public enum PlayerType

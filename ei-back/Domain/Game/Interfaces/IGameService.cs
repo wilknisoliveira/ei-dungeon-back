@@ -2,6 +2,6 @@
 {
     public interface IGameService
     {
-        Task<GameEntity> CreateAsync(GameEntity game);
+        Task<GameEntity> CreateAsync(GameEntity game, CancellationToken cancellationToken);
     }
 }
