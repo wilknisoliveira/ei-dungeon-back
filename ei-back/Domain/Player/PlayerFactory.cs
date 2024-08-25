@@ -27,7 +27,7 @@ namespace ei_back.Domain.Player
 
             if (numberOfArtificalPlayers > 0)
             {
-                var iaResponse = await _generativeAIApiHttpService.GenerateSimpleResponse(PlayersGeneratorPrompt(), cancellationToken);
+                var iaResponse = await _generativeAIApiHttpService.GenerateSimpleResponse(PlayersGeneratorPrompt(game.SystemGame), cancellationToken);
 
                 if (iaResponse.IsNullOrEmpty())
                 {
@@ -63,9 +63,9 @@ namespace ei_back.Domain.Player
             return players;
         }
 
-        private static string PlayersGeneratorPrompt()
+        private static string PlayersGeneratorPrompt(string systemGame)
         {
-            return "Gere a seguinte quantidade de personagens aleatórios e jogáveis para o sistema D&D 5e: 3.  <character-name-{number}>Insira exclusivamente o nome gerado para o personagem neste espaço. Nenhuma outra palavra, frase ou caractere deve ser adicionado dentro destes delimitadores.</character-name-{number}> <content-{number}>Insira todas as informações do personagem estritamente dentro desta seção. Absolutamente nada além disso deve ser incluído dentro destes delimitadores. As informações podem conter: raça, classe, background, alinhamento, habilidades, aparência física, história, personalidade, itens e motivação. </content-{number}> IMPORTANTE: A resposta à este prompt não deve conter nenhuma informação, texto ou caractere fora dos delimitadores. Não adicione nenhuma informação, texto ou caractere a mais do que o solicitado dentro dos delimitadores.";
+            return $"Gere a seguinte quantidade de personagens aleatórios e jogáveis para o sistema {systemGame}: 3. Cada personagem irá compor uma estrutura <character-name-'number'></character-name-'number'> <content-'number'></content-'number'>. <character-name-'number'>Insira exclusivamente o nome gerado para o personagem neste espaço. Nenhuma outra palavra, frase ou caractere deve ser adicionado dentro destes delimitadores.</character-name-'number'> <content-'number'>Insira todas as informações do personagem estritamente dentro desta seção. Absolutamente nada além disso deve ser incluído dentro destes delimitadores. As informações podem conter: raça, classe, background, alinhamento, habilidades, aparência física, história, personalidade, itens e motivação. </content-'number'> IMPORTANTE: A resposta à este prompt não deve conter nenhuma informação, texto ou caractere fora dos delimitadores. Não adicione nenhuma informação, texto ou caractere a mais do que o solicitado dentro dos delimitadores.";
         }
     }
 }
