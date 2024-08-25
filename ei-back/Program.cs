@@ -168,7 +168,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 builder.Services.AddScoped<IFunTranslateApiHttpService, FunTranslateApiHttpService>();
 builder.Services.AddScoped<IFunTranslateApiClient, FunTranslateApiClient>();
 builder.Services.AddScoped<IGenerativeAIApiHttpService, GenerativeAIApiHttpService>();
-builder.Services.AddScoped<IGenerativeAIApiClient, GenerativeAIApiClient>();
+builder.Services.AddScoped<IGenerativeAIApiClient, OpenAIApiClient>();
 //Base
 builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ei_back.Infrastructure.Services.Client.GenerativeAIApiClient
 {
-    public class GenerativeAIApiClient(HttpClient httpClient, IConfiguration configuration) : ExternalApiWebClient(httpClient), IGenerativeAIApiClient
+    public class GeminiApiClient(HttpClient httpClient, IConfiguration configuration) : ExternalApiWebClient(httpClient), IGenerativeAIApiClient
     {
         private readonly string _host = configuration["Gateways:GeminiGenerativeApi"] ?? "";
         private readonly string _apiKey = configuration["keys:GeminiApiKey"] ?? "";
