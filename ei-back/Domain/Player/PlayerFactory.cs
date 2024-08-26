@@ -22,7 +22,7 @@ namespace ei_back.Domain.Player
         {
             List<PlayerEntity> players =
             [
-                new("Master", "Master Player", PlayerType.Master)
+                new("Table Master", "RPG Table Master", PlayerType.Master)
             ];
 
             if (numberOfArtificalPlayers > 0)
@@ -40,21 +40,25 @@ namespace ei_back.Domain.Player
                 for (int i = 1; i <= numberOfArtificalPlayers; i++)
                 {
                     string namePattern = @$"<character-name-{i}>(.*?)<\/character-name-{i}>";
-                    Match nameMatch = Regex.Match(iaResponse, namePattern);
+                    Match nameMatch = Regex.Match(iaResponse, namePattern, RegexOptions.Singleline);
 
                     string contentPattern = @$"<content-{i}>(.*?)<\/content-{i}>";
-                    Match contentMatch = Regex.Match(iaResponse, contentPattern);
+                    Match contentMatch = Regex.Match(iaResponse, contentPattern, RegexOptions.Singleline);
 
                     if (nameMatch.Success && contentMatch.Success)
                     {
-                        players.Add(new(nameMatch.Groups[1].Value, contentMatch.Groups[1].Value, PlayerType.ArtificialPlayer));
+                        var playerName = nameMatch.Groups[1].Value.Replace("\n", "");
+                        var playerContent = contentMatch.Groups[1].Value;
+
+                        if (playerName.IsNullOrEmpty() || playerContent.IsNullOrEmpty())
+                            ConvertRegexError();
+
+                        var player = new PlayerEntity(playerName, playerContent, PlayerType.ArtificialPlayer);
+                        player.SetCreatedDate(DateTime.Now);
+                        players.Add(player);
                     }
                     else
-                    {
-                        var errorMessage = "The gateway content is out of prompt pattern";
-                        _logger.LogError(errorMessage);
-                        throw new Exception(errorMessage);
-                    }
+                        ConvertRegexError();
                 }
             }
 
@@ -66,6 +70,13 @@ namespace ei_back.Domain.Player
         private static string PlayersGeneratorPrompt(int quantity, string systemGame)
         {
             return $"Gere {quantity} personagens aleatórios e jogáveis para o sistema {systemGame}. Cada personagem deve seguir a estrutura com delimitadores: <character-name-X>Insira aqui o conteúdo</character-name-X> <content-X>Insira aqui o conteúdo</content-X>. <character-name-X> deve conter apenas o nome do personagem. <content-X> deve conter todas as informações do personagem, incluindo raça, classe, background, alinhamento, habilidades, aparência física, história, personalidade, itens e motivação. Não inclua nada fora dos delimitadores.";
+        }
+
+        private void ConvertRegexError()
+        {
+            var errorMessage = "The gateway content is out of prompt pattern";
+            _logger.LogError(errorMessage);
+            throw new InternalServerErrorException(errorMessage);
         }
     }
 }

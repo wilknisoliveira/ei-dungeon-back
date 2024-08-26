@@ -3,6 +3,7 @@ using ei_back.Application.Api.Game.Dtos;
 using ei_back.Application.Usecases.Game.Interfaces;
 using ei_back.Domain.Game;
 using ei_back.Domain.Game.Interfaces;
+using ei_back.Domain.Player;
 using ei_back.Domain.Player.Interfaces;
 using ei_back.Domain.User.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
@@ -36,8 +37,13 @@ namespace ei_back.Application.Usecases.Game
                 throw new NotFoundException($"No user found to user name {userName}.");
             game.SetOwnerUser(user);
 
+            var realPlayer = new PlayerEntity(gameDtoRequest.CharacterName, gameDtoRequest.CharacterDescription, PlayerType.RealPlayer);
+            realPlayer.SetCreatedDate(DateTime.Now);
+
             var artificialPlayersAndMaster = await _playerFactory
                 .BuildArtificialPlayersAndMaster(gameDtoRequest.NumberOfArtificialPlayers, game, cancellationToken);
+
+            artificialPlayersAndMaster.Add(realPlayer);
             game.SetPlayers(artificialPlayersAndMaster);
 
             var gameResponse = await _gameService.CreateAsync(game, cancellationToken);

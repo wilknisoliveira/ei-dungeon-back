@@ -39,11 +39,5 @@ namespace ei_back.Domain.Game
         {
             Players = players;
         }
-
-        public void SetCreatedDate(DateTime createdDate)
-        {
-            CreatedAt = createdDate;
-            UpdatedAt = createdDate;
-        }
     }
 }

@@ -8,5 +8,16 @@
 
         public DateTime UpdatedAt { get; set; }
 
+        public void SetCreatedDate(DateTime createdDate)
+        {
+            CreatedAt = createdDate;
+            UpdatedAt = createdDate;
+        }
+
+        public void SetUpdatedDate(DateTime updatedDate)
+        {
+            UpdatedAt= updatedDate;
+        }
+
     }
 }
