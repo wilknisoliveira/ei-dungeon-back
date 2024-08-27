@@ -1,6 +1,7 @@
 ﻿using ei_back.Application.Api.Game.Dtos;
 using ei_back.Application.Usecases.Game.Interfaces;
 using ei_back.Application.Usecases.User.Interfaces;
+using ei_back.Infrastructure.Context;
 using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,17 +17,20 @@ namespace ei_back.Application.Api.Game
         private readonly IUnitOfWork _unitOfWork;
         private readonly ICreateGameUseCase _createGameUseCase;
         private readonly IGetUserNameUseCase _getUserNameUseCase;
+        private readonly IGetGamesUseCase _getGamesUseCase;
 
         public GameController(
             ILogger<GameController> logger,
             IUnitOfWork unitOfWork,
             ICreateGameUseCase createGameUseCase,
-            IGetUserNameUseCase getUserNameUseCase)
+            IGetUserNameUseCase getUserNameUseCase,
+            IGetGamesUseCase getGamesUseCase)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _createGameUseCase = createGameUseCase;
             _getUserNameUseCase = getUserNameUseCase;
+            _getGamesUseCase = getGamesUseCase;
         }
 
         [HttpPost]
@@ -59,6 +63,32 @@ namespace ei_back.Application.Api.Game
             _logger.LogInformation($"Game {gameDtoRequest.Name} created.");
 
             return Ok(gameDtoResponse);
+        }
+
+        [HttpGet("{sortDirection}/{pageSize}/{page}")]
+        [ProducesResponseType(typeof(PagedSearchDto<GameDtoResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "Admin, CommonUser")]
+        public async Task<IActionResult> Get(
+            string sortDirection,
+            int pageSize,
+            int page,
+            CancellationToken cancellationToken)
+        {
+            var userName = _getUserNameUseCase.Handler(User);
+
+            if (userName.IsNullOrEmpty())
+            {
+                var errorMessage = "Something went wrong while attempting to get the user logged credential.";
+                _logger.LogError(errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+            }
+
+            _logger.LogInformation($"Get the list game to user {userName}");
+
+            var response = await _getGamesUseCase.Handler(sortDirection, pageSize, page, userName, cancellationToken);
+
+            return Ok(response);
         }
     }
 }

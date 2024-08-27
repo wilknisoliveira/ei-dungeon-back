@@ -185,5 +185,55 @@ namespace ei_back.Domain.Base
         {
             return await _dbSet.AnyAsync(g => g.Id.Equals(id), cancellationToken);
         }
+
+        public async Task<List<T>> FindWithPagedSearchAsync(string sort, int size, int page, int offset, Guid id, string column, string table, CancellationToken cancellationToken = default)
+        {
+            string query = $@"SELECT * FROM {table} t WHERE t.{column} = '{id}' ORDER BY t.{column} {sort} LIMIT {size} OFFSET {offset} ";
+
+            return await _dbSet.FromSqlRaw<T>(query).ToListAsync();
+        }
+
+        public async Task<List<T>> FindWithPagedSearchAsync(string sort, int size, int page, int offset, int number, string column, string table, CancellationToken cancellationToken = default)
+        {
+            string query = $@"SELECT * FROM {table} t WHERE t.{column} = {number} ORDER BY t.{column} {sort} LIMIT {size} OFFSET {offset} ";
+
+            return await _dbSet.FromSqlRaw<T>(query).ToListAsync();
+        }
+
+        public async Task<int> GetCountAsync(Guid id, string column, string table, CancellationToken cancellationToken = default)
+        {
+            string query = $@"SELECT COUNT(*) FROM {table} t WHERE t.{column} = '{id}'";
+
+            var result = "";
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+                    var response = await command.ExecuteScalarAsync();
+                    result = response.ToString();
+                }
+            }
+            return int.Parse(result);
+        }
+
+        public async Task<int> GetCountAsync(int number, string column, string table, CancellationToken cancellationToken = default)
+        {
+            string query = $@"SELECT COUNT(*) FROM {table} t WHERE t.{column} = {number}";
+
+            var result = "";
+            using (var connection = _context.Database.GetDbConnection())
+            {
+                connection.Open();
+                using (var command = connection.CreateCommand())
+                {
+                    command.CommandText = query;
+                    var response = await command.ExecuteScalarAsync();
+                    result = response.ToString();
+                }
+            }
+            return int.Parse(result);
+        }
     }
 }

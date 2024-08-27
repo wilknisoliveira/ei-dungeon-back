@@ -196,6 +196,7 @@ builder.Services.AddScoped<IPlayerFactory, PlayerFactory>();
 builder.Services.AddScoped<IGameRepository, GameRepository>();
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
+builder.Services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
 
 //Play
 builder.Services.AddScoped<IPlayRepository, PlayRepository>();
