@@ -16,12 +16,14 @@ namespace ei_back.Domain.Game
             _mapper = mapper;
         }
 
+
         public async Task<GameEntity> CreateAsync(GameEntity game, CancellationToken cancellationToken)
         {
             game.SetCreatedDate(DateTime.Now);
 
             return await _gameRepository.CreateAsync(game, cancellationToken);
         }
+
 
         public async Task<PagedSearchDto<GameDtoResponse>> FindWithPagedSearch(
             Guid userId,
@@ -57,6 +59,12 @@ namespace ei_back.Domain.Game
                 TotalResults = totalResults
             };
 
+        }
+
+
+        public async Task<bool> CheckIfExistGameByUser(Guid gameId, Guid OwnerUserId, CancellationToken cancellationToken)
+        {
+            return await _gameRepository.CheckIfExistGameByUser(gameId, OwnerUserId, cancellationToken);
         }
     }
 }

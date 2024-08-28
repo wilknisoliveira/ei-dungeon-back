@@ -15,5 +15,6 @@ namespace ei_back.Domain.Game.Interfaces
             int offset,
             int page,
             CancellationToken cancellationToken);
+        Task<bool> CheckIfExistGameByUser(Guid gameId, Guid OwnerUserId, CancellationToken cancellationToken);
     }
 }

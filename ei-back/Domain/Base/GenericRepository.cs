@@ -74,7 +74,7 @@ namespace ei_back.Domain.Base
         {
             string query = $@"SELECT * FROM {table} t WHERE 1 = 1";
             if (!string.IsNullOrWhiteSpace(name)) query = query + $" AND t.{column} ILIKE '%{name}%' ";
-            query += $" ORDER BY t.{column} {sort} LIMIT {size} OFFSET {offset} ";
+            query += $" ORDER BY t.updated_at {sort} LIMIT {size} OFFSET {offset} ";
 
             return _dbSet.FromSqlRaw<T>(query).ToList();
         }
@@ -91,7 +91,7 @@ namespace ei_back.Domain.Base
         {
             string query = $@"SELECT * FROM {table} t WHERE 1 = 1";
             if (!string.IsNullOrWhiteSpace(name)) query = query + $" AND t.{column} ILIKE '%{name}%' ";
-            query += $" ORDER BY t.{column} {sort} LIMIT {size} OFFSET {offset} ";
+            query += $" ORDER BY t.updated_at {sort} LIMIT {size} OFFSET {offset} ";
 
             return await _dbSet.FromSqlRaw<T>(query).ToListAsync();
         }
@@ -188,14 +188,14 @@ namespace ei_back.Domain.Base
 
         public async Task<List<T>> FindWithPagedSearchAsync(string sort, int size, int page, int offset, Guid id, string column, string table, CancellationToken cancellationToken = default)
         {
-            string query = $@"SELECT * FROM {table} t WHERE t.{column} = '{id}' ORDER BY t.{column} {sort} LIMIT {size} OFFSET {offset} ";
+            string query = $@"SELECT * FROM {table} t WHERE t.{column} = '{id}' ORDER BY t.updated_at {sort} LIMIT {size} OFFSET {offset} ";
 
             return await _dbSet.FromSqlRaw<T>(query).ToListAsync();
         }
 
         public async Task<List<T>> FindWithPagedSearchAsync(string sort, int size, int page, int offset, int number, string column, string table, CancellationToken cancellationToken = default)
         {
-            string query = $@"SELECT * FROM {table} t WHERE t.{column} = {number} ORDER BY t.{column} {sort} LIMIT {size} OFFSET {offset} ";
+            string query = $@"SELECT * FROM {table} t WHERE t.{column} = {number} ORDER BY t.updated_at {sort} LIMIT {size} OFFSET {offset} ";
 
             return await _dbSet.FromSqlRaw<T>(query).ToListAsync();
         }

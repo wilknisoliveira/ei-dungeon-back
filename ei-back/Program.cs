@@ -1,6 +1,8 @@
 using ei_back.Application.Hubs;
 using ei_back.Application.Usecases.Game;
 using ei_back.Application.Usecases.Game.Interfaces;
+using ei_back.Application.Usecases.Play;
+using ei_back.Application.Usecases.Play.Interfaces;
 using ei_back.Application.Usecases.Role;
 using ei_back.Application.Usecases.Role.Interfaces;
 using ei_back.Application.Usecases.User;
@@ -201,6 +203,7 @@ builder.Services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
 //Play
 builder.Services.AddScoped<IPlayRepository, PlayRepository>();
 builder.Services.AddScoped<IPlayService, PlayService>();
+builder.Services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
 
 
 

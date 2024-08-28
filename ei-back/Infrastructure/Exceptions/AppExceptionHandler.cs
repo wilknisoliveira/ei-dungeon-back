@@ -22,6 +22,7 @@ namespace ei_back.Infrastructure.Exceptions
                 NotFoundException notFoundException => (StatusCodes.Status404NotFound, notFoundException.Message),
                 NoContentException noContentException => (StatusCodes.Status204NoContent, noContentException.Message),
                 InternalServerErrorException internalServerErrorException => (StatusCodes.Status500InternalServerError, internalServerErrorException.Message),
+                UnauthorizedException unauthorizedException => (StatusCodes.Status401Unauthorized, unauthorizedException.Message),
                 _ => (StatusCodes.Status500InternalServerError, "Something went wrong")
             };
 

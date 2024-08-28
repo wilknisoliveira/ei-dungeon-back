@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using ei_back.Application.Api.Game.Dtos;
+using ei_back.Application.Api.Play.Dtos;
 using ei_back.Application.Api.Role.Dtos;
 using ei_back.Application.Api.User.Dtos;
 using ei_back.Domain.Game;
+using ei_back.Domain.Play;
 using ei_back.Domain.Role;
 using ei_back.Domain.User;
 
@@ -32,6 +34,9 @@ namespace ei_back.Infrastructure.Mappings
                 .ForMember(dest => dest.Players, opt => opt.Ignore())
                 .ForMember(dest => dest.Plays, opt => opt.Ignore());
             CreateMap<GameEntity, GameDtoResponse>();
+
+            //Play
+            CreateMap<PlayEntity, PlayDtoResponse>();
         }
     }
 }
