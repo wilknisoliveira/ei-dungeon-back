@@ -36,9 +36,9 @@ namespace ei_back.Application.Usecases.Play
             var pagedSearchDto = new PagedSearchDto<PlayDtoResponse>();
             var size = pagedSearchDto.ValidateSize(pageSize);
 
-            var plays = await _playService.FindWithPagedSearch(gameId, size, cancellationToken);
+            pagedSearchDto = await _playService.FindWithPagedSearch(gameId, size, cancellationToken);
 
-            return plays;
+            return pagedSearchDto;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ei_back.Domain.Base;
 using ei_back.Domain.Game;
 using ei_back.Domain.Play;
+using System.ComponentModel;
 
 namespace ei_back.Domain.Player
 {
@@ -38,10 +39,10 @@ namespace ei_back.Domain.Player
         }
     }
 
-    public enum PlayerType
+    public enum PlayerType : short
     {
-        RealPlayer = 0,
-        ArtificialPlayer = 1,
-        Master = 2
+        [Description("RealPlayer")] RealPlayer = 0,
+        [Description("ArtificialPlayer")] ArtificialPlayer = 1,
+        [Description("Master")] Master = 2
     }
 }
