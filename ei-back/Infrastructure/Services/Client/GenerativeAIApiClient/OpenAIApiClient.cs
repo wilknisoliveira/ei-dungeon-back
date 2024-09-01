@@ -1,4 +1,5 @@
-﻿using ei_back.Infrastructure.Services.Client.Core;
+﻿using ei_back.Domain.Prompt.Interfaces;
+using ei_back.Infrastructure.Services.Client.Core;
 using ei_back.Infrastructure.Services.Dtos.Request;
 using ei_back.Infrastructure.Services.Dtos.Response;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +23,30 @@ namespace ei_back.Infrastructure.Services.Client.GenerativeAIApiClient
 
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers
                 .AuthenticationHeaderValue("Bearer", _apiToken);
+        }
+
+        public async Task<string> GetResponseWithRoleBase(List<IAiPrompt> prompts, CancellationToken cancellationToken)
+        {
+            List<Message> messages = [];
+            foreach (var prompt in prompts)
+            {
+                messages.Add(new()
+                {
+                    role = prompt.Role,
+                    content = prompt.Content,
+                });
+            }
+
+            var requestBody = new OpenAiDtoRequest()
+            {
+                model = _openAiModel,
+                messages = messages,
+                temperature = 0.7m
+            };
+
+            var response = await Post<OpenAiDtoResponse, OpenAiDtoRequest>(_host, requestBody, cancellationToken);
+
+            return response?.choices?.FirstOrDefault()?.message?.content ?? "";
         }
 
         public async Task<string> GetSimpleResponse(string prompt, CancellationToken cancellationToken)

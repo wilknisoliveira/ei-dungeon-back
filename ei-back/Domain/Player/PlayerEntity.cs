@@ -37,6 +37,11 @@ namespace ei_back.Domain.Player
             Game = game;
             GameId = game.Id;
         }
+
+        public string InfoToString()
+        {
+            return $"PlayerId: {Id} \nPlayerName: {Name} \nPlayerDescription: {Description}\n";
+        }
     }
 
     public enum PlayerType : short

@@ -15,6 +15,8 @@ using ei_back.Domain.Play;
 using ei_back.Domain.Play.Interfaces;
 using ei_back.Domain.Player;
 using ei_back.Domain.Player.Interfaces;
+using ei_back.Domain.Prompt;
+using ei_back.Domain.Prompt.Interfaces;
 using ei_back.Domain.Role;
 using ei_back.Domain.Role.Interfaces;
 using ei_back.Domain.User;
@@ -203,10 +205,12 @@ builder.Services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
 //Play
 builder.Services.AddScoped<IPlayRepository, PlayRepository>();
 builder.Services.AddScoped<IPlayService, PlayService>();
+builder.Services.AddScoped<IPlayFactory, PlayFactory>();
 builder.Services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
 builder.Services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
 
-
+//Prompt
+//builder.Services.AddScoped<IAiPrompt, AiPrompt>();
 
 
 var app = builder.Build();

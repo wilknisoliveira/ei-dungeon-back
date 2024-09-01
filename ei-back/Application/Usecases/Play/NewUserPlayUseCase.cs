@@ -38,6 +38,14 @@ namespace ei_back.Application.Usecases.Play
             var playDtoResponse = _mapper.Map<PlayDtoResponse>(playResponse);
             playDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(player);
 
+            //Master play
+
+            //Game Intelligence
+
+            //Artificial Player
+
+            //Master play
+
             var response = new List<PlayDtoResponse>
             {
                 playDtoResponse

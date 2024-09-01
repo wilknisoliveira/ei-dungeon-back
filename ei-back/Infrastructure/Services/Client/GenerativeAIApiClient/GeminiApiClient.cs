@@ -1,4 +1,5 @@
-﻿using ei_back.Infrastructure.Services.Client.Core;
+﻿using ei_back.Domain.Prompt.Interfaces;
+using ei_back.Infrastructure.Services.Client.Core;
 using ei_back.Infrastructure.Services.Dtos.Request;
 using ei_back.Infrastructure.Services.Dtos.Response;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +10,11 @@ namespace ei_back.Infrastructure.Services.Client.GenerativeAIApiClient
     {
         private readonly string _host = configuration["Gateways:GeminiGenerativeApi"] ?? "";
         private readonly string _apiKey = configuration["keys:GeminiApiKey"] ?? "";
+
+        public Task<string> GetResponseWithRoleBase(List<IAiPrompt> prompts, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<string> GetSimpleResponse(string prompt, CancellationToken cancellationToken)
         {

@@ -2,6 +2,7 @@
 using ei_back.Domain.Play;
 using ei_back.Domain.Player;
 using ei_back.Domain.User;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ei_back.Domain.Game
 {
@@ -38,6 +39,14 @@ namespace ei_back.Domain.Game
         public void SetPlayers(List<PlayerEntity> players)
         {
             Players = players;
+        }
+
+        public void NewPlay(PlayEntity play)
+        {
+            if (Plays == null)
+                Plays = [];
+
+            Plays.Add(play);
         }
     }
 }
