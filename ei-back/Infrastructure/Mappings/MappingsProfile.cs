@@ -5,6 +5,7 @@ using ei_back.Application.Api.Role.Dtos;
 using ei_back.Application.Api.User.Dtos;
 using ei_back.Domain.Game;
 using ei_back.Domain.Play;
+using ei_back.Domain.Player;
 using ei_back.Domain.Role;
 using ei_back.Domain.User;
 
@@ -37,6 +38,9 @@ namespace ei_back.Infrastructure.Mappings
 
             //Play
             CreateMap<PlayEntity, PlayDtoResponse>();
+
+            //Player
+            CreateMap<PlayerEntity, PlayerDtoResponse>();
         }
     }
 }

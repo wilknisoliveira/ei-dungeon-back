@@ -3,6 +3,7 @@ using ei_back.Application.Api.Game.Dtos;
 using ei_back.Application.Api.Play.Dtos;
 using ei_back.Domain.Play.Interfaces;
 using ei_back.Infrastructure.Context;
+using ei_back.Migrations;
 using k8s.KubeConfigModels;
 
 namespace ei_back.Domain.Play
@@ -18,6 +19,11 @@ namespace ei_back.Domain.Play
             _mapper = mapper;
         }
 
+        public Task<PlayEntity> CreatePlay(PlayEntity playEntity, CancellationToken cancellationToken)
+        {
+            return _playRepository.CreateAsync(playEntity, cancellationToken);
+        }
+
         public async Task<PagedSearchDto<PlayDtoResponse>> FindWithPagedSearch(
             Guid gameId,
             int size,
@@ -31,10 +37,19 @@ namespace ei_back.Domain.Play
                 "plays",
                 cancellationToken);
 
+            List<PlayDtoResponse> playDtoResponseList = [];
+            foreach (var play in plays)
+            {
+                var playDtoResponse = _mapper.Map<PlayDtoResponse>(play);
+                playDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(play.Player);
+
+                playDtoResponseList.Add(playDtoResponse);
+            }
+
             return new PagedSearchDto<PlayDtoResponse>
             {
                 CurrentPage = 1,
-                List = plays.Select(_mapper.Map<PlayDtoResponse>).ToList(),
+                List = playDtoResponseList,
                 PageSize = size,
                 SortDirections = "desc",
                 TotalResults = totalResults

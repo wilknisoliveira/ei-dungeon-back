@@ -9,5 +9,7 @@ namespace ei_back.Domain.Play.Interfaces
             Guid gameId,
             int size,
             CancellationToken cancellationToken);
+
+        Task<PlayEntity> CreatePlay(PlayEntity playEntity, CancellationToken cancellationToken);
     }
 }

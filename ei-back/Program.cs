@@ -204,6 +204,7 @@ builder.Services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
 builder.Services.AddScoped<IPlayRepository, PlayRepository>();
 builder.Services.AddScoped<IPlayService, PlayService>();
 builder.Services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
+builder.Services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
 
 
 

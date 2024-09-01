@@ -66,5 +66,10 @@ namespace ei_back.Domain.Game
         {
             return await _gameRepository.CheckIfExistGameByUser(gameId, OwnerUserId, cancellationToken);
         }
+
+        public async Task<GameEntity?> GetGameByIdAndOwnerUserName(Guid id, string userName, CancellationToken cancellationToken)
+        {
+            return await _gameRepository.GetGameByIdAndOwnerUserName(id, userName, cancellationToken);
+        }
     }
 }

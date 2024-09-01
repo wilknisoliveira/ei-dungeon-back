@@ -13,6 +13,16 @@ namespace ei_back.Domain.Play
             Prompt = prompt;
         }
 
+        public PlayEntity(GameEntity game, PlayerEntity player, string prompt)
+        {
+            GameId = game.Id;
+            Game = game;
+            PlayerId = player.Id;
+            Player = player;
+            Prompt = prompt;
+            this.SetCreatedDate(DateTime.Now);
+        }
+
         public GameEntity Game { get; private set; }
         public Guid GameId { get; private set; }
         public PlayerEntity Player { get; private set; }

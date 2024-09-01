@@ -19,18 +19,21 @@ namespace ei_back.Application.Api.Play
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGetUserNameUseCase _getUserNameUseCase;
         private readonly IGetPlaysUseCase _getPlaysUseCase;
+        private readonly INewUserPlayUseCase _newUserPlayUseCase;
 
 
         public PlayController(
             ILogger<PlayController> logger,
             IUnitOfWork unitOfWork,
             IGetUserNameUseCase getUserNameUseCase,
-            IGetPlaysUseCase getPlaysUseCase)
+            IGetPlaysUseCase getPlaysUseCase,
+            INewUserPlayUseCase newUserPlayUseCase)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _getUserNameUseCase = getUserNameUseCase;
             _getPlaysUseCase = getPlaysUseCase;
+            _newUserPlayUseCase = newUserPlayUseCase;
         }
 
         [HttpGet("{gameId}/{pageSize}")]
@@ -58,5 +61,40 @@ namespace ei_back.Application.Api.Play
 
             return Ok(response);
         }
+
+
+        [HttpPost]
+        [ProducesResponseType(typeof(List<PlayDtoResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize(Roles = "Admin, CommonUser")]
+        public async Task<IActionResult> CreateUserPlay([FromBody] PlayDtoRequest playDtoRequest, CancellationToken cancellationToken = default)
+        {
+            var userName = _getUserNameUseCase.Handler(User);
+
+            if (userName.IsNullOrEmpty())
+            {
+                var errorMessage = "Something went wrong while attempting to get the user logged credential.";
+                _logger.LogError(errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+            }
+
+            _logger.LogInformation($"New play by user {userName} to game {playDtoRequest.GameId}.");
+
+            var response = await _newUserPlayUseCase.Handler(playDtoRequest, userName, cancellationToken);
+            var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
+
+            if (changedItems == 0)
+            {
+                var errorMessage = "Something went wrong while attempting to create the user play.";
+                _logger.LogError(errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+            }
+
+            _logger.LogInformation($"User play process success.");
+
+            return Ok(response);
+        }
+
+
     }
 }
