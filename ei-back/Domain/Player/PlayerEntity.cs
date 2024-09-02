@@ -22,6 +22,12 @@ namespace ei_back.Domain.Player
             Type = type;
         }
 
+        public PlayerEntity(string name, string description, PlayerType type, GameEntity game) : this(name, description, type)
+        {
+            Game = game;
+            SetCreatedDate(DateTime.Now);
+        }
+
         public string Name { get; private set; }
         public string Description { get; private set; }
         public PlayerType Type { get; private set; }
@@ -48,6 +54,7 @@ namespace ei_back.Domain.Player
     {
         [Description("RealPlayer")] RealPlayer = 0,
         [Description("ArtificialPlayer")] ArtificialPlayer = 1,
-        [Description("Master")] Master = 2
+        [Description("Master")] Master = 2,
+        [Description("System")] System = 3
     }
 }

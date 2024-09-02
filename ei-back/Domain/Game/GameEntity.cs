@@ -41,7 +41,7 @@ namespace ei_back.Domain.Game
             Players = players;
         }
 
-        public void NewPlay(PlayEntity play)
+        public void AddPlay(PlayEntity play)
         {
             if (Plays == null)
                 Plays = [];

@@ -41,18 +41,19 @@ namespace ei_back.Application.Usecases.Game
                 throw new NotFoundException($"No user found to user name {userName}.");
             game.SetOwnerUser(user);
 
-            var realPlayer = new PlayerEntity(gameDtoRequest.CharacterName, gameDtoRequest.CharacterDescription, PlayerType.RealPlayer);
-            realPlayer.SetCreatedDate(DateTime.Now);
+            var systemPlayer = new PlayerEntity("System", "System", PlayerType.System, game);
+            var realPlayer = new PlayerEntity(gameDtoRequest.CharacterName, gameDtoRequest.CharacterDescription, PlayerType.RealPlayer, game);
 
             var artificialPlayersAndMaster = await _playerFactory
                 .BuildArtificialPlayersAndMaster(gameDtoRequest.NumberOfArtificialPlayers, game, cancellationToken);
 
+            artificialPlayersAndMaster.Add(systemPlayer);
             artificialPlayersAndMaster.Add(realPlayer);
             game.SetPlayers(artificialPlayersAndMaster);
 
             var masterPlay = await _playFactory.BuildInitialMasterPlay(game, cancellationToken) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to generate the initial master play.");
-            game.NewPlay(masterPlay);
+            game.AddPlay(masterPlay);
 
             var gameResponse = await _gameService.CreateAsync(game, cancellationToken);
 
