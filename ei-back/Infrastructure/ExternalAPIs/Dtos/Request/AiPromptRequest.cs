@@ -1,12 +1,11 @@
-﻿using ei_back.Core.Application.Service.Prompt.Interfaces;
-using Microsoft.OpenApi.Extensions;
+﻿using Microsoft.OpenApi.Extensions;
 using System.ComponentModel;
 
-namespace ei_back.Core.Application.Service.Prompt
+namespace ei_back.Infrastructure.ExternalAPIs.Dtos.Request
 {
-    public class AiPrompt : IAiPrompt
+    public class AiPromptRequest : IAiPromptRequest
     {
-        public AiPrompt(PromptRole role, string content)
+        public AiPromptRequest(PromptRole role, string content)
         {
             Role = role.GetAttributeOfType<DescriptionAttribute>().Description;
             Content = content;

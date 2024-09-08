@@ -17,19 +17,22 @@ namespace ei_back.Core.Application.UseCase.Game
         private readonly IUserService _userService;
         private readonly IPlayerFactory _playerFactory;
         private readonly IInitialMasterPlayService _initialMasterPlayService;
+        private readonly IGeneratePlaysResumeService _generatePlaysResumeService;
 
         public CreateGameUseCase(
             IMapper mapper,
             IGameService gameService,
             IUserService userService,
             IPlayerFactory playerFactory,
-            IInitialMasterPlayService initialMasterPlayService)
+            IInitialMasterPlayService initialMasterPlayService,
+            IGeneratePlaysResumeService generatePlaysResumeService)
         {
             _mapper = mapper;
             _gameService = gameService;
             _userService = userService;
             _playerFactory = playerFactory;
             _initialMasterPlayService = initialMasterPlayService;
+            _generatePlaysResumeService = generatePlaysResumeService;
         }
 
         public async Task<GameDtoResponse> Handler(GameDtoRequest gameDtoRequest, string userName, CancellationToken cancellationToken)
@@ -54,7 +57,12 @@ namespace ei_back.Core.Application.UseCase.Game
                 throw new InternalServerErrorException("Something went wrong while attempting to generate the initial master play.");
             game.AddPlay(masterPlay);
 
-            //Gerar o resumo dos Players Description + Master play
+            var playersDescription = "";
+            foreach (var player in game.Players.Where(x => !x.Type.Equals(PlayerType.Master)))
+                playersDescription = playersDescription + player.InfoToString() + "\n";
+
+            var gameResume = await _generatePlaysResumeService.Handler(game.Plays, game, playersDescription, cancellationToken);
+            game.AddPlay(gameResume);
 
             var gameResponse = await _gameService.CreateAsync(game, cancellationToken);
 

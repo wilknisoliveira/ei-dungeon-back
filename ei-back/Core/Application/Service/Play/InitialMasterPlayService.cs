@@ -1,8 +1,7 @@
 ﻿using ei_back.Core.Application.Service.Play.Interfaces;
-using ei_back.Core.Application.Service.Prompt;
-using ei_back.Core.Application.Service.Prompt.Interfaces;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
+using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
@@ -34,10 +33,10 @@ namespace ei_back.Core.Application.Service.Play
 
             string prompt = initialGuidance + playersDescription;
 
-            List<IAiPrompt> promptList =
+            List<IAiPromptRequest> promptList =
             [
-                new AiPrompt(PromptRole.System, prompt),
-                new AiPrompt(PromptRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações dos players repassados como contexto para definição do background da história.")
+                new AiPromptRequest(PromptRole.System, prompt),
+                new AiPromptRequest(PromptRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações dos players repassados como contexto para definição do background da história.")
             ];
 
             var iaResponse = await _generativeAIApiHttpService.GenerateResponseWithRoleBase(promptList, cancellationToken);

@@ -1,6 +1,6 @@
-﻿using ei_back.Core.Application.Service.Prompt.Interfaces;
-using ei_back.Infrastructure.Exceptions.ExceptionTypes;
+﻿using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient;
+using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
@@ -10,7 +10,7 @@ namespace ei_back.Infrastructure.ExternalAPIs
     {
         private readonly IGenerativeAIApiClient _generativeAIApiClient = generativeAIApiClient;
 
-        public async Task<string> GenerateResponseWithRoleBase(List<IAiPrompt> prompts, CancellationToken cancellationToken)
+        public async Task<string> GenerateResponseWithRoleBase(List<IAiPromptRequest> prompts, CancellationToken cancellationToken)
         {
             var response = await _generativeAIApiClient.GetResponseWithRoleBase(prompts, cancellationToken);
 

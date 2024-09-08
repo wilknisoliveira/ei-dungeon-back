@@ -1,5 +1,4 @@
-﻿using ei_back.Core.Application.Service.Prompt.Interfaces;
-using ei_back.Infrastructure.ExternalAPIs.Client.Core;
+﻿using ei_back.Infrastructure.ExternalAPIs.Client.Core;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Response;
 using Microsoft.IdentityModel.Tokens;
@@ -25,7 +24,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
                 .AuthenticationHeaderValue("Bearer", _apiToken);
         }
 
-        public async Task<string> GetResponseWithRoleBase(List<IAiPrompt> prompts, CancellationToken cancellationToken)
+        public async Task<string> GetResponseWithRoleBase(List<IAiPromptRequest> prompts, CancellationToken cancellationToken)
         {
             List<Message> messages = [];
             foreach (var prompt in prompts)
