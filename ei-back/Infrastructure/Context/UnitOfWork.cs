@@ -1,7 +1,7 @@
-﻿using ei_back.Domain.Base;
-using ei_back.Domain.Base.Interfaces;
+﻿using ei_back.Core.Application.Repository;
+using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using ei_back.Infrastructure.Context.Repository;
 
 namespace ei_back.Infrastructure.Context
 {

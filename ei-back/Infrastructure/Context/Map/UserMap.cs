@@ -1,6 +1,4 @@
-﻿using ei_back.Domain.Base;
-using ei_back.Domain.Role;
-using ei_back.Domain.User;
+﻿using ei_back.Core.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

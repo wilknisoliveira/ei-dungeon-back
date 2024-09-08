@@ -1,34 +1,11 @@
-using ei_back.Application.Hubs;
-using ei_back.Application.Usecases.Game;
-using ei_back.Application.Usecases.Game.Interfaces;
-using ei_back.Application.Usecases.Play;
-using ei_back.Application.Usecases.Play.Interfaces;
-using ei_back.Application.Usecases.Role;
-using ei_back.Application.Usecases.Role.Interfaces;
-using ei_back.Application.Usecases.User;
-using ei_back.Application.Usecases.User.Interfaces;
-using ei_back.Domain.Base;
-using ei_back.Domain.Base.Interfaces;
-using ei_back.Domain.Game;
-using ei_back.Domain.Game.Interfaces;
-using ei_back.Domain.Play;
-using ei_back.Domain.Play.Interfaces;
-using ei_back.Domain.Player;
-using ei_back.Domain.Player.Interfaces;
-using ei_back.Domain.Prompt;
-using ei_back.Domain.Prompt.Interfaces;
-using ei_back.Domain.Role;
-using ei_back.Domain.Role.Interfaces;
-using ei_back.Domain.User;
-using ei_back.Domain.User.Interfaces;
 using ei_back.Infrastructure.Context;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions;
 using ei_back.Infrastructure.Mappings;
-using ei_back.Infrastructure.Services;
-using ei_back.Infrastructure.Services.Client.FunTranslateApiClient;
-using ei_back.Infrastructure.Services.Client.GenerativeAIApiClient;
-using ei_back.Infrastructure.Services.Interfaces;
+using ei_back.Infrastructure.ExternalAPIs;
+using ei_back.Infrastructure.ExternalAPIs.Client.FunTranslateApiClient;
+using ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient;
+using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using ei_back.Infrastructure.Swagger;
 using ei_back.Infrastructure.Token;
 using HealthChecks.UI.Client;
@@ -43,6 +20,27 @@ using Serilog;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using ei_back.UserInterface.Hubs;
+using ei_back.Core.Application.UseCase.Role;
+using ei_back.Core.Application.UseCase.User;
+using ei_back.Core.Application.UseCase.Role.Interfaces;
+using ei_back.Core.Application.UseCase.User.Interfaces;
+using ei_back.Core.Application.UseCase.Play;
+using ei_back.Core.Application.UseCase.Game;
+using ei_back.Core.Application.UseCase.Play.Interfaces;
+using ei_back.Core.Application.UseCase.Game.Interfaces;
+using ei_back.Core.Application.Repository;
+using ei_back.Infrastructure.Context.Repository;
+using ei_back.Core.Application.Service.User;
+using ei_back.Core.Application.Service.Game;
+using ei_back.Core.Application.Service.Play;
+using ei_back.Core.Application.Service.Player;
+using ei_back.Core.Application.Service.Role;
+using ei_back.Core.Application.Service.User.Interfaces;
+using ei_back.Core.Application.Service.Game.Interfaces;
+using ei_back.Core.Application.Service.Play.Interfaces;
+using ei_back.Core.Application.Service.Player.Interfaces;
+using ei_back.Core.Application.Service.Role.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -133,7 +131,7 @@ builder.Services.AddInfrastructureSwagger();
 var connection = builder.Configuration["PostgresConnection:PostgresConnectionString"];
 builder.Services.AddDbContext<EIContext>(options => options.UseNpgsql(
     connection, 
-    assembly => assembly.MigrationsAssembly(typeof(EIContext).Assembly.FullName))
+    assembly => assembly.MigrationsAssembly("ei_back.Infrastructure"))
 );
 
 //HealthChecks

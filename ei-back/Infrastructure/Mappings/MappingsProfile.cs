@@ -1,13 +1,9 @@
 ﻿using AutoMapper;
-using ei_back.Application.Api.Game.Dtos;
-using ei_back.Application.Api.Play.Dtos;
-using ei_back.Application.Api.Role.Dtos;
-using ei_back.Application.Api.User.Dtos;
-using ei_back.Domain.Game;
-using ei_back.Domain.Play;
-using ei_back.Domain.Player;
-using ei_back.Domain.Role;
-using ei_back.Domain.User;
+using ei_back.Core.Application.UseCase.Game.Dtos;
+using ei_back.Core.Application.UseCase.Play.Dtos;
+using ei_back.Core.Application.UseCase.Role.Dtos;
+using ei_back.Core.Application.UseCase.User.Dtos;
+using ei_back.Core.Domain.Entity;
 
 namespace ei_back.Infrastructure.Mappings
 {

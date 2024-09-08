@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using ei_back.Core.Application.Repository;
+using ei_back.Core.Application.Service.User.Interfaces;
+using ei_back.Core.Domain.Entity;
 using ei_back.Domain.Role;
 using ei_back.Domain.User;
-using ei_back.Domain.User.Interfaces;
 
 namespace ei_back.Tests.Domain.User
 {

@@ -1,8 +1,4 @@
-﻿using ei_back.Domain.Game;
-using ei_back.Domain.Play;
-using ei_back.Domain.Player;
-using ei_back.Domain.Role;
-using ei_back.Domain.User;
+﻿using ei_back.Core.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context

@@ -1,4 +1,4 @@
-﻿using ei_back.Domain.Game;
+﻿using ei_back.Core.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

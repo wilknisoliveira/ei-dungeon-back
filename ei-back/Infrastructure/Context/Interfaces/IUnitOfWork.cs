@@ -1,5 +1,5 @@
-﻿using ei_back.Domain.Base.Interfaces;
-using ei_back.Domain.Base;
+﻿using ei_back.Core.Application.Repository;
+using ei_back.Core.Domain.Entity;
 
 namespace ei_back.Infrastructure.Context.Interfaces
 {
