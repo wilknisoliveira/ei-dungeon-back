@@ -203,7 +203,7 @@ builder.Services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
 //Play
 builder.Services.AddScoped<IPlayRepository, PlayRepository>();
 builder.Services.AddScoped<IPlayService, PlayService>();
-builder.Services.AddScoped<IPlayFactory, PlayFactory>();
+builder.Services.AddScoped<IInitialMasterPlayService, InitialMasterPlayService>();
 builder.Services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
 builder.Services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
 

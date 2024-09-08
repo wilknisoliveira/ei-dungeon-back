@@ -16,20 +16,20 @@ namespace ei_back.Core.Application.UseCase.Game
         private readonly IGameService _gameService;
         private readonly IUserService _userService;
         private readonly IPlayerFactory _playerFactory;
-        private readonly IPlayFactory _playFactory;
+        private readonly IInitialMasterPlayService _initialMasterPlayService;
 
         public CreateGameUseCase(
             IMapper mapper,
             IGameService gameService,
             IUserService userService,
             IPlayerFactory playerFactory,
-            IPlayFactory playFactory)
+            IInitialMasterPlayService initialMasterPlayService)
         {
             _mapper = mapper;
             _gameService = gameService;
             _userService = userService;
             _playerFactory = playerFactory;
-            _playFactory = playFactory;
+            _initialMasterPlayService = initialMasterPlayService;
         }
 
         public async Task<GameDtoResponse> Handler(GameDtoRequest gameDtoRequest, string userName, CancellationToken cancellationToken)
@@ -50,7 +50,7 @@ namespace ei_back.Core.Application.UseCase.Game
             artificialPlayersAndMaster.Add(realPlayer);
             game.SetPlayers(artificialPlayersAndMaster);
 
-            var masterPlay = await _playFactory.BuildInitialMasterPlay(game, cancellationToken) ??
+            var masterPlay = await _initialMasterPlayService.Handler(game, cancellationToken) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to generate the initial master play.");
             game.AddPlay(masterPlay);
 

@@ -8,20 +8,20 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ei_back.Core.Application.Service.Play
 {
-    public class PlayFactory : IPlayFactory
+    public class InitialMasterPlayService : IInitialMasterPlayService
     {
         private readonly IGenerativeAIApiHttpService _generativeAIApiHttpService;
-        private readonly ILogger<PlayFactory> _logger;
+        private readonly ILogger<InitialMasterPlayService> _logger;
 
-        public PlayFactory(
+        public InitialMasterPlayService(
             IGenerativeAIApiHttpService generativeAIApiHttpService,
-            ILogger<PlayFactory> logger)
+            ILogger<InitialMasterPlayService> logger)
         {
             _generativeAIApiHttpService = generativeAIApiHttpService;
             _logger = logger;
         }
 
-        public async Task<PlayEntity> BuildInitialMasterPlay(GameEntity gameEntity, CancellationToken cancellationToken)
+        public async Task<PlayEntity> Handler(GameEntity gameEntity, CancellationToken cancellationToken)
         {
             string initialGuidance = InitialGuidance(gameEntity.SystemGame);
 
