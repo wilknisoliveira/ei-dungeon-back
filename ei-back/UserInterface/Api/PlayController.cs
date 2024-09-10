@@ -79,14 +79,6 @@ namespace ei_back.UserInterface.Api
             _logger.LogInformation($"New play by user {userName} to game {playDtoRequest.GameId}.");
 
             var response = await _newUserPlayUseCase.Handler(playDtoRequest, userName, cancellationToken);
-            var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
-
-            if (changedItems == 0)
-            {
-                var errorMessage = "Something went wrong while attempting to create the user play.";
-                _logger.LogError(errorMessage);
-                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
-            }
 
             _logger.LogInformation($"User play process success.");
 

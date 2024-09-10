@@ -28,13 +28,9 @@ namespace ei_back.Core.Application.Service.Play
             int size,
             CancellationToken cancellationToken)
         {
-            var plays = await _playRepository.GetPlaysByGameAndSize(gameId, size, cancellationToken);
+            var plays = await _playRepository.GetPlaysByGameAndSizeButSystemPlay(gameId, size, cancellationToken);
 
-            int totalResults = await _playRepository.GetCountAsync(
-                gameId,
-                "game_id",
-                "plays",
-                cancellationToken);
+            int totalResults = await _playRepository.CountPlaysByGameAndSizeButSystemPlay(gameId, size, cancellationToken);   
 
             List<PlayDtoResponse> playDtoResponseList = [];
             foreach (var play in plays)

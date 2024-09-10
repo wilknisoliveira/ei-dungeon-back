@@ -4,6 +4,8 @@ namespace ei_back.Core.Application.Repository
 {
     public interface IPlayRepository : IRepository<PlayEntity>
     {
-        Task<List<PlayEntity>> GetPlaysByGameAndSize(Guid gameId, int size, CancellationToken cancellationToken);
+        Task<List<PlayEntity>> GetPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
+        Task<PlayEntity?> GetLastPlayByPlayerTypeAndGameId(Guid gameId, PlayerType playerType, CancellationToken cancellationToken);
+        Task<int> CountPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
     }
 }

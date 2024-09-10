@@ -36,7 +36,7 @@ namespace ei_back.Core.Application.Service.Play
             List<IAiPromptRequest> promptList =
             [
                 new AiPromptRequest(PromptRole.System, prompt),
-                new AiPromptRequest(PromptRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações dos players repassados como contexto para definição do background da história.")
+                new AiPromptRequest(PromptRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações dos players repassados como contexto para definição do background da história. A resposta deve conter no máximo 900 tokens.")
             ];
 
             var iaResponse = await _generativeAIApiHttpService.GenerateResponseWithRoleBase(promptList, cancellationToken);
