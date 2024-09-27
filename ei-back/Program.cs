@@ -3,7 +3,6 @@ using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions;
 using ei_back.Infrastructure.Mappings;
 using ei_back.Infrastructure.ExternalAPIs;
-using ei_back.Infrastructure.ExternalAPIs.Client.FunTranslateApiClient;
 using ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using ei_back.Infrastructure.Swagger;
@@ -167,8 +166,6 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 //Apply the Dependecy Injection here!
 //ExternalApi
-builder.Services.AddScoped<IFunTranslateApiHttpService, FunTranslateApiHttpService>();
-builder.Services.AddScoped<IFunTranslateApiClient, FunTranslateApiClient>();
 builder.Services.AddScoped<IGenerativeAIApiHttpService, GenerativeAIApiHttpService>();
 builder.Services.AddScoped<IGenerativeAIApiClient, OpenAIApiClient>();
 //Base
