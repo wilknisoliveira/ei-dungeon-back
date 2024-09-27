@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.Game.Interfaces;
-using ei_back.Core.Application.Service.Play;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
@@ -10,8 +9,6 @@ using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
-using ei_back.Migrations;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ei_back.Core.Application.UseCase.Play

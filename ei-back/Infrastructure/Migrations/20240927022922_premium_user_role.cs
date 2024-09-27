@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ei_back.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class seeding_roles : Migration
+    public partial class premium_user_role : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,8 +18,7 @@ namespace ei_back.Infrastructure.Migrations
                 columns: new[] { "id", "created_at", "description", "name", "updated_at" },
                 values: new object[,]
                 {
-                    { new Guid("11841ca4-6c2b-4bdf-b14f-265fc7307717"), new DateTime(2024, 3, 30, 23, 43, 3, 919, DateTimeKind.Local).AddTicks(965), "", "CommonUser", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) },
-                    { new Guid("440e090b-1245-4cfe-bb62-b22a676ab441"), new DateTime(2024, 3, 30, 23, 43, 3, 919, DateTimeKind.Local).AddTicks(955), "", "Admin", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
+                    { new Guid("03c54894-e384-499d-a271-59451471af56"), new DateTime(2024, 3, 30, 23, 43, 3, 919, DateTimeKind.Unspecified).AddTicks(950), "", "PremiumUser", new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) }
                 });
         }
 
@@ -29,12 +28,7 @@ namespace ei_back.Infrastructure.Migrations
             migrationBuilder.DeleteData(
                 table: "roles",
                 keyColumn: "id",
-                keyValue: new Guid("11841ca4-6c2b-4bdf-b14f-265fc7307717"));
-
-            migrationBuilder.DeleteData(
-                table: "roles",
-                keyColumn: "id",
-                keyValue: new Guid("440e090b-1245-4cfe-bb62-b22a676ab441"));
+                keyValue: new Guid("03c54894-e384-499d-a271-59451471af56"));
         }
     }
 }

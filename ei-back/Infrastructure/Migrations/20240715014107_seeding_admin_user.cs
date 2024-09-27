@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace ei_back.Migrations
+namespace ei_back.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class seeding_admin_user : Migration

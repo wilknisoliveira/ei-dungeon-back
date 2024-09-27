@@ -9,7 +9,7 @@ using ei_back.Infrastructure.Context;
 
 #nullable disable
 
-namespace ei_back.Migrations
+namespace ei_back.Infrastructure.Migrations
 {
     [DbContext(typeof(EIContext))]
     [Migration("20240824232737_unique_user_name")]

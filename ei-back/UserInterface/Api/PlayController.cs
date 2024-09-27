@@ -38,7 +38,7 @@ namespace ei_back.UserInterface.Api
         [ProducesResponseType(typeof(PagedSearchDto<PlayDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize(Roles = "Admin, CommonUser")]
+        [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
         public async Task<IActionResult> Get(
             Guid gameId,
             int pageSize,
@@ -64,7 +64,7 @@ namespace ei_back.UserInterface.Api
         [HttpPost]
         [ProducesResponseType(typeof(List<PlayDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = "Admin, CommonUser")]
+        [Authorize(Roles = "Admin, PremiumUser")]
         public async Task<IActionResult> CreateUserPlay([FromBody] PlayDtoRequest playDtoRequest, CancellationToken cancellationToken = default)
         {
             var userName = _getUserNameUseCase.Handler(User);

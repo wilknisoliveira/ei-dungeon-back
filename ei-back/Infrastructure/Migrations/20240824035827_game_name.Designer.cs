@@ -9,7 +9,7 @@ using ei_back.Infrastructure.Context;
 
 #nullable disable
 
-namespace ei_back.Migrations
+namespace ei_back.Infrastructure.Migrations
 {
     [DbContext(typeof(EIContext))]
     [Migration("20240824035827_game_name")]

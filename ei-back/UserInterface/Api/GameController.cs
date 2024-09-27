@@ -36,7 +36,7 @@ namespace ei_back.UserInterface.Api
         [HttpPost]
         [ProducesResponseType(typeof(GameDtoResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = "Admin, CommonUser")]
+        [Authorize(Roles = "Admin, PremiumUser")]
         public async Task<IActionResult> Create([FromBody] GameDtoRequest gameDtoRequest, CancellationToken cancellationToken = default)
         {
             var userName = _getUserNameUseCase.Handler(User);
@@ -68,7 +68,7 @@ namespace ei_back.UserInterface.Api
         [HttpGet("{sortDirection}/{pageSize}/{page}")]
         [ProducesResponseType(typeof(PagedSearchDto<GameDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = "Admin, CommonUser")]
+        [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
         public async Task<IActionResult> Get(
             string sortDirection,
             int pageSize,

@@ -53,7 +53,7 @@ namespace ei_back.UserInterface.Api
         [HttpPatch]
         [ProducesResponseType(typeof(UserGetDtoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = "Admin, CommonUser")]
+        [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
         [Route("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] PasswordDtoRequest passwordDtoRequest)
         {

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace ei_back.Migrations
+namespace ei_back.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class unique_user_name : Migration

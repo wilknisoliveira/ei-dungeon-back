@@ -45,7 +45,7 @@ namespace ei_back.UserInterface.Api
         [HttpGet("{sortDirection}/{pageSize}/{page}")]
         [ProducesResponseType(typeof(PagedSearchDto<UserGetDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = "Admin, CommonUser")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get(
             [FromQuery] string? name,
             string sortDirection,

@@ -3,7 +3,6 @@ using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
-using ei_back.Migrations;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
 

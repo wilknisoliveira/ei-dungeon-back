@@ -21,6 +21,24 @@ namespace ei_back.Infrastructure.Context
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
+
+            List<RoleEntity> roles =
+            [
+                new RoleEntity("Admin", ""),
+                new RoleEntity("CommonUser", ""),
+                new RoleEntity("PremiumUser", "")
+            ];
+
+            roles.ForEach(role => {
+                if (role.Name == "Admin")
+                    role.Id = Guid.Parse("440e090b-1245-4cfe-bb62-b22a676ab441"); //Tem que colocar um id para cada
+                else
+                    role.Id = Guid.NewGuid();
+
+                role.CreatedAt = DateTime.Parse("2024-03-30 23:43:03.919095");
+            });
+            modelBuilder.Entity<RoleEntity>().HasData(roles);
+
             /*
             // Role seeding
             List<RoleEntity> roles =

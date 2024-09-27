@@ -47,7 +47,7 @@ namespace ei_back.UserInterface.Api
 
         [HttpGet]
         [ProducesResponseType(typeof(RoleDtoResponse), StatusCodes.Status200OK)]
-        [Authorize(Roles = "Admin, CommonUser")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             _logger.LogInformation("API: Getting all the roles");
