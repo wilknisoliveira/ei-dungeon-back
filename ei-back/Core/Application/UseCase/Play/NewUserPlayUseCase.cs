@@ -76,16 +76,6 @@ namespace ei_back.Core.Application.UseCase.Play
             newPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(newPlay.Player);
             response.Add(newPlayDtoResponse);
 
-            var firstMasterPlayRequest = GenerateMasterPlay(plays, game, cancellationToken);
-            var firstMasterPlay = await firstMasterPlayRequest;
-            _ = await _playService.CreatePlay(firstMasterPlay, cancellationToken) ??
-                throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
-
-            plays.Add(firstMasterPlay);
-            var firstMasterPlayDtoResponse = _mapper.Map<PlayDtoResponse>(firstMasterPlay);
-            firstMasterPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(firstMasterPlay.Player);
-            response.Add(firstMasterPlayDtoResponse);
-
             if (game.Players.Any(x => x.Type.Equals(PlayerType.ArtificialPlayer)))
             {
                 var lastArtificialPlayer = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.ArtificialPlayer, cancellationToken);
@@ -100,23 +90,23 @@ namespace ei_back.Core.Application.UseCase.Play
                 var artificialPlayerPlayDtoResponse = _mapper.Map<PlayDtoResponse>(artificialPlayerPlay);
                 artificialPlayerPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(artificialPlayerPlay.Player);
                 response.Add(artificialPlayerPlayDtoResponse);
-
-                var secondMasterPlayRequest = GenerateMasterPlay(plays, game, cancellationToken);
-                var secondMasterPlay = await secondMasterPlayRequest;
-                _ = await _playService.CreatePlay(secondMasterPlay, cancellationToken) ??
-                    throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
-
-                plays.Add(secondMasterPlay);
-                var secondMasterPlayDtoResponse = _mapper.Map<PlayDtoResponse>(secondMasterPlay);
-                secondMasterPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(secondMasterPlay.Player);
-                response.Add(secondMasterPlayDtoResponse);
             }
+
+            var masterPlayRequest = GenerateMasterPlay(plays, game, cancellationToken);
+            var masterPlay = await masterPlayRequest;
+            _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
+                throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
+
+            plays.Add(masterPlay);
+            var masterPlayDtoResponse = _mapper.Map<PlayDtoResponse>(masterPlay);
+            masterPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(masterPlay.Player);
+            response.Add(masterPlayDtoResponse);
 
             var playerList = GeneratePlayerList(game);
             var gameResumeRequest = _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, cancellationToken);
             var gameResume = await gameResumeRequest;
             _ = await _playService.CreatePlay(gameResume, cancellationToken) ??
-                        throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
+                throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
 
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
