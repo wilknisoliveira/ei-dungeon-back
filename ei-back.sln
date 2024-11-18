@@ -5,7 +5,12 @@ VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ei-back", "ei-back\ei-back.csproj", "{31FBCBCA-D4B8-47D4-A552-3F551B6A2AE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ei-back.Tests", "ei-back.Tests\ei-back.Tests.csproj", "{5D5A380F-2E3A-489F-A9AD-335419A1B75F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ei-back.Tests", "ei-back.Tests\ei-back.Tests.csproj", "{5D5A380F-2E3A-489F-A9AD-335419A1B75F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{73FEC4FB-A3CE-4583-BFA4-F8D152CFE608}"
+	ProjectSection(SolutionItems) = preProject
+		railway.toml = railway.toml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,8 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "./ei-back/Dockerfile"
+
+[deploy]
+startCommand = "./ei-back"
+restartPolicyType = "always"
+healthcheckPath = "/health"
