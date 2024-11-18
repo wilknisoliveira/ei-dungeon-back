@@ -4,5 +4,4 @@ dockerfilePath = "./ei-back/Dockerfile"
 
 [deploy]
 startCommand = "dotnet ei-back.dll"
-restartPolicyType = "always"
-healthcheckPath = "/health"
+restartPolicyType = "never"
