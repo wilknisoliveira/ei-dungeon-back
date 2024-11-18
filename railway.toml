@@ -3,6 +3,6 @@ builder = "dockerfile"
 dockerfilePath = "./ei-back/Dockerfile"
 
 [deploy]
-startCommand = "./ei-back"
+startCommand = "dotnet ei-back.dll"
 restartPolicyType = "always"
 healthcheckPath = "/health"
