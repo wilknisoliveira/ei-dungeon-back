@@ -58,6 +58,10 @@ builder.Logging.AddSerilog(logger);
 builder.Configuration.AddEnvironmentVariables()
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
+//Deploy
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8081";
+builder.WebHost.UseUrls($"https://*:{port}");
+
 //Exception Handler
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
 
