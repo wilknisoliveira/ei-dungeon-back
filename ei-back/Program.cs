@@ -60,7 +60,7 @@ builder.Configuration.AddEnvironmentVariables()
 
 //Deploy
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8081";
-builder.WebHost.UseUrls($"https://*:{port}");
+builder.WebHost.UseUrls($"http://*:{port}");
 
 //Exception Handler
 builder.Services.AddExceptionHandler<AppExceptionHandler>();
