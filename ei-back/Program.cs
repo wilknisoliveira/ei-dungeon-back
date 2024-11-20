@@ -40,6 +40,7 @@ using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.Service.Player.Interfaces;
 using ei_back.Core.Application.Service.Role.Interfaces;
+using ei_back.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -167,50 +168,9 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
 });
 
-
-//Apply the Dependecy Injection here!
-//ExternalApi
-builder.Services.AddScoped<IGenerativeAIApiHttpService, GenerativeAIApiHttpService>();
-builder.Services.AddScoped<IGenerativeAIApiClient, OpenAIApiClient>();
-//Base
-builder.Services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-//User
-builder.Services.AddScoped<ILoginService, LoginService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ICreateUserUseCase,  CreateUserUseCase>();
-builder.Services.AddScoped<IGetUserUseCase, GetUserUseCase>();
-builder.Services.AddScoped<ISignInUseCase, SigninUseCase>();
-builder.Services.AddScoped<IChangePasswordUseCase, ChangePasswordUseCase>();
-builder.Services.AddScoped<IGetUserNameUseCase, GetUserNameUseCase>();
-//Role
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IApplyRolesUseCase, ApplyRolesUseCase>();
-builder.Services.AddScoped<ICreateRoleUseCase, CreateRoleUseCase>();
-builder.Services.AddScoped<IGetAllRoleUseCase, GetAllRoleUseCase>();
-//Player
-builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
-builder.Services.AddScoped<IPlayerService, PlayerService>();
-builder.Services.AddScoped<IPlayerFactory, PlayerFactory>();
-//Game
-builder.Services.AddScoped<IGameRepository, GameRepository>();
-builder.Services.AddScoped<IGameService, GameService>();
-builder.Services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
-builder.Services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
-
-//Play
-builder.Services.AddScoped<IPlayRepository, PlayRepository>();
-builder.Services.AddScoped<IPlayService, PlayService>();
-builder.Services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
-builder.Services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
-builder.Services.AddScoped<IInitialMasterPlayService, InitialMasterPlayService>();
-builder.Services.AddScoped<IGeneratePlaysResumeService, GeneratePlaysResumeService>();
-
-//Prompt
-//builder.Services.AddScoped<IAiPrompt, AiPrompt>();
+builder.Services.AddRepositories();
+builder.Services.AddServices();
+builder.Services.AddUseCases();
 
 
 var app = builder.Build();
