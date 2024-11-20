@@ -251,4 +251,10 @@ app.MapControllers();
 
 app.UseRequestLocalization();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<EIContext>();
+    dbContext.Database.Migrate();
+}
+
 app.Run();
