@@ -2,8 +2,14 @@
 
 namespace ei_back.Infrastructure.ExternalAPIs.Dtos.Request
 {
-    public class GeminiGenerativeAiDtoRequest
+    public record GeminiGenerativeAiDtoRequest
     {
-        public Content contents { get; set; }
+        public SystemInstruction? system_instruction {  get; set; }
+        public List<Content> contents { get; set; }
+    }
+
+    public record SystemInstruction
+    {
+        public Part parts { get; set; }
     }
 }

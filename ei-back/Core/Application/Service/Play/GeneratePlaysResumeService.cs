@@ -27,10 +27,10 @@ namespace ei_back.Core.Application.Service.Play
 
             List<IAiPromptRequest> promptList = [];
             if (lastSystemPlay != null)
-                promptList.Add(new AiPromptRequest(PromptRole.Assistant, "#Resume\n" + lastSystemPlay.Prompt));
+                promptList.Add(new AiPromptRequest(PromptRole.Model, "#Resume\n" + lastSystemPlay.Prompt));
 
             if (!initialAddicionalInfo.IsNullOrEmpty())
-                promptList.Add(new AiPromptRequest(PromptRole.System, "#Additional Info\n" + initialAddicionalInfo));
+                promptList.Add(new AiPromptRequest(PromptRole.Instruction, "#Additional Info\n" + initialAddicionalInfo));
 
             var lastPlays = "#Last Plays\n";
             foreach (var play in plays.Where(x => !x.Player.Type.Equals(PlayerType.System)))
@@ -42,7 +42,7 @@ namespace ei_back.Core.Application.Service.Play
 
                 lastPlays += play.Prompt + "\n\n";
             }
-            promptList.Add(new AiPromptRequest(PromptRole.System, lastPlays));
+            promptList.Add(new AiPromptRequest(PromptRole.Instruction, lastPlays));
 
             promptList.Add(new AiPromptRequest(PromptRole.User, PromptCommand()));
 

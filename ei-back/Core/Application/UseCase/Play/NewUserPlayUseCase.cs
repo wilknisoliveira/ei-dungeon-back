@@ -128,16 +128,16 @@ namespace ei_back.Core.Application.UseCase.Play
                 switch (playerType)
                 {
                     case PlayerType.System:
-                        promptList.Add(new AiPromptRequest(PromptRole.System, "#Resume\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, "#Resume\n" + play.Prompt));
                         break;
                     case PlayerType.RealPlayer:
-                        promptList.Add(new AiPromptRequest(PromptRole.System, $"#Player: {play.Player.Name}\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Player: {play.Player.Name}\n" + play.Prompt));
                         break;
                     case PlayerType.Master:
-                        promptList.Add(new AiPromptRequest(PromptRole.Assistant, $"#Master Table\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(PromptRole.Model, $"#Master Table\n" + play.Prompt));
                         break;
                     case PlayerType.ArtificialPlayer:
-                        promptList.Add(new AiPromptRequest(PromptRole.System, $"#Player: {play.Player.Name}\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Player: {play.Player.Name}\n" + play.Prompt));
                         break;
                 }
             }
@@ -160,7 +160,7 @@ namespace ei_back.Core.Application.UseCase.Play
             foreach (var player in game.Players.Where(x => x.Type.Equals(PlayerType.RealPlayer) || x.Type.Equals(PlayerType.ArtificialPlayer)))
                 players += player.Name + "\n";
 
-            return new AiPromptRequest(PromptRole.System, players);
+            return new AiPromptRequest(PromptRole.Instruction, players);
         }
 
         private static string MasterPlayCommand(string systemGame)
@@ -187,7 +187,7 @@ namespace ei_back.Core.Application.UseCase.Play
         {
             List<IAiPromptRequest> promptList = [];
             promptList.Add(GeneratePlayerList(game));
-            promptList.Add(new AiPromptRequest(PromptRole.System, $"#Your Player Description: {currentPlayer.InfoToString()}"));
+            promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Your Player Description: {currentPlayer.InfoToString()}"));
 
             foreach (var play in plays)
             {
@@ -196,18 +196,18 @@ namespace ei_back.Core.Application.UseCase.Play
                 switch (playerType)
                 {
                     case PlayerType.System:
-                        promptList.Add(new AiPromptRequest(PromptRole.System, "#Resume\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, "#Resume\n" + play.Prompt));
                         break;
                     case PlayerType.RealPlayer:
-                        promptList.Add(new AiPromptRequest(PromptRole.System, $"#Player: {play.Player.Name}\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Player: {play.Player.Name}\n" + play.Prompt));
                         break;
                     case PlayerType.Master:
-                        promptList.Add(new AiPromptRequest(PromptRole.System, $"#Master Table\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Master Table\n" + play.Prompt));
                         break;
                     case PlayerType.ArtificialPlayer:
-                        var promptRole = PromptRole.System;
+                        var promptRole = PromptRole.Instruction;
                         if (play.Player.Id.Equals(currentPlayer.Id))
-                            promptRole = PromptRole.Assistant;
+                            promptRole = PromptRole.Model;
                         promptList.Add(new AiPromptRequest(promptRole, $"#Player: {play.Player.Name}\n" + play.Prompt));
                         break;
                 }

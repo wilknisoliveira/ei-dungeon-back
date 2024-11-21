@@ -44,7 +44,7 @@ namespace ei_back.Infrastructure.Extensions
 
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddScoped<IGenerativeAIApiClient, OpenAIApiClient>();
+            services.AddScoped<IGenerativeAIApiClient, GeminiApiClient>();
             services.AddScoped<IGenerativeAIApiHttpService, GenerativeAIApiHttpService>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<ITokenService, TokenService>();

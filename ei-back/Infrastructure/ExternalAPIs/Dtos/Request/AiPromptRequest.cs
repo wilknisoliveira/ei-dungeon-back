@@ -18,7 +18,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Dtos.Request
     public enum PromptRole : short
     {
         [Description("user")] User = 0,
-        [Description("assistant")] Assistant = 1,
-        [Description("system")] System = 2
+        [Description("model")] Model = 1,
+        [Description("instruction")] Instruction = 2
     }
 }
