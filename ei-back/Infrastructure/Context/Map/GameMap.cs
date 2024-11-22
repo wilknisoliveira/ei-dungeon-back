@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ei_back.Infrastructure.Context.Map
 {
-    public class GameMap : BaseMap<GameEntity>
+    public class GameMap : BaseMap<Game>
     {
         public GameMap() : base("games") { }
 
-        public override void Configure(EntityTypeBuilder<GameEntity> builder)
+        public override void Configure(EntityTypeBuilder<Game> builder)
         {
             base.Configure(builder);
 

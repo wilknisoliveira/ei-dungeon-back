@@ -4,7 +4,7 @@ using ei_back.Infrastructure.Context;
 
 namespace ei_back.Infrastructure.Context.Repository
 {
-    public class PlayerRepository : GenericRepository<PlayerEntity>, IPlayerRepository
+    public class PlayerRepository : GenericRepository<Player>, IPlayerRepository
     {
         public PlayerRepository(EIContext context) : base(context) { }
     }

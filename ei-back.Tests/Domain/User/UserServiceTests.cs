@@ -33,7 +33,7 @@ namespace ei_back.Tests.Domain.User
             var userId = Guid.NewGuid();
             CancellationToken cancellationToken = default;
 
-            var userResponse = A.Fake<UserEntity>();
+            var userResponse = A.Fake<Core.Domain.Entity.User>();
             A.CallTo(() => _userRepository.FindByIdAsync(userId, cancellationToken))
                 .Returns(Task.FromResult(userResponse));
 
@@ -41,7 +41,7 @@ namespace ei_back.Tests.Domain.User
             var result = await _userService.FindByIdAsync(userId);
 
             //Assert
-            result.Should().BeAssignableTo<UserEntity>();
+            result.Should().BeAssignableTo<Core.Domain.Entity.User>();
             result.Should().NotBeNull();
         }
     }

@@ -11,6 +11,6 @@ namespace ei_back.Core.Application.Service.Play.Interfaces
             int size,
             CancellationToken cancellationToken);
 
-        Task<PlayEntity> CreatePlay(PlayEntity playEntity, CancellationToken cancellationToken);
+        Task<Domain.Entity.Play> CreatePlay(Domain.Entity.Play playEntity, CancellationToken cancellationToken);
     }
 }

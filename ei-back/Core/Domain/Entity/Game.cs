@@ -2,42 +2,42 @@
 
 namespace ei_back.Core.Domain.Entity
 {
-    public class GameEntity : BaseEntity
+    public class Game : Base
     {
-        public GameEntity(Guid ownerUserId, string systemGame, string name)
+        public Game(Guid ownerUserId, string systemGame, string name)
         {
             OwnerUserId = ownerUserId;
             SystemGame = systemGame;
             Name = name;
         }
 
-        public GameEntity(string name, string systemGame)
+        public Game(string name, string systemGame)
         {
             Name = name;
             SystemGame = systemGame;
         }
 
         public string Name { get; private set; }
-        public UserEntity OwnerUser { get; private set; }
+        public User OwnerUser { get; private set; }
         public Guid OwnerUserId { get; private set; }
         public string SystemGame { get; private set; }
 
 
-        public List<PlayerEntity> Players { get; private set; }
-        public List<PlayEntity> Plays { get; private set; }
+        public List<Player> Players { get; private set; }
+        public List<Play> Plays { get; private set; }
 
-        public void SetOwnerUser(UserEntity user)
+        public void SetOwnerUser(User user)
         {
             OwnerUser = user;
             OwnerUserId = user.Id;
         }
 
-        public void SetPlayers(List<PlayerEntity> players)
+        public void SetPlayers(List<Player> players)
         {
             Players = players;
         }
 
-        public void AddPlay(PlayEntity play)
+        public void AddPlay(Play play)
         {
             if (Plays == null)
                 Plays = [];

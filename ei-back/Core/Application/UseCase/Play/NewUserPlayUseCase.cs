@@ -46,7 +46,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
         public async Task<List<PlayDtoResponse>> Handler(PlayDtoRequest playDtoRequest, string userName, CancellationToken cancellationToken)
         {
-            List<PlayEntity> plays = [];
+            List<Domain.Entity.Play> plays = [];
             List<PlayDtoResponse> response = [];
 
             var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken) ??
@@ -55,7 +55,7 @@ namespace ei_back.Core.Application.UseCase.Play
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer)) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to get the real player info");
 
-            var newPlay = new PlayEntity(game, realPlayer, playDtoRequest.Prompt);
+            var newPlay = new Domain.Entity.Play(game, realPlayer, playDtoRequest.Prompt);
             _ = await _playService.CreatePlay(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
 
@@ -116,7 +116,7 @@ namespace ei_back.Core.Application.UseCase.Play
             return response.Where(x => !x.PlayerDtoResponse.Type.Equals(PlayerType.System)).ToList();
         }
 
-        private async Task<PlayEntity> GenerateMasterPlay(List<PlayEntity> plays, GameEntity game, CancellationToken cancellationToken)
+        private async Task<Domain.Entity.Play> GenerateMasterPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
         {
             List<IAiPromptRequest> promptList = [];
             promptList.Add(GeneratePlayerList(game));
@@ -151,10 +151,10 @@ namespace ei_back.Core.Application.UseCase.Play
             var masterPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
                 throw new NotFoundException($"No Master player was found to the game {game.Id}");
 
-            return new PlayEntity(game, masterPlayer, iaResponse);
+            return new Domain.Entity.Play(game, masterPlayer, iaResponse);
         }
 
-        private static IAiPromptRequest GeneratePlayerList(GameEntity game)
+        private static IAiPromptRequest GeneratePlayerList(Domain.Entity.Game game)
         {
             var players = "#Lista de players do jogo: \n";
             foreach (var player in game.Players.Where(x => x.Type.Equals(PlayerType.RealPlayer) || x.Type.Equals(PlayerType.ArtificialPlayer)))
@@ -169,7 +169,7 @@ namespace ei_back.Core.Application.UseCase.Play
             return $"Você é um mestre de mesa (Master table) em um jogo de RPG, sistema {systemGame}. Nas informações repassadas, encontra-se um breve resumo de partidas anteriores, bem como as últimas jogadas dos demais players. Sua função é de conduzir a história, desenvolver o enredo, interpretar os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações relativas a uma mestre de Mesa. \nObservações: 1. Você como Mestre da Mesa, nunca deve interpretar o papel dos Players! Também nunca deve ditar as ações dos Players!; 2. Foi acordado entre os jogadores que não será usado mecanismos de rolagem de dados. \n Agora, prossiga com a próxima orientação do Mestre da Mesa!";
         }
 
-        private static PlayerEntity NextPlayer(PlayerEntity? currentPlayer, List<PlayerEntity> players)
+        private static Player NextPlayer(Player? currentPlayer, List<Player> players)
         {
             players = players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer)).OrderBy(x => x.Name).ToList();
 
@@ -183,7 +183,7 @@ namespace ei_back.Core.Application.UseCase.Play
             return players[currentPlayerIndex + 1];
         }
 
-        private async Task<PlayEntity> GenerateArtificialPlay(List<PlayEntity> plays, GameEntity game, PlayerEntity currentPlayer, CancellationToken cancellationToken)
+        private async Task<Domain.Entity.Play> GenerateArtificialPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, Player currentPlayer, CancellationToken cancellationToken)
         {
             List<IAiPromptRequest> promptList = [];
             promptList.Add(GeneratePlayerList(game));
@@ -220,10 +220,10 @@ namespace ei_back.Core.Application.UseCase.Play
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");
 
-            return new PlayEntity(game, currentPlayer, iaResponse);
+            return new Domain.Entity.Play(game, currentPlayer, iaResponse);
         }
 
-        private static string ArtificialPlayCommand(PlayerEntity currentPlayer)
+        private static string ArtificialPlayCommand(Player currentPlayer)
         {
             return $"Você está participando de um jogo de RPG de Mesa. Seu personagem é {currentPlayer.Name}. Você deve se comportar unicamente como um jogador, interpretando seu personagem ou fazendo perguntas ao Mestre da Mesa quando achar necessário. Observações importantes: 1. Está vedado e proibido tomar ações por outros personagens e/ou NPCs; 2. Você não deve tomar ações próprias de um Mestre de Mesa, ou seja, não deve ditar o rumo da história ou acontecimentos; 3. Sempre que possível, dê preferência para a narração em primeira pessoa. Agora é com você! Com base nas informações repassadas, qual a sua próxima jogada?";
         }

@@ -8,16 +8,16 @@ namespace ei_back.Core.Application.Service.User.Interfaces
     public interface IUserService
     {
         string ComputeHash(string input, HashAlgorithm hashAlgorithm);
-        Task<UserEntity> CreateAsync(UserEntity userEntity);
+        Task<Domain.Entity.User> CreateAsync(Domain.Entity.User userEntity);
         Task<PagedSearchDto<UserGetDtoResponse>> FindWithPagedSearch(
             string name,
             string sortDirection,
             int pageSize,
             int offset,
             int page);
-        Task<UserEntity> FindByIdAsync(Guid userId);
-        Task<UserEntity> FindUserAndRoles(Guid userId);
-        UserEntity Update(UserEntity user);
-        Task<UserEntity?> FindByUserName(string userName);
+        Task<Domain.Entity.User> FindByIdAsync(Guid userId);
+        Task<Domain.Entity.User> FindUserAndRoles(Guid userId);
+        Domain.Entity.User Update(Domain.Entity.User user);
+        Task<Domain.Entity.User?> FindByUserName(string userName);
     }
 }

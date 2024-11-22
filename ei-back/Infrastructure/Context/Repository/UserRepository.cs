@@ -5,17 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context.Repository
 {
-    public class UserRepository : GenericRepository<UserEntity>, IUserRepository
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
 
         public UserRepository(EIContext context) : base(context) { }
 
-        public UserEntity ValidateCredentials(string userName, string pass)
+        public User ValidateCredentials(string userName, string pass)
         {
             return _context.Users.Include(u => u.Roles).FirstOrDefault(u => u.UserName == userName && u.Password == pass);
         }
 
-        public UserEntity RefreshUserInfo(UserEntity user)
+        public User RefreshUserInfo(User user)
         {
             if (!_context.Users.Any(u => u.Id.Equals(user.Id))) return null;
 
@@ -36,14 +36,14 @@ namespace ei_back.Infrastructure.Context.Repository
             return result;
         }
 
-        public async Task<UserEntity?> GetUserAndRolesAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task<User?> GetUserAndRolesAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _context.Users
                 .Include(u => u.Roles)
                 .SingleOrDefaultAsync(u => u.Id.Equals(userId), cancellationToken);
         }
 
-        public async Task<UserEntity?> FindByUserName(string userName, CancellationToken cancellationToken = default)
+        public async Task<User?> FindByUserName(string userName, CancellationToken cancellationToken = default)
         {
             return await _context.Users
                 .SingleOrDefaultAsync(x => x.UserName.Equals(userName), cancellationToken);

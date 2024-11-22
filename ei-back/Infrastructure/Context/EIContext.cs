@@ -9,11 +9,11 @@ namespace ei_back.Infrastructure.Context
 
         public EIContext(DbContextOptions<EIContext> options) : base(options) { }
 
-        public DbSet<UserEntity> Users { get; set; }
-        public DbSet<RoleEntity> Roles { get; set; }
-        public DbSet<PlayerEntity> Players { get; set; }
-        public DbSet<GameEntity> Games { get; set; }
-        public DbSet<PlayEntity> Plays { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Player> Players { get; set; }
+        public DbSet<Game> Games { get; set; }
+        public DbSet<Play> Plays { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -22,11 +22,11 @@ namespace ei_back.Infrastructure.Context
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
 
-            List<RoleEntity> roles =
+            List<Role> roles =
             [
-                new RoleEntity("Admin", ""),
-                new RoleEntity("CommonUser", ""),
-                new RoleEntity("PremiumUser", "")
+                new Role("Admin", ""),
+                new Role("CommonUser", ""),
+                new Role("PremiumUser", "")
             ];
 
             roles.ForEach(role => {
@@ -37,7 +37,7 @@ namespace ei_back.Infrastructure.Context
 
                 role.CreatedAt = DateTime.Parse("2024-03-30 23:43:03.919095");
             });
-            modelBuilder.Entity<RoleEntity>().HasData(roles);
+            modelBuilder.Entity<Role>().HasData(roles);
 
             /*
             // Role seeding

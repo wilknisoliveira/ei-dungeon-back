@@ -2,8 +2,8 @@
 
 namespace ei_back.Core.Application.Repository
 {
-    public interface IRoleRepository : IRepository<RoleEntity>
+    public interface IRoleRepository : IRepository<Role>
     {
-        Task<List<RoleEntity>> FindRolesAndUsersAsync(CancellationToken cancellationToken = default);
+        Task<List<Role>> FindRolesAndUsersAsync(CancellationToken cancellationToken = default);
     }
 }

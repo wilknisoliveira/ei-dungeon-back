@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ei_back.Infrastructure.Context.Map
 {
-    public class BaseMap<T> : IEntityTypeConfiguration<T> where T : BaseEntity
+    public class BaseMap<T> : IEntityTypeConfiguration<T> where T : Base
     {
         private readonly string _tableName;
 

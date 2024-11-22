@@ -20,7 +20,7 @@ namespace ei_back.Core.Application.Service.Play
             _logger = logger;
         }
 
-        public async Task<PlayEntity> Handler(GameEntity gameEntity, CancellationToken cancellationToken)
+        public async Task<Domain.Entity.Play> Handler(Domain.Entity.Game gameEntity, CancellationToken cancellationToken)
         {
             string initialGuidance = InitialGuidance(gameEntity.SystemGame);
 
@@ -47,7 +47,7 @@ namespace ei_back.Core.Application.Service.Play
             var masterPlayer = gameEntity.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
                 throw new NotFoundException($"No Master player was found to the game {gameEntity.Id}");
 
-            return new PlayEntity(gameEntity, masterPlayer, iaResponse);
+            return new Domain.Entity.Play(gameEntity, masterPlayer, iaResponse);
         }
 
         private static string InitialGuidance(string systemGame)

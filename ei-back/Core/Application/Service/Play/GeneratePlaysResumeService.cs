@@ -21,7 +21,7 @@ namespace ei_back.Core.Application.Service.Play
             _logger = logger;
         }
 
-        public async Task<PlayEntity> Handler(List<PlayEntity> plays, GameEntity game, string initialAddicionalInfo, CancellationToken cancellationToken)
+        public async Task<Domain.Entity.Play> Handler(List<Domain.Entity.Play> plays, Domain.Entity.Game game, string initialAddicionalInfo, CancellationToken cancellationToken)
         {
             var lastSystemPlay = plays.FirstOrDefault(x => x.Player.Type.Equals(PlayerType.System));
 
@@ -54,7 +54,7 @@ namespace ei_back.Core.Application.Service.Play
             var systemPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.System)) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to get the system player entity");
 
-            return new PlayEntity(game, systemPlayer, iaResponse);
+            return new Domain.Entity.Play(game, systemPlayer, iaResponse);
         }
 
         private static string PromptCommand()

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context.Repository
 {
-    public class RoleRepository : GenericRepository<RoleEntity>, IRoleRepository
+    public class RoleRepository : GenericRepository<Role>, IRoleRepository
     {
         public RoleRepository(EIContext context) : base(context) { }
 
-        public async Task<List<RoleEntity>> FindRolesAndUsersAsync(CancellationToken cancellationToken = default)
+        public async Task<List<Role>> FindRolesAndUsersAsync(CancellationToken cancellationToken = default)
         {
             return await _context.Roles
                 .Include(r => r.Users)

@@ -18,9 +18,9 @@ namespace ei_back.Core.Application.Service.Player
             _logger = logger;
         }
 
-        public async Task<List<PlayerEntity>> BuildArtificialPlayersAndMaster(int numberOfArtificalPlayers, GameEntity game, CancellationToken cancellationToken = default)
+        public async Task<List<Domain.Entity.Player>> BuildArtificialPlayersAndMaster(int numberOfArtificalPlayers, Domain.Entity.Game game, CancellationToken cancellationToken = default)
         {
-            List<PlayerEntity> players =
+            List<Domain.Entity.Player> players =
             [
                 new("Table Master", "RPG Table Master", PlayerType.Master)
             ];
@@ -36,7 +36,7 @@ namespace ei_back.Core.Application.Service.Player
                     throw new BadGatewayException(errorMessage);
                 }
 
-                List<PlayerEntity> artificialPlayers = [];
+                List<Domain.Entity.Player> artificialPlayers = [];
                 for (int i = 1; i <= numberOfArtificalPlayers; i++)
                 {
                     string namePattern = @$"<character-name-{i}>(.*?)<\/character-name-{i}>";
@@ -53,7 +53,7 @@ namespace ei_back.Core.Application.Service.Player
                         if (playerName.IsNullOrEmpty() || playerContent.IsNullOrEmpty())
                             ConvertRegexError();
 
-                        var player = new PlayerEntity(playerName, playerContent, PlayerType.ArtificialPlayer);
+                        var player = new Domain.Entity.Player(playerName, playerContent, PlayerType.ArtificialPlayer);
                         player.SetCreatedDate(DateTime.Now);
                         players.Add(player);
                     }

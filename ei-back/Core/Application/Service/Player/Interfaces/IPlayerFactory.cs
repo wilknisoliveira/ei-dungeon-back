@@ -4,6 +4,6 @@ namespace ei_back.Core.Application.Service.Player.Interfaces
 {
     public interface IPlayerFactory
     {
-        Task<List<PlayerEntity>> BuildArtificialPlayersAndMaster(int numberOfArtificalPlayers, GameEntity game, CancellationToken cancellationToken);
+        Task<List<Domain.Entity.Player>> BuildArtificialPlayersAndMaster(int numberOfArtificalPlayers, Domain.Entity.Game game, CancellationToken cancellationToken);
     }
 }

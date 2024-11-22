@@ -32,7 +32,7 @@ namespace ei_back.Infrastructure.Context
             throw new NotImplementedException();
         }
 
-        public IRepository<T> GetRepository<T>() where T : BaseEntity
+        public IRepository<T> GetRepository<T>() where T : Base
         {
             if (_repositories.ContainsKey(typeof(T)))
             {

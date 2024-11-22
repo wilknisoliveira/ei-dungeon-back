@@ -28,7 +28,7 @@ namespace ei_back.Core.Application.Service.User
             return BitConverter.ToString(hashedBytes);
         }
 
-        public async Task<UserEntity> CreateAsync(UserEntity userEntity)
+        public async Task<Domain.Entity.User> CreateAsync(Domain.Entity.User userEntity)
         {
             userEntity.CreatedAt = DateTime.Now;
             userEntity.UpdatedAt = DateTime.Now;
@@ -70,23 +70,23 @@ namespace ei_back.Core.Application.Service.User
 
         }
 
-        public async Task<UserEntity> FindByIdAsync(Guid userId)
+        public async Task<Domain.Entity.User> FindByIdAsync(Guid userId)
         {
             return await _userRepository.FindByIdAsync(userId);
         }
 
-        public async Task<UserEntity> FindUserAndRoles(Guid userId)
+        public async Task<Domain.Entity.User> FindUserAndRoles(Guid userId)
         {
             return await _userRepository.GetUserAndRolesAsync(userId);
         }
 
-        public UserEntity Update(UserEntity user)
+        public Domain.Entity.User Update(Domain.Entity.User user)
         {
             user.UpdatedAt = DateTime.Now;
             return _userRepository.Update(user);
         }
 
-        public async Task<UserEntity?> FindByUserName(string userName)
+        public async Task<Domain.Entity.User?> FindByUserName(string userName)
         {
             return await _userRepository.FindByUserName(userName);
         }

@@ -14,19 +14,19 @@ namespace ei_back.Core.Application.Service.Role
             _roleRepository = roleRepository;
         }
 
-        public async Task<RoleEntity> CreateAsync(RoleEntity entity)
+        public async Task<Domain.Entity.Role> CreateAsync(Domain.Entity.Role entity)
         {
             entity.CreatedAt = DateTime.Now;
             entity.UpdatedAt = DateTime.Now;
             return await _roleRepository.CreateAsync(entity);
         }
 
-        public async Task<List<RoleEntity>> FindAllAsync()
+        public async Task<List<Domain.Entity.Role>> FindAllAsync()
         {
             return await _roleRepository.FindRolesAndUsersAsync();
         }
 
-        public async Task<List<RoleEntity>> FindSelectedRoles(List<string> rolesList)
+        public async Task<List<Domain.Entity.Role>> FindSelectedRoles(List<string> rolesList)
         {
             var roles = await FindAllAsync();
             var selectedRoles = roles.Where(r => rolesList.Contains(r.Name)).ToList();

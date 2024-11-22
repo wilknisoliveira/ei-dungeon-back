@@ -22,7 +22,7 @@ namespace ei_back.Core.Application.UseCase.User
 
         public async Task<UserDtoResponse> Handler(UserDtoRequest userDtoRequest)
         {
-            var user = _mapper.Map<UserEntity>(userDtoRequest);
+            var user = _mapper.Map<Domain.Entity.User>(userDtoRequest);
 
             var selectedRoles = await _roleService.FindSelectedRoles(
             [

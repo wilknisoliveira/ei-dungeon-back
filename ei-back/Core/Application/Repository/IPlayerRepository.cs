@@ -2,7 +2,7 @@
 
 namespace ei_back.Core.Application.Repository
 {
-    public interface IPlayerRepository : IRepository<PlayerEntity>
+    public interface IPlayerRepository : IRepository<Player>
     {
     }
 }

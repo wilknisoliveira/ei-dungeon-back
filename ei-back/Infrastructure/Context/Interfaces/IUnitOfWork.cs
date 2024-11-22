@@ -8,6 +8,6 @@ namespace ei_back.Infrastructure.Context.Interfaces
         void Commit();
         Task<int> CommitAsync(CancellationToken cancellationToken = default);
         void Rollback();
-        IRepository<T> GetRepository<T>() where T : BaseEntity;
+        IRepository<T> GetRepository<T>() where T : Base;
     }
 }

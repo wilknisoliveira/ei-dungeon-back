@@ -6,7 +6,7 @@ namespace ei_back.Core.Application.Service.Game.Interfaces
 {
     public interface IGameService
     {
-        Task<GameEntity> CreateAsync(GameEntity game, CancellationToken cancellationToken);
+        Task<Domain.Entity.Game> CreateAsync(Domain.Entity.Game game, CancellationToken cancellationToken);
         Task<PagedSearchDto<GameDtoResponse>> FindWithPagedSearch(
             Guid userId,
             string column,
@@ -16,6 +16,6 @@ namespace ei_back.Core.Application.Service.Game.Interfaces
             int page,
             CancellationToken cancellationToken);
         Task<bool> CheckIfExistGameByUser(Guid gameId, Guid OwnerUserId, CancellationToken cancellationToken);
-        Task<GameEntity?> GetGameByIdAndOwnerUserName(Guid id, string userName, CancellationToken cancellationToken);
+        Task<Domain.Entity.Game?> GetGameByIdAndOwnerUserName(Guid id, string userName, CancellationToken cancellationToken);
     }
 }

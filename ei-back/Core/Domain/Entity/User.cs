@@ -2,9 +2,9 @@
 
 namespace ei_back.Core.Domain.Entity
 {
-    public class UserEntity : BaseEntity
+    public class User : Base
     {
-        public UserEntity(string userName, string fullName, string email, string password)
+        public User(string userName, string fullName, string email, string password)
         {
             UserName = userName;
             FullName = fullName;
@@ -16,11 +16,11 @@ namespace ei_back.Core.Domain.Entity
         public string FullName { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public List<RoleEntity> Roles { get; } = new();
+        public List<Role> Roles { get; } = new();
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
 
-        public List<GameEntity> Games { get; set; } = new();
+        public List<Game> Games { get; set; } = new();
     }
 }

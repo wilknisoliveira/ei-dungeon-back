@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ei_back.Infrastructure.Context.Map
 {
-    public class RoleMap : BaseMap<RoleEntity>
+    public class RoleMap : BaseMap<Role>
     {
         public RoleMap() : base("roles") { }
 
-        public override void Configure(EntityTypeBuilder<RoleEntity> builder)
+        public override void Configure(EntityTypeBuilder<Role> builder)
         {
             base.Configure(builder);
 

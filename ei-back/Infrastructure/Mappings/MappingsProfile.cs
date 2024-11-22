@@ -12,31 +12,31 @@ namespace ei_back.Infrastructure.Mappings
         public MappingsProfile()
         {
             //User
-            CreateMap<UserEntity, UserDtoResponse>();
-            CreateMap<UserEntity, UserGetDtoResponse>();
-            CreateMap<UserDtoRequest, UserEntity>()
+            CreateMap<User, UserDtoResponse>();
+            CreateMap<User, UserGetDtoResponse>();
+            CreateMap<UserDtoRequest, User>()
                 .ForMember(dest => dest.Roles, opt => opt.Ignore())
                 .ForMember(dest => dest.Games, opt => opt.Ignore());
 
             //Role
-            CreateMap<RoleEntity, RoleDto>().ReverseMap();
-            CreateMap<RoleEntity, RoleDtoResponse>()
+            CreateMap<Role, RoleDto>().ReverseMap();
+            CreateMap<Role, RoleDtoResponse>()
                 .ForMember(dest => dest.Users, opt => opt.Ignore());
-            CreateMap<UserEntity, ApplyRoleDtoResponse>()
+            CreateMap<User, ApplyRoleDtoResponse>()
                 .ForMember(dest => dest.Roles, opt => opt.Ignore());
 
             //Game
-            CreateMap<GameDtoRequest, GameEntity>()
+            CreateMap<GameDtoRequest, Game>()
                 .ForMember(dest => dest.OwnerUser, opt => opt.Ignore())
                 .ForMember(dest => dest.Players, opt => opt.Ignore())
                 .ForMember(dest => dest.Plays, opt => opt.Ignore());
-            CreateMap<GameEntity, GameDtoResponse>();
+            CreateMap<Game, GameDtoResponse>();
 
             //Play
-            CreateMap<PlayEntity, PlayDtoResponse>();
+            CreateMap<Play, PlayDtoResponse>();
 
             //Player
-            CreateMap<PlayerEntity, PlayerDtoResponse>();
+            CreateMap<Player, PlayerDtoResponse>();
         }
     }
 }

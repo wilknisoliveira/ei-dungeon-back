@@ -37,14 +37,14 @@ namespace ei_back.Core.Application.UseCase.Game
 
         public async Task<GameDtoResponse> Handler(GameDtoRequest gameDtoRequest, string userName, CancellationToken cancellationToken)
         {
-            var game = _mapper.Map<GameEntity>(gameDtoRequest);
+            var game = _mapper.Map<Domain.Entity.Game>(gameDtoRequest);
 
             var user = await _userService.FindByUserName(userName) ??
                 throw new NotFoundException($"No user found to user name {userName}.");
             game.SetOwnerUser(user);
 
-            var systemPlayer = new PlayerEntity("System", "System", PlayerType.System, game);
-            var realPlayer = new PlayerEntity(gameDtoRequest.CharacterName, gameDtoRequest.CharacterDescription, PlayerType.RealPlayer, game);
+            var systemPlayer = new Player("System", "System", PlayerType.System, game);
+            var realPlayer = new Player(gameDtoRequest.CharacterName, gameDtoRequest.CharacterDescription, PlayerType.RealPlayer, game);
 
             var artificialPlayersAndMaster = await _playerFactory
                 .BuildArtificialPlayersAndMaster(gameDtoRequest.NumberOfArtificialPlayers, game, cancellationToken);

@@ -1,6 +1,6 @@
 ﻿namespace ei_back.Core.Domain.Entity
 {
-    public class BaseEntity
+    public class Base
     {
         public Guid Id { get; set; }
 

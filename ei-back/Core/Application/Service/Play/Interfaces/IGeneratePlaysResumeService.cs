@@ -4,6 +4,6 @@ namespace ei_back.Core.Application.Service.Play.Interfaces
 {
     public interface IGeneratePlaysResumeService
     {
-        Task<PlayEntity> Handler(List<PlayEntity> plays, GameEntity game, string initialAddicionalInfo, CancellationToken cancellationToken);
+        Task<Domain.Entity.Play> Handler(List<Domain.Entity.Play> plays, Domain.Entity.Game game, string initialAddicionalInfo, CancellationToken cancellationToken);
     }
 }

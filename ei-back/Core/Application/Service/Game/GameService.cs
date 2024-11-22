@@ -19,7 +19,7 @@ namespace ei_back.Core.Application.Service.Game
         }
 
 
-        public async Task<GameEntity> CreateAsync(GameEntity game, CancellationToken cancellationToken)
+        public async Task<Domain.Entity.Game> CreateAsync(Domain.Entity.Game game, CancellationToken cancellationToken)
         {
             game.SetCreatedDate(DateTime.Now);
 
@@ -69,7 +69,7 @@ namespace ei_back.Core.Application.Service.Game
             return await _gameRepository.CheckIfExistGameByUser(gameId, OwnerUserId, cancellationToken);
         }
 
-        public async Task<GameEntity?> GetGameByIdAndOwnerUserName(Guid id, string userName, CancellationToken cancellationToken)
+        public async Task<Domain.Entity.Game?> GetGameByIdAndOwnerUserName(Guid id, string userName, CancellationToken cancellationToken)
         {
             return await _gameRepository.GetGameByIdAndOwnerUserName(id, userName, cancellationToken);
         }

@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ei_back.Infrastructure.Context.Map
 {
-    public class UserMap : BaseMap<UserEntity>
+    public class UserMap : BaseMap<User>
     {
         public UserMap() : base("users") { }
 
-        public override void Configure(EntityTypeBuilder<UserEntity> builder)
+        public override void Configure(EntityTypeBuilder<User> builder)
         {
             base.Configure(builder);
 

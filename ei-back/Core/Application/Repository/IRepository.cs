@@ -2,7 +2,7 @@
 
 namespace ei_back.Core.Application.Repository
 {
-    public interface IRepository<T> where T : BaseEntity
+    public interface IRepository<T> where T : Base
     {
         T Create(T item);
         Task<T> CreateAsync(T item, CancellationToken cancellationToken = default);

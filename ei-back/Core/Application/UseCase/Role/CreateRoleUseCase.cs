@@ -19,7 +19,7 @@ namespace ei_back.Core.Application.UseCase.Role
 
         public async Task<RoleDto> Handler(RoleDto request)
         {
-            var role = _mapper.Map<RoleEntity>(request);
+            var role = _mapper.Map<Domain.Entity.Role>(request);
             var response = await _roleService.CreateAsync(role);
             return _mapper.Map<RoleDto>(response);
         }

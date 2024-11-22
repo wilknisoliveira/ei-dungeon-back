@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context.Repository
 {
-    public class GenericRepository<T> : IRepository<T> where T : BaseEntity
+    public class GenericRepository<T> : IRepository<T> where T : Base
     {
         protected EIContext _context;
 

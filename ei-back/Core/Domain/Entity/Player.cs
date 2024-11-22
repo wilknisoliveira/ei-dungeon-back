@@ -2,9 +2,9 @@
 
 namespace ei_back.Core.Domain.Entity
 {
-    public class PlayerEntity : BaseEntity
+    public class Player : Base
     {
-        public PlayerEntity(string name, string description, PlayerType type, Guid gameId)
+        public Player(string name, string description, PlayerType type, Guid gameId)
         {
             Name = name;
             Description = description;
@@ -12,14 +12,14 @@ namespace ei_back.Core.Domain.Entity
             GameId = gameId;
         }
 
-        public PlayerEntity(string name, string description, PlayerType type)
+        public Player(string name, string description, PlayerType type)
         {
             Name = name;
             Description = description;
             Type = type;
         }
 
-        public PlayerEntity(string name, string description, PlayerType type, GameEntity game) : this(name, description, type)
+        public Player(string name, string description, PlayerType type, Game game) : this(name, description, type)
         {
             Game = game;
             SetCreatedDate(DateTime.Now);
@@ -28,14 +28,14 @@ namespace ei_back.Core.Domain.Entity
         public string Name { get; private set; }
         public string Description { get; private set; }
         public PlayerType Type { get; private set; }
-        public GameEntity Game { get; private set; }
+        public Game Game { get; private set; }
         public Guid GameId { get; private set; }
 
 
-        public List<PlayEntity> Plays { get; private set; }
+        public List<Play> Plays { get; private set; }
 
 
-        public void SetGame(GameEntity game)
+        public void SetGame(Game game)
         {
             Game = game;
             GameId = game.Id;

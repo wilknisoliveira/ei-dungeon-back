@@ -2,10 +2,10 @@
 
 namespace ei_back.Core.Application.Repository
 {
-    public interface IPlayRepository : IRepository<PlayEntity>
+    public interface IPlayRepository : IRepository<Play>
     {
-        Task<List<PlayEntity>> GetPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
-        Task<PlayEntity?> GetLastPlayByPlayerTypeAndGameId(Guid gameId, PlayerType playerType, CancellationToken cancellationToken);
+        Task<List<Play>> GetPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
+        Task<Play?> GetLastPlayByPlayerTypeAndGameId(Guid gameId, PlayerType playerType, CancellationToken cancellationToken);
         Task<int> CountPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
     }
 }

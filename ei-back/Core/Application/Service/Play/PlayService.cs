@@ -18,7 +18,7 @@ namespace ei_back.Core.Application.Service.Play
             _mapper = mapper;
         }
 
-        public Task<PlayEntity> CreatePlay(PlayEntity playEntity, CancellationToken cancellationToken)
+        public Task<Domain.Entity.Play> CreatePlay(Domain.Entity.Play playEntity, CancellationToken cancellationToken)
         {
             return _playRepository.CreateAsync(playEntity, cancellationToken);
         }
