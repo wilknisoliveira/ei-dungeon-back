@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using ei_back.Core.Application.UseCase.Game.Dtos;
+using ei_back.Core.Application.UseCase.GameInfo.Dtos;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Role.Dtos;
 using ei_back.Core.Application.UseCase.User.Dtos;
@@ -37,6 +38,10 @@ namespace ei_back.Infrastructure.Mappings
 
             //Player
             CreateMap<Player, PlayerDtoResponse>();
+
+            //GameInfo
+            CreateMap<GameInfo, GameInfoDto>();
+            CreateMap<GameInfoDto, GameInfo>();
         }
     }
 }

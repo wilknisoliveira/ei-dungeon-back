@@ -44,6 +44,19 @@ namespace ei_back.Infrastructure.Context.Repository
             }
         }
 
+        public async Task<List<T>> CreateRangeAsync(List<T> items, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await _context.AddRangeAsync(items, cancellationToken);
+                return items;
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public List<T> FindAll()
         {
             return _dbSet.ToList();

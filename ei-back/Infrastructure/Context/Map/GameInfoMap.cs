@@ -16,7 +16,7 @@ namespace ei_back.Infrastructure.Context.Map
 
             builder.Property(x => x.Type).HasColumnName("type").IsRequired();
             builder.Property(x => x.Value).HasColumnName("value").IsRequired();
-            builder.HasIndex(x => x.Value).IsUnique();
+            builder.HasIndex(x => new { x.Type, x.Value }).IsUnique();
         }
     }
 }

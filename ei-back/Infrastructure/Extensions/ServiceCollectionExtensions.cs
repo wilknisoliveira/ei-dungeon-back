@@ -24,6 +24,8 @@ using ei_back.Core.Application.UseCase.Game.Interfaces;
 using ei_back.Core.Application.UseCase.Game;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play;
+using ei_back.Core.Application.UseCase.GameInfo.Interfaces;
+using ei_back.Core.Application.UseCase.GameInfo;
 
 namespace ei_back.Infrastructure.Extensions
 {
@@ -38,6 +40,7 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<IGameRepository, GameRepository>();
             services.AddScoped<IPlayRepository, PlayRepository>();
+            services.AddScoped<IGameInfoRepository, GameInfoRepository>();
 
             return services;
         }
@@ -74,6 +77,7 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
             services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
             services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
+            services.AddScoped<ICreateGameInfoUseCase, CreateGameInfoUseCase>();
 
             return services;
         }

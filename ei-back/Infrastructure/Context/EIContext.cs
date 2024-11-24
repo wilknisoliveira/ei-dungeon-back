@@ -14,6 +14,7 @@ namespace ei_back.Infrastructure.Context
         public DbSet<Player> Players { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<Play> Plays { get; set; }
+        public DbSet<GameInfo> GameInfos { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
