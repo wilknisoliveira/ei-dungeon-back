@@ -1,6 +1,5 @@
 ﻿using ei_back.Core.Application.Repository;
 using ei_back.Core.Domain.Entity;
-using ei_back.Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context.Repository

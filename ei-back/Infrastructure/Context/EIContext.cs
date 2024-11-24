@@ -21,7 +21,7 @@ namespace ei_back.Infrastructure.Context
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
 
-
+            /*
             List<Role> roles =
             [
                 new Role("Admin", ""),
@@ -39,7 +39,7 @@ namespace ei_back.Infrastructure.Context
             });
             modelBuilder.Entity<Role>().HasData(roles);
 
-            /*
+            
             // Role seeding
             List<RoleEntity> roles =
             [
