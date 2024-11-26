@@ -15,5 +15,12 @@ namespace ei_back.Infrastructure.Context.Repository
         {
             return await _context.GameInfos.Where(x => x.Type.Equals(type) && values.Contains(x.Value)).ToListAsync(cancellationToken);
         }
+
+        public async Task<IEnumerable<GameInfo>> GetLimitRandomValuesByType(int limit, InfoType type, CancellationToken cancellationToken)
+        {
+            return await _context.GameInfos
+                .FromSqlRaw("SELECT * FROM game_infos WHERE Type = {0} ORDER BY RANDOM() LIMIT {1}", type, limit)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

@@ -66,7 +66,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
             return await Post(requestBody, cancellationToken);
         }
 
-        public async Task<string> GetSimpleResponse(string prompt, CancellationToken cancellationToken)
+        public async Task<string> GetSimpleResponse(string prompt, CancellationToken cancellationToken, double temperature = 0.5)
         {
             var requestBody = new GeminiGenerativeAiDtoRequest()
             {
@@ -81,8 +81,75 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
                     ]
                     }
                     
+                },
+                generationConfig = new GenerationConfig()
+                {
+                    temperature = temperature
                 }
             };
+
+            return await Post(requestBody, cancellationToken);
+        }
+
+        public async Task<string> GetStructureJsonResponse(List<IAiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
+        {
+            List<Content> contents = new();
+            foreach (var prompt in prompts)
+            {
+                if (prompt.Role != PromptRole.Instruction.GetAttributeOfType<DescriptionAttribute>().Description)
+                {
+                    contents.Add(new Content()
+                    {
+                        role = prompt.Role,
+                        parts = new List<Part>()
+                        {
+                            new Part()
+                            {
+                                text = prompt.Content,
+                            }
+                        }
+                    });
+                }
+            }
+
+
+            Dictionary<string, PropertyType> properties = new();
+
+            fields.ForEach(x => properties.Add(x, new PropertyType() { type = "STRING" }));
+
+            var requestBody = new GeminiGenerativeAiDtoRequest()
+            {
+                contents = contents,
+                generationConfig = new GenerationConfig()
+                {
+                    temperature = temperature,
+                    response_mime_type = "application/json",
+                    response_schema = new ResponseSchema()
+                    {
+                        type = "ARRAY",
+                        items = new Item
+                        {
+                            type = "OBJECT",
+                            properties = properties
+                        }
+                    }
+                }
+            };
+
+            List<string> instructionsPrompt = prompts.Where(x => x.Role.Equals(PromptRole.Instruction.GetAttributeOfType<DescriptionAttribute>().Description)).Select(x => x.Content).ToList();
+
+            if (!instructionsPrompt.IsNullOrEmpty())
+            {
+                var instructions = new SystemInstruction()
+                {
+                    parts = new Part()
+                    {
+                        text = string.Join(" ", instructionsPrompt),
+                    }
+                };
+
+                requestBody.system_instruction = instructions;
+            }
 
             return await Post(requestBody, cancellationToken);
         }

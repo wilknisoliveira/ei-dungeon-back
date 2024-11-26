@@ -48,7 +48,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
             return response?.choices?.FirstOrDefault()?.message?.content ?? "";
         }
 
-        public async Task<string> GetSimpleResponse(string prompt, CancellationToken cancellationToken)
+        public async Task<string> GetSimpleResponse(string prompt, CancellationToken cancellationToken, double temperature = 0.5)
         {
             var requestBody = new OpenAiDtoRequest()
             {
@@ -65,6 +65,11 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
             var response = await Post<OpenAiDtoResponse, OpenAiDtoRequest>(_host, requestBody, cancellationToken);
 
             return response?.choices?.FirstOrDefault()?.message?.content ?? "";
+        }
+
+        public Task<string> GetStructureJsonResponse(List<IAiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
+        {
+            throw new NotImplementedException();
         }
     }
 }
