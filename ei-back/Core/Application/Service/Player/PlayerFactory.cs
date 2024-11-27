@@ -105,9 +105,32 @@ namespace ei_back.Core.Application.Service.Player
 
             var characters = new List<string>();
             for (int i = 0; i < quantity; i++)
-                characters.Add($"#Personagem {i + 1}# Nome: {charactersName[i].Value}, Raça: {charactersRace[i].Value}, Classe: {charactersClass[i].Value} ");
+                characters.Add($"#Personagem {i + 1}# Nome: {charactersName[i].Value}, Raça: {charactersRace[i].Value}, Classe: {charactersClass[i].Value}, Alignment: {RandomAlignment()}");
 
             return characters;
+        }
+
+
+        private static string RandomAlignment()
+        {
+            List<string> alignments = new()
+            {
+                "Lawful Good — Just",
+                "Neutral Good — Benefactor",
+                "Chaotic Good — Revolutionary",
+                "Lawful Neutral — Judge",
+                "Neutral — Realist",
+                "Chaotic Neutral — Individualist",
+                "Lawful Evil — Tyrant",
+                "Neutral Evil — Mercenary",
+                "Chaotic Evil — Destroyer"
+            };
+
+            Random random = new();
+
+            int randomIndex = random.Next(alignments.Count) - 1;
+
+            return alignments[randomIndex];
         }
 
 
