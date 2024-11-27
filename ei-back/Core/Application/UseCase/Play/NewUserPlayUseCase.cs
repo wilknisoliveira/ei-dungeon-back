@@ -10,6 +10,7 @@ using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
+using System.Text.Json;
 
 namespace ei_back.Core.Application.UseCase.Play
 {
@@ -73,11 +74,19 @@ namespace ei_back.Core.Application.UseCase.Play
             newPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(newPlay.Player);
             response.Add(newPlayDtoResponse);
 
+            var nextArtificialPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
+                throw new InternalServerErrorException("No Table Master was found.");
             if (game.Players.Any(x => x.Type.Equals(PlayerType.ArtificialPlayer)))
             {
-                var lastArtificialPlayer = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.ArtificialPlayer, cancellationToken);
-                var nextArtificialPlayer = NextPlayer(lastArtificialPlayer?.Player, game.Players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer)).ToList());
+                //var lastArtificialPlayer = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.ArtificialPlayer, cancellationToken);
+                //var nextArtificialPlayer = NextPlayer(lastArtificialPlayer?.Player, game.Players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer)).ToList());
 
+                nextArtificialPlayer = game.Players.FirstOrDefault(x => x.Name.Equals(DefineNextPlayer(plays, game, cancellationToken))) ??
+                    nextArtificialPlayer;
+            }
+
+            if (nextArtificialPlayer.Type.Equals(PlayerType.ArtificialPlayer))
+            {
                 var artificialPlayerPlayRequest = GenerateArtificialPlay(plays, game, nextArtificialPlayer, cancellationToken);
                 var artificialPlayerPlay = await artificialPlayerPlayRequest;
                 _ = await _playService.CreatePlay(artificialPlayerPlay, cancellationToken) ??
@@ -88,16 +97,18 @@ namespace ei_back.Core.Application.UseCase.Play
                 artificialPlayerPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(artificialPlayerPlay.Player);
                 response.Add(artificialPlayerPlayDtoResponse);
             }
+            else
+            {
+                var masterPlayRequest = GenerateMasterPlay(plays, game, cancellationToken);
+                var masterPlay = await masterPlayRequest;
+                _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
+                    throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
 
-            var masterPlayRequest = GenerateMasterPlay(plays, game, cancellationToken);
-            var masterPlay = await masterPlayRequest;
-            _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
-                throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
-
-            plays.Add(masterPlay);
-            var masterPlayDtoResponse = _mapper.Map<PlayDtoResponse>(masterPlay);
-            masterPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(masterPlay.Player);
-            response.Add(masterPlayDtoResponse);
+                plays.Add(masterPlay);
+                var masterPlayDtoResponse = _mapper.Map<PlayDtoResponse>(masterPlay);
+                masterPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(masterPlay.Player);
+                response.Add(masterPlayDtoResponse);
+            }
 
             var playerList = GeneratePlayerList(game);
             var gameResumeRequest = _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, cancellationToken);
@@ -182,6 +193,77 @@ namespace ei_back.Core.Application.UseCase.Play
 
             return players[currentPlayerIndex + 1];
         }
+
+
+        private async Task<string> DefineNextPlayer(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
+        {
+            List<string> properties = new()
+            {
+                "name"
+            };
+
+            AiPromptRequest instruction = new(PromptRole.Instruction,
+                "A resposta deve ser exclusivamente no seguite modelo [{\"name\": \"example\"}]. Segue alguns exemplos: [{\"name\": \"Table Master\"}] ou [{\"name\": \"Brock\"}] ou [{\"name\": \"Frodo\"}]");
+
+            List<IAiPromptRequest> playPrompts = new()
+            {
+                instruction
+            };
+
+            IAiPromptRequest playersDescription = GeneratePlayerList(game);
+            playPrompts.Add(new AiPromptRequest(PromptRole.User, playersDescription.Content));
+
+            string resume = plays.Where(x => x.Player.Type.Equals(PlayerType.System)).FirstOrDefault()?.Prompt ?? "";
+            if (!resume.IsNullOrEmpty())
+            {
+                playPrompts.Add(new AiPromptRequest(PromptRole.User, resume));
+            }
+
+            string realPlay = plays.Where(x => x.Player.Type.Equals(PlayerType.RealPlayer)).FirstOrDefault()?.Prompt ??
+                throw new InternalServerErrorException("Something went wrong while attempting to get the real play.");
+            playPrompts.Add(new AiPromptRequest(PromptRole.User, realPlay));
+
+            playPrompts.Add(new AiPromptRequest(PromptRole.User,
+                "Você está observando um jogo de RPG de Mesa. Com base nas informações anteriores, qual o participante mais adequado para " +
+                "responder a última mensagem? Você poderá escolher entre um dos jogadores ou Table Master."));
+
+            var iaResponse = await _generativeAIApiHttpService.GenerateStructureJsonResponse(playPrompts, properties, cancellationToken, 0);
+
+            if (iaResponse.IsNullOrEmpty())
+            {
+                var errorMessage = "No content was returned by the gateway";
+                _logger.LogError(errorMessage);
+                throw new BadGatewayException(errorMessage);
+            }
+
+            JsonElement charactersDescription = ConvertStringToArrayJson(iaResponse);
+
+            string nextPlayer = charactersDescription.EnumerateArray().FirstOrDefault().GetProperty("name").GetString() ?? "";
+
+            if (nextPlayer.IsNullOrEmpty())
+            {
+                var errorMessage = "Something went wrong while attempting to define the next player";
+                _logger.LogError(errorMessage);
+                throw new InternalServerErrorException(errorMessage);
+            }
+
+            return nextPlayer;
+        }
+
+        private JsonElement ConvertStringToArrayJson(string value)
+        {
+            try
+            {
+                return JsonSerializer.Deserialize<JsonElement>(value);
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"Something went wrong while attempting to convert the IA response to json: {ex.Message}";
+                _logger.LogError(errorMessage);
+                throw new InternalServerErrorException(errorMessage);
+            }
+        }
+
 
         private async Task<Domain.Entity.Play> GenerateArtificialPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, Player currentPlayer, CancellationToken cancellationToken)
         {

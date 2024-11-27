@@ -27,10 +27,13 @@ namespace ei_back.Core.Application.Service.Player
 
         public async Task<List<Domain.Entity.Player>> BuildArtificialPlayersAndMaster(int numberOfArtificalPlayers, Domain.Entity.Game game, CancellationToken cancellationToken = default)
         {
-            List<Domain.Entity.Player> players =
-            [
-                new("Table Master", "RPG Table Master", PlayerType.Master)
-            ];
+            Domain.Entity.Player master = new("Table Master", "RPG Table Master", PlayerType.Master);
+            master.SetCreatedDate(DateTime.Now);
+
+            List<Domain.Entity.Player> players = new()
+            {
+                master
+            };
 
             if (numberOfArtificalPlayers > 0)
             {
