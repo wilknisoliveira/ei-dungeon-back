@@ -49,7 +49,7 @@ namespace ei_back.Core.Application.UseCase.Play
         {
             List<Domain.Entity.Play> plays = [];
             List<PlayDtoResponse> response = [];
-
+             
             var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken) ??
                 throw new NotFoundException($"No game found with id {playDtoRequest.GameId} to user name {userName}.");
 
@@ -81,14 +81,15 @@ namespace ei_back.Core.Application.UseCase.Play
                 //var lastArtificialPlayer = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.ArtificialPlayer, cancellationToken);
                 //var nextArtificialPlayer = NextPlayer(lastArtificialPlayer?.Player, game.Players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer)).ToList());
 
-                nextArtificialPlayer = game.Players.FirstOrDefault(x => x.Name.Equals(DefineNextPlayer(plays, game, cancellationToken))) ??
+                string gameIntelligenceChoice = await DefineNextPlayer(plays, game, cancellationToken);
+
+                nextArtificialPlayer = game.Players.FirstOrDefault(x => x.Name.Equals(gameIntelligenceChoice)) ??
                     nextArtificialPlayer;
             }
 
             if (nextArtificialPlayer.Type.Equals(PlayerType.ArtificialPlayer))
             {
-                var artificialPlayerPlayRequest = GenerateArtificialPlay(plays, game, nextArtificialPlayer, cancellationToken);
-                var artificialPlayerPlay = await artificialPlayerPlayRequest;
+                var artificialPlayerPlay = await GenerateArtificialPlay(plays, game, nextArtificialPlayer, cancellationToken);
                 _ = await _playService.CreatePlay(artificialPlayerPlay, cancellationToken) ??
                     throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
 
@@ -99,8 +100,7 @@ namespace ei_back.Core.Application.UseCase.Play
             }
             else
             {
-                var masterPlayRequest = GenerateMasterPlay(plays, game, cancellationToken);
-                var masterPlay = await masterPlayRequest;
+                var masterPlay = await GenerateMasterPlay(plays, game, cancellationToken);
                 _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
                     throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
 
@@ -111,8 +111,7 @@ namespace ei_back.Core.Application.UseCase.Play
             }
 
             var playerList = GeneratePlayerList(game);
-            var gameResumeRequest = _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, cancellationToken);
-            var gameResume = await gameResumeRequest;
+            var gameResume = await _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, cancellationToken);
             _ = await _playService.CreatePlay(gameResume, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
 
@@ -179,21 +178,6 @@ namespace ei_back.Core.Application.UseCase.Play
             //Blocked the dices
             return $"Você é um mestre de mesa (Master table) em um jogo de RPG, sistema {systemGame}. Nas informações repassadas, encontra-se um breve resumo de partidas anteriores, bem como as últimas jogadas dos demais players. Sua função é de conduzir a história, desenvolver o enredo, interpretar os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações relativas a uma mestre de Mesa. \nObservações: 1. Você como Mestre da Mesa, nunca deve interpretar o papel dos Players! Também nunca deve ditar as ações dos Players!; 2. Foi acordado entre os jogadores que não será usado mecanismos de rolagem de dados. \n Agora, prossiga com a próxima orientação do Mestre da Mesa!";
         }
-
-        private static Player NextPlayer(Player? currentPlayer, List<Player> players)
-        {
-            players = players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer)).OrderBy(x => x.Name).ToList();
-
-            int currentPlayerIndex = currentPlayer != null ? players.FindIndex(x => x.Id.Equals(currentPlayer.Id)) : players.Count - 1;
-
-            if (currentPlayerIndex >= (players.Count - 1))
-            {
-                return players.First();
-            }
-
-            return players[currentPlayerIndex + 1];
-        }
-
 
         private async Task<string> DefineNextPlayer(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
         {
@@ -264,7 +248,6 @@ namespace ei_back.Core.Application.UseCase.Play
             }
         }
 
-
         private async Task<Domain.Entity.Play> GenerateArtificialPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, Player currentPlayer, CancellationToken cancellationToken)
         {
             List<IAiPromptRequest> promptList = [];
@@ -309,8 +292,5 @@ namespace ei_back.Core.Application.UseCase.Play
         {
             return $"Você está participando de um jogo de RPG de Mesa. Seu personagem é {currentPlayer.Name}. Você deve se comportar unicamente como um jogador, interpretando seu personagem ou fazendo perguntas ao Mestre da Mesa quando achar necessário. Observações importantes: 1. Está vedado e proibido tomar ações por outros personagens e/ou NPCs; 2. Você não deve tomar ações próprias de um Mestre de Mesa, ou seja, não deve ditar o rumo da história ou acontecimentos; 3. Sempre que possível, dê preferência para a narração em primeira pessoa. Agora é com você! Com base nas informações repassadas, qual a sua próxima jogada?";
         }
-
-
-
     }
 }
