@@ -186,8 +186,16 @@ namespace ei_back.Core.Application.UseCase.Play
                 "name"
             };
 
+            string playersOptions = "";
+            //
+
+            foreach(var player in game.Players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer) || x.Type.Equals(PlayerType.Master)))
+            {
+                playersOptions += "[{\"name\": \"" + player.Name + "\"}], ";
+            }
+
             AiPromptRequest instruction = new(PromptRole.Instruction,
-                "A resposta deve ser exclusivamente no seguite modelo [{\"name\": \"example\"}]. Segue alguns exemplos: [{\"name\": \"Table Master\"}] ou [{\"name\": \"Brock\"}] ou [{\"name\": \"Frodo\"}]");
+                "A resposta deve ser exclusivamente no seguite modelo [{\"name\": \"example\"}].");
 
             List<IAiPromptRequest> playPrompts = new()
             {
@@ -209,7 +217,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
             playPrompts.Add(new AiPromptRequest(PromptRole.User,
                 "Você está observando um jogo de RPG de Mesa. Com base nas informações anteriores, qual o participante mais adequado para " +
-                "responder a última mensagem? Você poderá escolher entre um dos jogadores ou Table Master."));
+                $"responder a última mensagem? Você poderá escolher entre as seguintes opções: {playersOptions}"));
 
             var iaResponse = await _generativeAIApiHttpService.GenerateStructureJsonResponse(playPrompts, properties, cancellationToken, 0);
 
