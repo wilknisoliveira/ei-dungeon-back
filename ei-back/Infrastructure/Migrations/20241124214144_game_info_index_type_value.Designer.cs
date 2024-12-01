@@ -12,7 +12,7 @@ using ei_back.Infrastructure.Context;
 namespace ei_back.Infrastructure.Migrations
 {
     [DbContext(typeof(EIContext))]
-    [Migration("20241124184144_game_info_index_type_value")]
+    [Migration("20241124214144_game_info_index_type_value")]
     partial class game_info_index_type_value
     {
         /// <inheritdoc />
