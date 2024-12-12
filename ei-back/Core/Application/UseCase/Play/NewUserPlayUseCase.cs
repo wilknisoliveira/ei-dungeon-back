@@ -78,9 +78,6 @@ namespace ei_back.Core.Application.UseCase.Play
                 throw new InternalServerErrorException("No Table Master was found.");
             if (game.Players.Any(x => x.Type.Equals(PlayerType.ArtificialPlayer)))
             {
-                //var lastArtificialPlayer = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.ArtificialPlayer, cancellationToken);
-                //var nextArtificialPlayer = NextPlayer(lastArtificialPlayer?.Player, game.Players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer)).ToList());
-
                 string gameIntelligenceChoice = await DefineNextPlayer(plays, game, cancellationToken);
 
                 nextArtificialPlayer = game.Players.FirstOrDefault(x => x.Name.Equals(gameIntelligenceChoice)) ??
@@ -129,7 +126,7 @@ namespace ei_back.Core.Application.UseCase.Play
         private async Task<Domain.Entity.Play> GenerateMasterPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
         {
             List<IAiPromptRequest> promptList = [];
-            promptList.Add(GeneratePlayerList(game));
+            promptList.Add(GeneratePlayersDescription(game));
 
             foreach (var play in plays)
             {
@@ -169,6 +166,15 @@ namespace ei_back.Core.Application.UseCase.Play
             var players = "#Lista de players do jogo: \n";
             foreach (var player in game.Players.Where(x => x.Type.Equals(PlayerType.RealPlayer) || x.Type.Equals(PlayerType.ArtificialPlayer)))
                 players += player.Name + "\n";
+
+            return new AiPromptRequest(PromptRole.Instruction, players);
+        }
+
+        private static IAiPromptRequest GeneratePlayersDescription(Domain.Entity.Game game)
+        {
+            var players = "#Lista de players do jogo: \n";
+            foreach (var player in game.Players.Where(x => x.Type.Equals(PlayerType.RealPlayer) || x.Type.Equals(PlayerType.ArtificialPlayer)))
+                players += "# Player: " + player.Name + "\nDescription: " + player.Description + "\n\n";
 
             return new AiPromptRequest(PromptRole.Instruction, players);
         }
