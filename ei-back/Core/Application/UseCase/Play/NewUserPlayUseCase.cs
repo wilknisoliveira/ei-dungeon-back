@@ -60,14 +60,20 @@ namespace ei_back.Core.Application.UseCase.Play
             _ = await _playService.CreatePlay(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
 
-            var lastResume = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.System, cancellationToken);
-            if (lastResume != null)
+            var lastPlay = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.System, cancellationToken);
+            if (lastPlay != null)
             {
-                plays.Add(lastResume);
-                var resumePlayDtoResponse = _mapper.Map<PlayDtoResponse>(lastResume);
-                resumePlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(lastResume.Player);
-                response.Add(resumePlayDtoResponse);
+                plays.Add(lastPlay);
             }
+            else
+            {
+                lastPlay = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.Master, cancellationToken) ??
+                throw new InternalServerErrorException("No Table Master play was found.");
+                plays.Add(lastPlay);
+            }
+            var lastPlayDtoResponse = _mapper.Map<PlayDtoResponse>(lastPlay);
+            lastPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(lastPlay.Player);
+            response.Add(lastPlayDtoResponse);
 
             plays.Add(newPlay);
             var newPlayDtoResponse = _mapper.Map<PlayDtoResponse>(newPlay);

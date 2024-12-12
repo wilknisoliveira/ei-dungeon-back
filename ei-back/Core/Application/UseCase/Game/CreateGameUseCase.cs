@@ -57,13 +57,6 @@ namespace ei_back.Core.Application.UseCase.Game
                 throw new InternalServerErrorException("Something went wrong while attempting to generate the initial master play.");
             game.AddPlay(masterPlay);
 
-            var playersDescription = "";
-            foreach (var player in game.Players.Where(x => !x.Type.Equals(PlayerType.Master)))
-                playersDescription = playersDescription + player.InfoToString() + "\n";
-
-            var gameResume = await _generatePlaysResumeService.Handler(game.Plays, game, playersDescription, cancellationToken);
-            game.AddPlay(gameResume);
-
             var gameResponse = await _gameService.CreateAsync(game, cancellationToken);
 
             return _mapper.Map<GameDtoResponse>(gameResponse);

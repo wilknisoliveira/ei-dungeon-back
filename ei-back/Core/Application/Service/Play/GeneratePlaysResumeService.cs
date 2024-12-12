@@ -5,6 +5,7 @@ using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
+using YamlDotNet.Core;
 
 namespace ei_back.Core.Application.Service.Play
 {
@@ -59,7 +60,9 @@ namespace ei_back.Core.Application.Service.Play
 
         private static string PromptCommand()
         {
-            return "Você está observando uma partida de RPG de mesa. Faça um resumo de todas as informações passadas. O resumo gerado deve ter no mínimo 50 tokens e no máximo 1000 tokens. O texto a ser gerado será utilizado posteriormente por uma IA generativa como base de dados para geração de novos resumos, ou seja, a linguagem e síntese utilizada deve ser direcionado para leitura por IA. Faça o resumo de forma a economizar de forma eficiente a margem/quantidade de tokens.";
+            var maxOutputTokens = 2000;
+            var minOutputTokens = 100;
+            return $"Você está observando uma partida de RPG de mesa. Faça um resumo de todas as informações passadas. O resumo gerado deve ter no mínimo {minOutputTokens} tokens e no máximo {maxOutputTokens} tokens. O texto a ser gerado será utilizado posteriormente por uma IA generativa como base de dados para geração de novos resumos, ou seja, a linguagem e síntese utilizada deve ser direcionado para leitura por IA. Utilize bem a quantidade máxima de {maxOutputTokens} tokens, de forma a registrar a história e os detalhes importantes.";
         }
     }
 }
