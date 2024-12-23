@@ -1,10 +1,7 @@
 using ei_back.Infrastructure.Context;
-using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions;
 using ei_back.Infrastructure.Mappings;
-using ei_back.Infrastructure.ExternalAPIs;
 using ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient;
-using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using ei_back.Infrastructure.Swagger;
 using ei_back.Infrastructure.Token;
 using HealthChecks.UI.Client;
@@ -20,26 +17,6 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using ei_back.UserInterface.Hubs;
-using ei_back.Core.Application.UseCase.Role;
-using ei_back.Core.Application.UseCase.User;
-using ei_back.Core.Application.UseCase.Role.Interfaces;
-using ei_back.Core.Application.UseCase.User.Interfaces;
-using ei_back.Core.Application.UseCase.Play;
-using ei_back.Core.Application.UseCase.Game;
-using ei_back.Core.Application.UseCase.Play.Interfaces;
-using ei_back.Core.Application.UseCase.Game.Interfaces;
-using ei_back.Core.Application.Repository;
-using ei_back.Infrastructure.Context.Repository;
-using ei_back.Core.Application.Service.User;
-using ei_back.Core.Application.Service.Game;
-using ei_back.Core.Application.Service.Play;
-using ei_back.Core.Application.Service.Player;
-using ei_back.Core.Application.Service.Role;
-using ei_back.Core.Application.Service.User.Interfaces;
-using ei_back.Core.Application.Service.Game.Interfaces;
-using ei_back.Core.Application.Service.Play.Interfaces;
-using ei_back.Core.Application.Service.Player.Interfaces;
-using ei_back.Core.Application.Service.Role.Interfaces;
 using ei_back.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -134,7 +111,7 @@ builder.Services.AddInfrastructureSwagger();
 //Database
 var connection = builder.Configuration["PostgresConnection:PostgresConnectionString"];
 builder.Services.AddDbContext<EIContext>(options => options.UseNpgsql(
-    connection, 
+    connection,
     assembly => assembly.MigrationsAssembly(typeof(EIContext).Assembly.FullName))
 );
 
@@ -171,7 +148,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddUseCases();
-
+builder.Services.AddInfraHttpClients();
 
 var app = builder.Build();
 

@@ -47,7 +47,6 @@ namespace ei_back.Infrastructure.Extensions
 
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddScoped<IGenerativeAIApiClient, GeminiApiClient>();
             services.AddScoped<IGenerativeAIApiHttpService, GenerativeAIApiHttpService>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<ITokenService, TokenService>();
@@ -78,6 +77,13 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
             services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
             services.AddScoped<ICreateGameInfoUseCase, CreateGameInfoUseCase>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddInfraHttpClients(this IServiceCollection services)
+        {
+            services.AddHttpClient<IGenerativeAIApiClient, GeminiApiClient>();
 
             return services;
         }

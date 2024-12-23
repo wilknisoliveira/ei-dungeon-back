@@ -2,9 +2,14 @@
 
 namespace ei_back.Infrastructure.ExternalAPIs.Client.Core
 {
-    public class ExternalApiWebClient(HttpClient httpClient)
+    public class ExternalApiWebClient
     {
-        private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        private readonly HttpClient _httpClient; 
+        
+        public ExternalApiWebClient(HttpClient httpClient)
+        {
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        }
 
         public async Task<T?> Get<T>(string uri, CancellationToken cancellationToken)
         {

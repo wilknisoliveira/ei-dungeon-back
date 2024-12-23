@@ -21,9 +21,9 @@ namespace ei_back.Core.Application.UseCase.Play
         private readonly IGameService _gameService;
         private readonly IGenerativeAIApiHttpService _generativeAIApiHttpService;
         private readonly IPlayRepository _playRepository;
-        private readonly IGeneratePlaysResumeService _generatePlaysResumeService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<NewUserPlayUseCase> _logger;
+        private readonly IServiceProvider _serviceProvider;
 
         public NewUserPlayUseCase(
             IMapper mapper,
@@ -31,18 +31,18 @@ namespace ei_back.Core.Application.UseCase.Play
             IGameService gameService,
             IGenerativeAIApiHttpService generativeAIApiHttpService,
             IPlayRepository playRepository,
-            IGeneratePlaysResumeService generatePlaysResumeService,
             IUnitOfWork unitOfWork,
-            ILogger<NewUserPlayUseCase> logger)
+            ILogger<NewUserPlayUseCase> logger,
+            IServiceProvider serviceProvider)
         {
             _mapper = mapper;
             _playService = playService;
             _gameService = gameService;
             _generativeAIApiHttpService = generativeAIApiHttpService;
             _playRepository = playRepository;
-            _generatePlaysResumeService = generatePlaysResumeService;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<List<PlayDtoResponse>> Handler(PlayDtoRequest playDtoRequest, string userName, CancellationToken cancellationToken)
@@ -112,12 +112,7 @@ namespace ei_back.Core.Application.UseCase.Play
                 masterPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(masterPlay.Player);
                 response.Add(masterPlayDtoResponse);
             }
-
-            var playerList = GeneratePlayerList(game);
-            var gameResume = await _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, cancellationToken);
-            _ = await _playService.CreatePlay(gameResume, cancellationToken) ??
-                throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
-
+            
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
             {
@@ -125,6 +120,29 @@ namespace ei_back.Core.Application.UseCase.Play
                 _logger.LogError(errorMessage);
                 throw new InternalServerErrorException(errorMessage);
             }
+            
+            
+            var playerList = GeneratePlayerList(game);
+
+            var timeSpan = TimeSpan.FromMinutes(2);
+            var cancellationTokenTask = new CancellationTokenSource(timeSpan);
+            
+            _ = Task.Run(async () =>
+            {
+                using var cancellationTokenService = new CancellationTokenSource(timeSpan);
+
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var _newGeneratePlaysResumeService = scope.ServiceProvider.GetRequiredService<IGeneratePlaysResumeService>();
+                    await _newGeneratePlaysResumeService.Handler(game.Plays, game, playerList.Content, cancellationTokenService.Token);
+                };
+            }, cancellationTokenTask.Token);
+
+            // Other ways to use async operations without create a new context:
+            // For cpu heavy operations
+            // _ = Task.Run(async () => await _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, CancellationToken.None), CancellationToken.None);
+            // For operatons with external services like http or DbContext:
+            // _ = _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, ctsg.Token);
 
             return response.Where(x => !x.PlayerDtoResponse.Type.Equals(PlayerType.System)).ToList();
         }
@@ -199,7 +217,6 @@ namespace ei_back.Core.Application.UseCase.Play
             };
 
             string playersOptions = "";
-            //
 
             foreach(var player in game.Players.Where(x => x.Type.Equals(PlayerType.ArtificialPlayer) || x.Type.Equals(PlayerType.Master)))
             {

@@ -1,5 +1,7 @@
-﻿using ei_back.Core.Application.Service.Play.Interfaces;
+﻿using ei_back.Core.Application.Repository;
+using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
+using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
@@ -13,16 +15,22 @@ namespace ei_back.Core.Application.Service.Play
     {
         private readonly IGenerativeAIApiHttpService _generativeAIApiHttpService;
         private readonly ILogger<GeneratePlaysResumeService> _logger;
+        private readonly IPlayService _playService;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GeneratePlaysResumeService(
             IGenerativeAIApiHttpService generativeAIApiHttpService,
-            ILogger<GeneratePlaysResumeService> logger)
+            ILogger<GeneratePlaysResumeService> logger,
+            IUnitOfWork unitOfWork,
+            IPlayService playService)
         {
             _generativeAIApiHttpService = generativeAIApiHttpService;
             _logger = logger;
+            _unitOfWork = unitOfWork;
+            _playService = playService;
         }
 
-        public async Task<Domain.Entity.Play> Handler(List<Domain.Entity.Play> plays, Domain.Entity.Game game, string initialAddicionalInfo, CancellationToken cancellationToken)
+        public async Task Handler(List<Domain.Entity.Play> plays, Domain.Entity.Game game, string initialAddicionalInfo, CancellationToken cancellationToken)
         {
             var lastSystemPlay = plays.FirstOrDefault(x => x.Player.Type.Equals(PlayerType.System));
 
@@ -47,7 +55,15 @@ namespace ei_back.Core.Application.Service.Play
 
             promptList.Add(new AiPromptRequest(PromptRole.User, PromptCommand()));
 
-            var iaResponse = await _generativeAIApiHttpService.GenerateResponseWithRoleBase(promptList, cancellationToken);
+            var iaResponse = "";
+            try
+            {
+                iaResponse = await _generativeAIApiHttpService.GenerateResponseWithRoleBase(promptList, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Something went wrong while attempting to generate resume: " + ex);
+            }
 
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");
@@ -55,7 +71,19 @@ namespace ei_back.Core.Application.Service.Play
             var systemPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.System)) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to get the system player entity");
 
-            return new Domain.Entity.Play(game, systemPlayer, iaResponse);
+            var newPlay = new Domain.Entity.Play(game.Id, systemPlayer.Id, iaResponse);
+            newPlay.SetCreatedDate(DateTime.Now);
+
+            var response = await _playService.CreatePlay(newPlay, cancellationToken) ??
+                throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
+
+            var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
+            if (changedItems == 0)
+            {
+                var errorMessage = "Something went wrong while attempting to create the user play.";
+                _logger.LogError(errorMessage);
+                throw new InternalServerErrorException(errorMessage);
+            }
         }
 
         private static string PromptCommand()
