@@ -24,5 +24,10 @@
         public Player Player { get; private set; }
         public Guid PlayerId { get; private set; }
         public string Prompt { get; private set; }
+
+        public void SetPrompt(string prompt)
+        {
+            Prompt = prompt;
+        }
     }
 }

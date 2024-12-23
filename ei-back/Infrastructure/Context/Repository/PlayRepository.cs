@@ -1,6 +1,7 @@
 ﻿using ei_back.Core.Application.Repository;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context.Repository
@@ -33,6 +34,22 @@ namespace ei_back.Infrastructure.Context.Repository
             return _context.Plays.Include(x => x.Player)
                 .Where(x => x.GameId.Equals(gameId) && !x.Player.Type.Equals(PlayerType.System))
                 .CountAsync(cancellationToken);
+        }
+
+        public Task<List<Play>> GetPlayWhereCreatedAtIsUpperThan(Guid gameId, DateTime createdAt, CancellationToken cancellationToken)
+        {
+            return _context.Plays.Include(x => x.Player)
+                .Where(x => x.GameId.Equals(gameId) && x.CreatedAt > createdAt)
+                .OrderBy(x => x.CreatedAt)
+                .ToListAsync(cancellationToken);
+        }
+
+        public Task<List<Play>> GetAllByGameId(Guid gameId, CancellationToken cancellationToken)
+        {
+            return _context.Plays.Include(x => x.Player)
+                .Where(x => x.GameId.Equals(gameId))
+                .OrderBy(x => x.CreatedAt)
+                .ToListAsync(cancellationToken);
         }
     }
 }

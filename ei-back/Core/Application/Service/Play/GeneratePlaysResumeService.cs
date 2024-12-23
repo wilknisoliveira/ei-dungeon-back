@@ -1,5 +1,4 @@
-﻿using ei_back.Core.Application.Repository;
-using ei_back.Core.Application.Service.Play.Interfaces;
+﻿using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
@@ -7,7 +6,6 @@ using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
-using YamlDotNet.Core;
 
 namespace ei_back.Core.Application.Service.Play
 {
@@ -32,6 +30,12 @@ namespace ei_back.Core.Application.Service.Play
 
         public async Task Handler(List<Domain.Entity.Play> plays, Domain.Entity.Game game, string initialAddicionalInfo, CancellationToken cancellationToken)
         {
+            var systemPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.System)) ??
+                throw new InternalServerErrorException("Something went wrong while attempting to get the system player entity");
+
+            var newPlay = new Domain.Entity.Play(game.Id, systemPlayer.Id, "");
+            newPlay.SetCreatedDate(DateTime.Now);
+
             var lastSystemPlay = plays.FirstOrDefault(x => x.Player.Type.Equals(PlayerType.System));
 
             List<IAiPromptRequest> promptList = [];
@@ -68,11 +72,7 @@ namespace ei_back.Core.Application.Service.Play
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");
 
-            var systemPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.System)) ??
-                throw new InternalServerErrorException("Something went wrong while attempting to get the system player entity");
-
-            var newPlay = new Domain.Entity.Play(game.Id, systemPlayer.Id, iaResponse);
-            newPlay.SetCreatedDate(DateTime.Now);
+            newPlay.SetPrompt(iaResponse);
 
             var response = await _playService.CreatePlay(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
