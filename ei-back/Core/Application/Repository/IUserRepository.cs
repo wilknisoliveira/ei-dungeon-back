@@ -1,4 +1,5 @@
 ﻿using ei_back.Core.Domain.Entity;
+using ei_back.Core.Domain.Enums;
 
 namespace ei_back.Core.Application.Repository
 {
@@ -8,5 +9,6 @@ namespace ei_back.Core.Application.Repository
         User RefreshUserInfo(User user);
         Task<User?> GetUserAndRolesAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<User?> FindByUserName(string userName, CancellationToken cancellationToken = default);
+        Task<Dictionary<UserRole, List<string>>> GetUsersNameGroupByRole();
     }
 }

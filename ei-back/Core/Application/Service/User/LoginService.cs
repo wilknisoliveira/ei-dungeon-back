@@ -1,7 +1,9 @@
 ﻿using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.User.Interfaces;
 using ei_back.Core.Application.UseCase.User.Dtos;
+using ei_back.Infrastructure.Extensions;
 using ei_back.Infrastructure.Token;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -40,17 +42,10 @@ namespace ei_back.Core.Application.Service.User
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
             };
 
-            if (user.Roles != null)
-            {
-                List<string> roles = new();
-                foreach (var role in user.Roles)
-                {
-                    roles.Add(role.Name);
-                    claims.Add(new Claim(ClaimTypes.Role, role.Name.ToString()));
-                }
+            List<string> roles = [user.Role.GetEnumDescription()];
+            claims.Add(new Claim(ClaimTypes.Role, user.Role.GetEnumDescription()));
 
-                claims.Add(new Claim("roles", JsonSerializer.Serialize(roles)));
-            }
+            claims.Add(new Claim("roles", JsonSerializer.Serialize(roles)));
 
             var accessToken = _tokenService.GenerateAccessToken(claims);
             var refreshToken = _tokenService.GenerateRefreshToken();

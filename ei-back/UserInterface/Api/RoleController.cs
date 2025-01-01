@@ -12,37 +12,19 @@ namespace ei_back.UserInterface.Api
     {
         private readonly ILogger<RoleController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ICreateRoleUseCase _createRoleUseCase;
         private readonly IGetAllRoleUseCase _getAllRoleUseCase;
         private readonly IApplyRolesUseCase _applyRolesUseCase;
 
         public RoleController(
             ILogger<RoleController> logger,
             IUnitOfWork unitOfWork,
-            ICreateRoleUseCase createRoleUseCase,
             IGetAllRoleUseCase getAllRoleUseCase,
             IApplyRolesUseCase applyRolesUseCase)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _createRoleUseCase = createRoleUseCase;
             _getAllRoleUseCase = getAllRoleUseCase;
             _applyRolesUseCase = applyRolesUseCase;
-        }
-
-        [HttpPost]
-        [ProducesResponseType(typeof(RoleDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Create([FromBody] RoleDto roleDtoRequest, CancellationToken cancellationToken = default)
-        {
-            if (roleDtoRequest == null) return BadRequest();
-            var response = await _createRoleUseCase.Handler(roleDtoRequest);
-            await _unitOfWork.CommitAsync(cancellationToken);
-
-            _logger.LogInformation("API: New role created");
-
-            return Ok(response);
         }
 
         [HttpGet]

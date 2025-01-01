@@ -16,15 +16,8 @@ namespace ei_back.Infrastructure.Mappings
             CreateMap<User, UserDtoResponse>();
             CreateMap<User, UserGetDtoResponse>();
             CreateMap<UserDtoRequest, User>()
-                .ForMember(dest => dest.Roles, opt => opt.Ignore())
                 .ForMember(dest => dest.Games, opt => opt.Ignore());
-
-            //Role
-            CreateMap<Role, RoleDto>().ReverseMap();
-            CreateMap<Role, RoleDtoResponse>()
-                .ForMember(dest => dest.Users, opt => opt.Ignore());
-            CreateMap<User, ApplyRoleDtoResponse>()
-                .ForMember(dest => dest.Roles, opt => opt.Ignore());
+            CreateMap<User, ApplyRoleDtoResponse>();
 
             //Game
             CreateMap<GameDtoRequest, Game>()

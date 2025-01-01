@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ei_back.Core.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ei_back.Core.Application.UseCase.Role.Dtos
 {
@@ -7,7 +8,6 @@ namespace ei_back.Core.Application.UseCase.Role.Dtos
         [Required]
         public Guid Id { get; set; }
         [Required]
-        [StringLength(10, MinimumLength = 2)]
-        public List<string> Roles { get; set; }
+        public UserRole role { get; set; }
     }
 }

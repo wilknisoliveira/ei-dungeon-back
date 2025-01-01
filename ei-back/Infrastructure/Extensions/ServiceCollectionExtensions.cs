@@ -7,8 +7,6 @@ using ei_back.Infrastructure.ExternalAPIs;
 using ei_back.Core.Application.Service.User.Interfaces;
 using ei_back.Core.Application.Service.User;
 using ei_back.Infrastructure.Token;
-using ei_back.Core.Application.Service.Role.Interfaces;
-using ei_back.Core.Application.Service.Role;
 using ei_back.Core.Application.Service.Player.Interfaces;
 using ei_back.Core.Application.Service.Player;
 using ei_back.Core.Application.Service.Game.Interfaces;
@@ -36,7 +34,6 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped(typeof(IRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<IGameRepository, GameRepository>();
             services.AddScoped<IPlayRepository, PlayRepository>();
@@ -51,7 +48,6 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IGameService, GameService>();
             services.AddScoped<IPlayService, PlayService>();
@@ -70,7 +66,6 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IChangePasswordUseCase, ChangePasswordUseCase>();
             services.AddScoped<IGetUserNameUseCase, GetUserNameUseCase>();
             services.AddScoped<IApplyRolesUseCase, ApplyRolesUseCase>();
-            services.AddScoped<ICreateRoleUseCase, CreateRoleUseCase>();
             services.AddScoped<IGetAllRoleUseCase, GetAllRoleUseCase>();
             services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
             services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();

@@ -1,6 +1,6 @@
 ﻿using ei_back.Core.Application.Repository;
 using ei_back.Core.Domain.Entity;
-using ei_back.Infrastructure.Context;
+using ei_back.Core.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context.Repository
@@ -12,7 +12,7 @@ namespace ei_back.Infrastructure.Context.Repository
 
         public User ValidateCredentials(string userName, string pass)
         {
-            return _context.Users.Include(u => u.Roles).FirstOrDefault(u => u.UserName == userName && u.Password == pass);
+            return _context.Users.FirstOrDefault(u => u.UserName == userName && u.Password == pass);
         }
 
         public User RefreshUserInfo(User user)
@@ -39,7 +39,6 @@ namespace ei_back.Infrastructure.Context.Repository
         public async Task<User?> GetUserAndRolesAsync(Guid userId, CancellationToken cancellationToken = default)
         {
             return await _context.Users
-                .Include(u => u.Roles)
                 .SingleOrDefaultAsync(u => u.Id.Equals(userId), cancellationToken);
         }
 
@@ -47,6 +46,16 @@ namespace ei_back.Infrastructure.Context.Repository
         {
             return await _context.Users
                 .SingleOrDefaultAsync(x => x.UserName.Equals(userName), cancellationToken);
+        }
+
+        public async Task<Dictionary<UserRole, List<string>>> GetUsersNameGroupByRole()
+        {
+            return await _context.Users
+                .GroupBy(x => x.Role)
+                .ToDictionaryAsync(
+                    group => group.Key,
+                    group => group.Select(x => x.UserName).ToList()  
+                );
         }
     }
 }
