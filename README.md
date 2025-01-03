@@ -34,7 +34,7 @@ Do you want to know more about the project goals? Go to the 'Next steps' section
 - [x] Docker settings
 
 # 💻 Architecture
-<img style="width:600px" src="./Infrastructure/Utils/EIDungeonArchitecture.png" alt="EI Dungeon Architecture">
+<img style="width:600px" src="./ei-back/Infrastructure/Utils/EIDungeonArchitecture.png" alt="EI Dungeon Architecture">
 
 # 🔨 How to install this project?
 ## Stack
