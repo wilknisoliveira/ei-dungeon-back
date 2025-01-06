@@ -1,10 +1,13 @@
 ﻿using ei_back.Core.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace ei_back.Core.Domain.Entity
 {
     public class User : Base
     {
+        public User()
+        {
+        }
+
         public User(string userName, string fullName, string email, string password, UserRole role)
         {
             UserName = userName;
