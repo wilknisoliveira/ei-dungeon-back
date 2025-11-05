@@ -1,7 +1,6 @@
 using ei_back.Infrastructure.Context;
 using ei_back.Infrastructure.Exceptions;
 using ei_back.Infrastructure.Mappings;
-using ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient;
 using ei_back.Infrastructure.Swagger;
 using ei_back.Infrastructure.Token;
 using HealthChecks.UI.Client;
@@ -18,6 +17,7 @@ using System.Reflection;
 using System.Text;
 using ei_back.UserInterface.Hubs;
 using ei_back.Infrastructure.Extensions;
+using GeminiDotnet;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +32,7 @@ var logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
-//Enviroment
+//Environment
 builder.Configuration.AddEnvironmentVariables()
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
@@ -85,7 +85,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-//Token Configurations -> Authorizate
+//Token Configurations -> Authorize
 builder.Services.AddAuthorization(auth =>
 {
     auth.AddPolicy("Bearer", new AuthorizationPolicyBuilder()
@@ -145,10 +145,23 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
 });
 
+var aiModel = builder.Configuration["GenAISettings:AiModel"];
+var apiToken = builder.Configuration["keys:GeminiApiKey"];
+if (aiModel.IsNullOrEmpty() || apiToken.IsNullOrEmpty())
+    throw new ArgumentException("AIModel and apiToken must be set");
+
+var geminiOptions = new GeminiClientOptions
+{
+    ApiKey = apiToken!,
+    ModelId = aiModel!,
+};
+var geminiClient = new GeminiClient(geminiOptions);
+
 builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddUseCases();
 builder.Services.AddInfraHttpClients();
+builder.Services.AddGenAiClient(geminiClient);
 
 var app = builder.Build();
 

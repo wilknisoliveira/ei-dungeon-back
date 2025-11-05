@@ -7,10 +7,9 @@ using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
-using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
-using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
+using ei_back.Core.Application.Interfaces;
 using Tiktoken;
 
 namespace ei_back.Core.Application.UseCase.Play
@@ -20,39 +19,34 @@ namespace ei_back.Core.Application.UseCase.Play
         private readonly IMapper _mapper;
         private readonly IPlayService _playService;
         private readonly IGameService _gameService;
-        private readonly IGenerativeAIApiHttpService _generativeAIApiHttpService;
         private readonly IPlayRepository _playRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<NewUserPlayUseCase> _logger;
         private readonly IServiceProvider _serviceProvider;
-        private readonly string _tikTokenModel;
         private readonly int _limitTokens;
+        private readonly IGenAi _genAi;
 
         public NewUserPlayUseCase(
             IMapper mapper,
             IPlayService playService,
             IGameService gameService,
-            IGenerativeAIApiHttpService generativeAIApiHttpService,
             IPlayRepository playRepository,
             IUnitOfWork unitOfWork,
             ILogger<NewUserPlayUseCase> logger,
             IServiceProvider serviceProvider,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IGenAi genAi)
         {
             _mapper = mapper;
             _playService = playService;
             _gameService = gameService;
-            _generativeAIApiHttpService = generativeAIApiHttpService;
             _playRepository = playRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _serviceProvider = serviceProvider;
-
-            _tikTokenModel = configuration["TikTokenSettings:AiModel"] ?? "";
+            _genAi = genAi;
 
             var errorMessage = "Verify if all the string connections was registered properly in the appsettings.";
-            if (_tikTokenModel.IsNullOrEmpty())
-                throw new InternalServerErrorException(errorMessage);
 
             var limitTokens = configuration["PlayOptions:LimitTokens"] ?? "";
             if (!int.TryParse(limitTokens, out _limitTokens))
@@ -62,7 +56,6 @@ namespace ei_back.Core.Application.UseCase.Play
         public async Task<List<PlayDtoResponse>> Handler(PlayDtoRequest playDtoRequest, string userName, CancellationToken cancellationToken)
         {
             List<Domain.Entity.Play> plays = [];
-            List<PlayDtoResponse> response = [];
              
             var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken) ??
                 throw new NotFoundException($"No game found with id {playDtoRequest.GameId} to user name {userName}.");
@@ -89,9 +82,11 @@ namespace ei_back.Core.Application.UseCase.Play
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
 
             plays.Add(newPlay);
-            var newPlayDtoResponse = _mapper.Map<PlayDtoResponse>(newPlay);
-            newPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(newPlay.Player);
-            response.Add(newPlayDtoResponse);
+            //var newPlayDtoResponse = _mapper.Map<PlayDtoResponse>(newPlay);
+            //newPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(newPlay.Player);
+            //response.Add(newPlayDtoResponse);
+            
+            /*
 
             var nextArtificialPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
                 throw new InternalServerErrorException("No Table Master was found.");
@@ -125,7 +120,15 @@ namespace ei_back.Core.Application.UseCase.Play
                 masterPlayDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(masterPlay.Player);
                 response.Add(masterPlayDtoResponse);
             }
+            */
             
+            var masterPlay = await GenerateMasterPlay(plays, game, cancellationToken);
+            _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
+                throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
+
+            plays.Add(masterPlay);
+            var response = new List<PlayDtoResponse> { _mapper.Map<PlayDtoResponse>(masterPlay) };
+
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
             {
@@ -161,13 +164,15 @@ namespace ei_back.Core.Application.UseCase.Play
                 // _ = _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, ctsg.Token);
             }
 
-            return response.Where(x => !x.PlayerDtoResponse.Type.Equals(PlayerType.System)).ToList();
+            return response;
         }
 
         private async Task<Domain.Entity.Play> GenerateMasterPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
         {
-            List<IAiPromptRequest> promptList = [];
-            promptList.Add(GeneratePlayersDescription(game));
+            List<AiPromptRequest> promptList =
+            [
+                GeneratePlayersDescription(game)
+            ];
 
             foreach (var play in plays)
             {
@@ -176,22 +181,22 @@ namespace ei_back.Core.Application.UseCase.Play
                 switch (playerType)
                 {
                     case PlayerType.System:
-                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, "#Resume\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(AiRole.System, "#Resume\n" + play.Prompt));
                         break;
                     case PlayerType.RealPlayer:
-                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Player: {play.Player.Name}\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(AiRole.System, $"#Player: {play.Player.Name}\n" + play.Prompt));
                         break;
                     case PlayerType.Master:
-                        promptList.Add(new AiPromptRequest(PromptRole.Model, $"#Master Table\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(AiRole.Assistant, $"#Master Table\n" + play.Prompt));
                         break;
                     case PlayerType.ArtificialPlayer:
-                        promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Player: {play.Player.Name}\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(AiRole.System, $"#Player: {play.Player.Name}\n" + play.Prompt));
                         break;
                 }
             }
-            promptList.Add(new AiPromptRequest(PromptRole.User, MasterPlayCommand(game.SystemGame)));
-
-            var iaResponse = await _generativeAIApiHttpService.GenerateResponseWithRoleBase(promptList, cancellationToken);
+            promptList.Add(new AiPromptRequest(AiRole.User, MasterPlayCommand(game.SystemGame)));
+            
+            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, cancellationToken);
 
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");
@@ -202,22 +207,22 @@ namespace ei_back.Core.Application.UseCase.Play
             return new Domain.Entity.Play(game, masterPlayer, iaResponse);
         }
 
-        private static IAiPromptRequest GeneratePlayerList(Domain.Entity.Game game)
+        private static AiPromptRequest GeneratePlayerList(Domain.Entity.Game game)
         {
             var players = "#Lista de players do jogo: \n";
             foreach (var player in game.Players.Where(x => x.Type.Equals(PlayerType.RealPlayer) || x.Type.Equals(PlayerType.ArtificialPlayer)))
                 players += player.Name + "\n";
 
-            return new AiPromptRequest(PromptRole.Instruction, players);
+            return new AiPromptRequest(AiRole.System, players);
         }
 
-        private static IAiPromptRequest GeneratePlayersDescription(Domain.Entity.Game game)
+        private static AiPromptRequest GeneratePlayersDescription(Domain.Entity.Game game)
         {
             var players = "#Lista de players do jogo: \n";
             foreach (var player in game.Players.Where(x => x.Type.Equals(PlayerType.RealPlayer) || x.Type.Equals(PlayerType.ArtificialPlayer)))
                 players += "# Player: " + player.Name + "\nDescription: " + player.Description + "\n\n";
 
-            return new AiPromptRequest(PromptRole.Instruction, players);
+            return new AiPromptRequest(AiRole.System, players);
         }
 
         private static string MasterPlayCommand(string systemGame)
@@ -226,6 +231,7 @@ namespace ei_back.Core.Application.UseCase.Play
             return $"Você é um mestre de mesa (Master table) em um jogo de RPG, sistema {systemGame}. Nas informações repassadas, encontra-se um breve resumo de partidas anteriores, bem como as últimas jogadas dos demais players. Sua função é de conduzir a história, desenvolver o enredo, interpretar os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações relativas a uma mestre de Mesa. \nObservações: 1. Você como Mestre da Mesa, nunca deve interpretar o papel dos Players! Também nunca deve ditar as ações dos Players!; 2. Foi acordado entre os jogadores que não será usado mecanismos de rolagem de dados. \n Agora, prossiga com a próxima orientação do Mestre da Mesa!";
         }
 
+        /*
         private async Task<string> DefineNextPlayer(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
         {
             List<string> properties = new()
@@ -243,12 +249,12 @@ namespace ei_back.Core.Application.UseCase.Play
             AiPromptRequest instruction = new(PromptRole.Instruction,
                 "A resposta deve ser exclusivamente no seguite modelo [{\"name\": \"example\"}].");
 
-            List<IAiPromptRequest> playPrompts = new()
+            List<AiPromptRequest> playPrompts = new()
             {
                 instruction
             };
 
-            IAiPromptRequest playersDescription = GeneratePlayerList(game);
+            AiPromptRequest playersDescription = GeneratePlayerList(game);
             playPrompts.Add(new AiPromptRequest(PromptRole.Instruction, playersDescription.Content));
 
             var lastPlays = plays.OrderByDescending(x => x.CreatedAt).Take(3);
@@ -300,6 +306,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
             return nextPlayer;
         }
+        */
 
         private JsonElement ConvertStringToArrayJson(string value)
         {
@@ -315,9 +322,10 @@ namespace ei_back.Core.Application.UseCase.Play
             }
         }
 
+        /*
         private async Task<Domain.Entity.Play> GenerateArtificialPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, Player currentPlayer, CancellationToken cancellationToken)
         {
-            List<IAiPromptRequest> promptList = [];
+            List<AiPromptRequest> promptList = [];
             promptList.Add(GeneratePlayerList(game));
             promptList.Add(new AiPromptRequest(PromptRole.Instruction, $"#Your Player Description: {currentPlayer.InfoToString()}"));
 
@@ -354,6 +362,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
             return new Domain.Entity.Play(game, currentPlayer, iaResponse);
         }
+        */
 
         private static string ArtificialPlayCommand(Player currentPlayer)
         {
@@ -362,14 +371,15 @@ namespace ei_back.Core.Application.UseCase.Play
 
         private int CountTokensFromPlays(List<Domain.Entity.Play> plays)
         {
+            const string model = "gpt-4";
             Encoder? encoder = null;
             try
             {
-                encoder = ModelToEncoder.For(_tikTokenModel);
+                encoder = ModelToEncoder.For(model);
             }
             catch (Exception ex)
             {
-                var errorMessage = $"Something went wrong while attempting to create a encoder for {_tikTokenModel} model.";
+                var errorMessage = $"Something went wrong while attempting to create a encoder for {model} model.";
                 _logger.LogError(errorMessage + " Error: " + ex);
                 throw new InternalServerErrorException(errorMessage + " Error: " + ex.Message);
             }

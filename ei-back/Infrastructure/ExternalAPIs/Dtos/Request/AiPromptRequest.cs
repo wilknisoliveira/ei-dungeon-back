@@ -3,7 +3,7 @@ using System.ComponentModel;
 
 namespace ei_back.Infrastructure.ExternalAPIs.Dtos.Request
 {
-    public class AiPromptRequest : IAiPromptRequest
+    public class AiPromptRequest
     {
         public AiPromptRequest(PromptRole role, string content)
         {

@@ -1,7 +1,9 @@
-﻿using ei_back.Infrastructure.ExternalAPIs.Client.Core;
+﻿using ei_back.Core.Application.Interfaces;
+using ei_back.Infrastructure.ExternalAPIs.Client.Core;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Response;
 using Microsoft.IdentityModel.Tokens;
+using AiPromptRequest = ei_back.Infrastructure.ExternalAPIs.Dtos.Request.AiPromptRequest;
 
 namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
 {
@@ -24,7 +26,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
                 .AuthenticationHeaderValue("Bearer", _apiToken);
         }
 
-        public async Task<string> GetResponseWithRoleBase(List<IAiPromptRequest> prompts, CancellationToken cancellationToken)
+        public async Task<string> GetResponseWithRoleBase(List<AiPromptRequest> prompts, CancellationToken cancellationToken)
         {
             List<Message> messages = [];
             foreach (var prompt in prompts)
@@ -67,7 +69,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
             return response?.choices?.FirstOrDefault()?.message?.content ?? "";
         }
 
-        public Task<string> GetStructureJsonResponse(List<IAiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
+        public Task<string> GetStructureJsonResponse(List<AiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
         {
             throw new NotImplementedException();
         }

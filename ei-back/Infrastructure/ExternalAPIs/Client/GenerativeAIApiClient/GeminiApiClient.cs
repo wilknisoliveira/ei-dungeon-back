@@ -21,7 +21,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
                 throw new Exception("Verify if all the string connections was registered properly in the appsettings.");
         }
 
-        public async Task<string> GetResponseWithRoleBase(List<IAiPromptRequest> prompts, CancellationToken cancellationToken)
+        public async Task<string> GetResponseWithRoleBase(List<AiPromptRequest> prompts, CancellationToken cancellationToken)
         {
             List<Content> contents = new();
             foreach (var prompt in prompts)
@@ -91,7 +91,7 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient
             return await Post(requestBody, cancellationToken);
         }
 
-        public async Task<string> GetStructureJsonResponse(List<IAiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
+        public async Task<string> GetStructureJsonResponse(List<AiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
         {
             List<Content> contents = new();
             foreach (var prompt in prompts)

@@ -2,30 +2,28 @@
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
-using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
-using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
-using System.Data;
+using ei_back.Core.Application.Interfaces;
 
 namespace ei_back.Core.Application.Service.Play
 {
     public class GeneratePlaysResumeService : IGeneratePlaysResumeService
     {
-        private readonly IGenerativeAIApiHttpService _generativeAIApiHttpService;
         private readonly ILogger<GeneratePlaysResumeService> _logger;
         private readonly IPlayService _playService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IGenAi _genAi;
 
         public GeneratePlaysResumeService(
-            IGenerativeAIApiHttpService generativeAIApiHttpService,
             ILogger<GeneratePlaysResumeService> logger,
             IUnitOfWork unitOfWork,
-            IPlayService playService)
+            IPlayService playService,
+            IGenAi genAi)
         {
-            _generativeAIApiHttpService = generativeAIApiHttpService;
             _logger = logger;
             _unitOfWork = unitOfWork;
             _playService = playService;
+            _genAi = genAi;
         }
 
         public async Task Handler(List<Domain.Entity.Play> plays, Domain.Entity.Game game, string initialAddicionalInfo, CancellationToken cancellationToken)
@@ -38,12 +36,12 @@ namespace ei_back.Core.Application.Service.Play
 
             var lastSystemPlay = plays.FirstOrDefault(x => x.Player.Type.Equals(PlayerType.System));
 
-            List<IAiPromptRequest> promptList = [];
+            List<AiPromptRequest> promptList = [];
             if (lastSystemPlay != null)
-                promptList.Add(new AiPromptRequest(PromptRole.Model, "#Resume\n" + lastSystemPlay.Prompt));
+                promptList.Add(new AiPromptRequest(AiRole.Assistant, "#Resume\n" + lastSystemPlay.Prompt));
 
             if (!initialAddicionalInfo.IsNullOrEmpty())
-                promptList.Add(new AiPromptRequest(PromptRole.Instruction, "#Additional Info\n" + initialAddicionalInfo));
+                promptList.Add(new AiPromptRequest(AiRole.System, "#Additional Info\n" + initialAddicionalInfo));
 
             var lastPlays = "#Last Plays\n";
             foreach (var play in plays.Where(x => !x.Player.Type.Equals(PlayerType.System)))
@@ -55,14 +53,14 @@ namespace ei_back.Core.Application.Service.Play
 
                 lastPlays += play.Prompt + "\n\n";
             }
-            promptList.Add(new AiPromptRequest(PromptRole.Instruction, lastPlays));
+            promptList.Add(new AiPromptRequest(AiRole.System, lastPlays));
 
-            promptList.Add(new AiPromptRequest(PromptRole.User, PromptCommand()));
+            promptList.Add(new AiPromptRequest(AiRole.User, PromptCommand()));
 
             var iaResponse = "";
             try
             {
-                iaResponse = await _generativeAIApiHttpService.GenerateResponseWithRoleBase(promptList, cancellationToken);
+                iaResponse = await _genAi.GenFromMultiplePrompts(promptList, cancellationToken);
             }
             catch (Exception ex)
             {

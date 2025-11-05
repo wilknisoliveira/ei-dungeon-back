@@ -10,6 +10,13 @@ namespace ei_back.Core.Domain.Entity
             SystemGame = systemGame;
             Name = name;
         }
+        
+        public Game(User ownerUser, string systemGame, string name)
+        {
+            SetOwnerUser(ownerUser);
+            SystemGame = systemGame;
+            Name = name;
+        }
 
         public Game(string name, string systemGame)
         {

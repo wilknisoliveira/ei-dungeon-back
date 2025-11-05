@@ -6,6 +6,8 @@ using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
+using ei_back.Core.Application.Interfaces;
+using AiPromptRequest = ei_back.Core.Application.Interfaces.AiPromptRequest;
 
 namespace ei_back.Core.Application.Service.Player
 {
@@ -49,13 +51,15 @@ namespace ei_back.Core.Application.Service.Player
                 };
                 var systemGuide = StructuredResponseGuide(properties);
 
-                List<IAiPromptRequest> promptList = new()
+                List<AiPromptRequest> promptList = new()
                 {
-                    new AiPromptRequest(PromptRole.User, prompt),
-                    new AiPromptRequest(PromptRole.Instruction, systemGuide)
+                    new AiPromptRequest(AiRole.User, prompt),
+                    new AiPromptRequest(AiRole.System, systemGuide)
                 };
 
-                var iaResponse = await _generativeAIApiHttpService.GenerateStructureJsonResponse(promptList, properties, cancellationToken, 0);
+                //This doesn't work
+                var iaResponse = "";
+                //await _generativeAIApiHttpService.GenerateStructureJsonResponse(promptList, properties, cancellationToken, 0);
 
                 if (iaResponse.IsNullOrEmpty())
                 {

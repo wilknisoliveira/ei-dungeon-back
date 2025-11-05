@@ -15,43 +15,40 @@ namespace ei_back.Core.Application.UseCase.Game
         private readonly IMapper _mapper;
         private readonly IGameService _gameService;
         private readonly IUserService _userService;
-        private readonly IPlayerFactory _playerFactory;
         private readonly IInitialMasterPlayService _initialMasterPlayService;
-        private readonly IGeneratePlaysResumeService _generatePlaysResumeService;
 
         public CreateGameUseCase(
             IMapper mapper,
             IGameService gameService,
             IUserService userService,
-            IPlayerFactory playerFactory,
-            IInitialMasterPlayService initialMasterPlayService,
-            IGeneratePlaysResumeService generatePlaysResumeService)
+            IInitialMasterPlayService initialMasterPlayService)
         {
             _mapper = mapper;
             _gameService = gameService;
             _userService = userService;
-            _playerFactory = playerFactory;
             _initialMasterPlayService = initialMasterPlayService;
-            _generatePlaysResumeService = generatePlaysResumeService;
         }
 
         public async Task<GameDtoResponse> Handler(GameDtoRequest gameDtoRequest, string userName, CancellationToken cancellationToken)
         {
-            var game = _mapper.Map<Domain.Entity.Game>(gameDtoRequest);
-
             var user = await _userService.FindByUserName(userName) ??
                 throw new NotFoundException($"No user found to user name {userName}.");
+
+            var game = new Domain.Entity.Game(user, "Dungeons & Dragons", gameDtoRequest.Name);
+            
             game.SetOwnerUser(user);
 
+            var players = new List<Player>();
             var systemPlayer = new Player("System", "System", PlayerType.System, game);
+            players.Add(systemPlayer);
+            
+            Player master = new("Table Master", "RPG Table Master", PlayerType.Master);
+            players.Add(master);
+            
             var realPlayer = new Player(gameDtoRequest.CharacterName, gameDtoRequest.CharacterDescription, PlayerType.RealPlayer, game);
-
-            var artificialPlayersAndMaster = await _playerFactory
-                .BuildArtificialPlayersAndMaster(gameDtoRequest.NumberOfArtificialPlayers, game, cancellationToken);
-
-            artificialPlayersAndMaster.Add(systemPlayer);
-            artificialPlayersAndMaster.Add(realPlayer);
-            game.SetPlayers(artificialPlayersAndMaster);
+            players.Add(realPlayer);
+            
+            game.SetPlayers(players);
 
             var masterPlay = await _initialMasterPlayService.Handler(game, cancellationToken) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to generate the initial master play.");

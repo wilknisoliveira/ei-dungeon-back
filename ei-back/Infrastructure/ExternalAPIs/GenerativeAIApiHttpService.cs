@@ -1,8 +1,10 @@
-﻿using ei_back.Infrastructure.Exceptions.ExceptionTypes;
+﻿using ei_back.Core.Application.Interfaces;
+using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient;
 using ei_back.Infrastructure.ExternalAPIs.Dtos.Request;
 using ei_back.Infrastructure.ExternalAPIs.Interfaces;
 using Microsoft.IdentityModel.Tokens;
+using AiPromptRequest = ei_back.Infrastructure.ExternalAPIs.Dtos.Request.AiPromptRequest;
 
 namespace ei_back.Infrastructure.ExternalAPIs
 {
@@ -10,7 +12,7 @@ namespace ei_back.Infrastructure.ExternalAPIs
     {
         private readonly IGenerativeAIApiClient _generativeAIApiClient = generativeAIApiClient;
 
-        public async Task<string> GenerateResponseWithRoleBase(List<IAiPromptRequest> prompts, CancellationToken cancellationToken)
+        public async Task<string> GenerateResponseWithRoleBase(List<AiPromptRequest> prompts, CancellationToken cancellationToken)
         {
             var response = await _generativeAIApiClient.GetResponseWithRoleBase(prompts, cancellationToken);
 
@@ -30,7 +32,7 @@ namespace ei_back.Infrastructure.ExternalAPIs
             return response;
         }
 
-        public async Task<string> GenerateStructureJsonResponse(List<IAiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
+        public async Task<string> GenerateStructureJsonResponse(List<AiPromptRequest> prompts, List<string> fields, CancellationToken cancellationToken, double temperature = 0.5)
         {
             var response = await _generativeAIApiClient.GetStructureJsonResponse(prompts, fields, cancellationToken, temperature);
 
