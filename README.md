@@ -54,6 +54,13 @@ $ git clone https://github.com/wilknisoliveira/ei-dungeon-back.git
 	- Database strings connections to your localhost database;
 	- GeminiApiKey. You can use the [gemini documentation](https://ai.google.dev/gemini-api/docs/api-key?_gl=1*1o49rdj*_up*MQ..&gclid=Cj0KCQiAj9m7BhD1ARIsANsIIvAfxmmrn8ErKq_oolGXsezbNN3m1ult-glRDcvptTq_Y5KLXkj1g0MaAngvEALw_wcB) to learn how to get your own API key.
 
+## Migrations
+To run migrations, install dotnet ef as global. Follow the commands in the Infra project:
+```
+dotnet ef migrations add <migration_name> --context EIContext
+dotnet ef database update --context EIContext
+```
+
 ## Seeding
 Run the following script in the Postgres to allow uuid-ossp extension:
 ```

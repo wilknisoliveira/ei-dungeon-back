@@ -14,7 +14,6 @@ namespace ei_back.Infrastructure.Context.Map
 
             builder.Property(x => x.Name).HasColumnName("name").IsRequired();
             builder.Property(x => x.OwnerUserId).HasColumnName("owner_user_id").IsRequired();
-            builder.Property(x => x.SystemGame).HasColumnName("system_game").IsRequired();
 
             builder.HasOne(x => x.OwnerUser)
                 .WithMany(x => x.Games)

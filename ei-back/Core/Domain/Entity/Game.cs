@@ -4,34 +4,30 @@ namespace ei_back.Core.Domain.Entity
 {
     public class Game : Base
     {
-        public Game(Guid ownerUserId, string systemGame, string name)
+        public Game(Guid ownerUserId, string name)
         {
             OwnerUserId = ownerUserId;
-            SystemGame = systemGame;
             Name = name;
         }
         
-        public Game(User ownerUser, string systemGame, string name)
+        public Game(User ownerUser, string name)
         {
             SetOwnerUser(ownerUser);
-            SystemGame = systemGame;
             Name = name;
         }
 
-        public Game(string name, string systemGame)
+        public Game(string name)
         {
             Name = name;
-            SystemGame = systemGame;
         }
 
         public string Name { get; private set; }
         public User OwnerUser { get; private set; }
         public Guid OwnerUserId { get; private set; }
-        public string SystemGame { get; private set; }
 
 
         public List<Player> Players { get; private set; }
-        public List<Play> Plays { get; private set; }
+        public List<Play> Plays { get; private set; } = [];
 
         public void SetOwnerUser(User user)
         {
@@ -46,9 +42,6 @@ namespace ei_back.Core.Domain.Entity
 
         public void AddPlay(Play play)
         {
-            if (Plays == null)
-                Plays = [];
-
             Plays.Add(play);
         }
     }

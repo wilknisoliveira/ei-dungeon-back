@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Play.Interfaces;
-using ei_back.Core.Application.Service.Player.Interfaces;
 using ei_back.Core.Application.Service.User.Interfaces;
 using ei_back.Core.Application.UseCase.Game.Dtos;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
@@ -34,7 +33,7 @@ namespace ei_back.Core.Application.UseCase.Game
             var user = await _userService.FindByUserName(userName) ??
                 throw new NotFoundException($"No user found to user name {userName}.");
 
-            var game = new Domain.Entity.Game(user, "Dungeons & Dragons", gameDtoRequest.Name);
+            var game = new Domain.Entity.Game(user, gameDtoRequest.Name);
             
             game.SetOwnerUser(user);
 

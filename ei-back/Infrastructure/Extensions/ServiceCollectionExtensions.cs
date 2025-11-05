@@ -3,8 +3,6 @@ using ei_back.Core.Application.Repository;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Context.Repository;
 using ei_back.Infrastructure.Context;
-using ei_back.Infrastructure.ExternalAPIs.Interfaces;
-using ei_back.Infrastructure.ExternalAPIs;
 using ei_back.Core.Application.Service.User.Interfaces;
 using ei_back.Core.Application.Service.User;
 using ei_back.Infrastructure.Token;
@@ -14,7 +12,6 @@ using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Game;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.Service.Play;
-using ei_back.Infrastructure.ExternalAPIs.Client.GenerativeAIApiClient;
 using ei_back.Core.Application.UseCase.User.Interfaces;
 using ei_back.Core.Application.UseCase.User;
 using ei_back.Core.Application.UseCase.Role.Interfaces;
@@ -46,7 +43,6 @@ namespace ei_back.Infrastructure.Extensions
 
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
-            services.AddScoped<IGenerativeAIApiHttpService, GenerativeAIApiHttpService>();
             services.AddScoped<ILoginService, LoginService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IUserService, UserService>();
@@ -55,7 +51,6 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IPlayService, PlayService>();
             services.AddScoped<IGeneratePlaysResumeService, GeneratePlaysResumeService>();
             services.AddScoped<IInitialMasterPlayService, InitialMasterPlayService>();
-            services.AddScoped<IPlayerFactory, PlayerFactory>();
 
             return services;
         }
@@ -80,8 +75,6 @@ namespace ei_back.Infrastructure.Extensions
 
         public static IServiceCollection AddInfraHttpClients(this IServiceCollection services)
         {
-            services.AddHttpClient<IGenerativeAIApiClient, GeminiApiClient>();
-
             return services;
         }
 

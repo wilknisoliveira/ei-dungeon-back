@@ -43,7 +43,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\Domain\Service\" />
+    <Folder Include="Infrastructure\ExternalAPIs\Dtos\Request\" />
+    <Folder Include="Infrastructure\ExternalAPIs\Dtos\Response\" />
+    <Folder Include="Infrastructure\ExternalAPIs\Interfaces\" />
+    <Folder Include="Infrastructure\Logs\" />
     <Folder Include="Infrastructure\Utils\" />
   </ItemGroup>
 

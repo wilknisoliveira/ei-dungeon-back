@@ -49,7 +49,7 @@ namespace ei_back.Core.Application.Service.Play
                 if (play.Player.Type.Equals(PlayerType.Master))
                     lastPlays += $"Master Table: \n";
                 else
-                    lastPlays += $"Player: {play.Player.Name} \n";
+                    lastPlays += $"{play.Player.Name}(player): \n";
 
                 lastPlays += play.Prompt + "\n\n";
             }
@@ -80,14 +80,13 @@ namespace ei_back.Core.Application.Service.Play
             {
                 var errorMessage = "Something went wrong while attempting to create the user play.";
                 _logger.LogError(errorMessage);
-                throw new InternalServerErrorException(errorMessage);
             }
         }
 
         private static string PromptCommand()
         {
             var maxOutputTokens = 2000;
-            var minOutputTokens = 100;
+            var minOutputTokens = 500;
             return $"Você está observando uma partida de RPG de mesa. Faça um resumo de todas as informações passadas. O resumo gerado deve ter no mínimo {minOutputTokens} tokens e no máximo {maxOutputTokens} tokens. O texto a ser gerado será utilizado posteriormente por uma IA generativa como base de dados para geração de novos resumos, ou seja, a linguagem e síntese utilizada deve ser direcionado para leitura por IA. Utilize bem a quantidade máxima de {maxOutputTokens} tokens, de forma a registrar a história e os detalhes importantes.";
         }
     }

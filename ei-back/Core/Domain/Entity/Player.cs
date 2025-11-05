@@ -32,7 +32,7 @@ namespace ei_back.Core.Domain.Entity
         public Guid GameId { get; private set; }
 
 
-        public List<Play> Plays { get; private set; }
+        public List<Play> Plays { get; private set; } = [];
 
 
         public void SetGame(Game game)
@@ -43,14 +43,14 @@ namespace ei_back.Core.Domain.Entity
 
         public string InfoToString()
         {
-            return $"PlayerId: {Id} \nPlayerName: {Name} \nPlayerDescription: {Description}\n";
+            return $"PlayerName: {Name} \nPlayerDescription: {Description}\n";
         }
     }
 
     public enum PlayerType : short
     {
         [Description("RealPlayer")] RealPlayer = 0,
-        [Description("ArtificialPlayer")] ArtificialPlayer = 1,
+        [Description("ArtificialPlayer")] ArtificialPlayer = 1, // Legacy, do not use it.
         [Description("Master")] Master = 2,
         [Description("System")] System = 3
     }

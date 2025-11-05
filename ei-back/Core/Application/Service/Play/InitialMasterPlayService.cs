@@ -3,7 +3,6 @@ using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Core.Application.Interfaces;
 using Microsoft.IdentityModel.Tokens;
-using static ei_back.Core.Application.Interfaces.AiPromptRequest;
 
 namespace ei_back.Core.Application.Service.Play
 {
@@ -14,21 +13,17 @@ namespace ei_back.Core.Application.Service.Play
 
         public async Task<Domain.Entity.Play> Handler(Domain.Entity.Game gameEntity, CancellationToken cancellationToken)
         {
-            string initialGuidance = InitialGuidance(gameEntity.SystemGame);
+            string initialGuidance = InitialGuidance();
 
-            string playersDescription = "<players>\n";
-            foreach (var player in gameEntity.Players.Where(x => !x.Type.Equals(PlayerType.Master)))
-            {
-                playersDescription = playersDescription + player.InfoToString() + "\n";
-            }
-            playersDescription = playersDescription + @"<\/players>" + "\n";
+            var player = gameEntity.Players.Find(x => x.Type.Equals(PlayerType.RealPlayer));
+            string playerDescription = "<player>\n" + player!.InfoToString() + "\n" + @"<\/player>" + "\n";
 
-            string prompt = initialGuidance + playersDescription;
+            string prompt = initialGuidance + playerDescription;
 
             List<AiPromptRequest> promptList =
             [
                 new(AiRole.System, prompt),
-                new(AiRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações dos players repassados como contexto para definição do background da história. A resposta deve conter no máximo 900 tokens.")
+                new(AiRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações do player repassadas como contexto para definição do background da história. A resposta deve conter no máximo 900 tokens.")
             ];
 
             var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, cancellationToken);
@@ -42,9 +37,9 @@ namespace ei_back.Core.Application.Service.Play
             return new Domain.Entity.Play(gameEntity, masterPlayer, iaResponse);
         }
 
-        private static string InitialGuidance(string systemGame)
+        private static string InitialGuidance()
         {
-            return $"<guidance>\nVocê é um mestre de RPG de mesa em uma campanha de {systemGame}. Lembre-se que como Mestre da Mesa, você NÃO deve agir como player ou ditar as ações dos players. Os players da campanha estão descritos dentro das tags <players></players>.\n</guidance>\n";
+            return $"<guidance>\nVocê é um mestre de RPG de mesa em uma campanha de Dungeons & Dragons. Lembre-se que como Mestre da Mesa, você NÃO deve agir como player ou ditar as ações do player. O player da campanha está descrito dentro das tags <player></player>.\n</guidance>\n";
         }
     }
 }
