@@ -51,5 +51,14 @@ namespace ei_back.Infrastructure.Context.Repository
                 .OrderBy(x => x.CreatedAt)
                 .ToListAsync(cancellationToken);
         }
+
+        public Task<List<Play>> GetLastNBeforeDate(Guid gameId, int limit, DateTime limitDate, CancellationToken cancellationToken)
+        {
+            return _context.Plays.Include(x => x.Player)
+                .Where(x => x.GameId.Equals(gameId) && x.CreatedAt < limitDate)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(limit)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

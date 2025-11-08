@@ -60,18 +60,28 @@ namespace ei_back.Core.Application.UseCase.Play
             var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken) ??
                 throw new NotFoundException($"No game found with id {playDtoRequest.GameId} to user name {userName}.");
 
-            var lastPlay = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.System, cancellationToken);
-            if (lastPlay != null)
+            var lastSummary = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.System, cancellationToken);
+            if (lastSummary != null)
             {
-                plays.Add(lastPlay);
+                List<Domain.Entity.Play> nextPlays = await _playRepository.GetPlayWhereCreatedAtIsUpperThan(game.Id, lastSummary.CreatedAt, cancellationToken);
 
-                List<Domain.Entity.Play> followPlays = await _playRepository.GetPlayWhereCreatedAtIsUpperThan(game.Id, lastPlay.CreatedAt, cancellationToken);
-                followPlays.ForEach(plays.Add);
+                var numberOfPlaysRequiredForContext = 4;
+                if (nextPlays.Count < numberOfPlaysRequiredForContext)
+                {
+                    var missingPlaysNumber = numberOfPlaysRequiredForContext - nextPlays.Count;
+                    
+                    List<Domain.Entity.Play> previousPlays = (await _playRepository
+                        .GetLastNBeforeDate(game.Id, missingPlaysNumber, lastSummary.CreatedAt, cancellationToken))
+                        .OrderBy(x => x.CreatedAt).ToList();
+                    plays.AddRange(previousPlays);
+                }
+                plays.Add(lastSummary);
+                plays.AddRange(nextPlays);
             }
             else
             {
-                List<Domain.Entity.Play> allOldPlays = await _playRepository.GetAllByGameId(game.Id, cancellationToken);
-                allOldPlays.ForEach(plays.Add);
+                List<Domain.Entity.Play> allGamePlays = await _playRepository.GetAllByGameId(game.Id, cancellationToken);
+                plays.AddRange(allGamePlays);
             }
 
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer)) ??

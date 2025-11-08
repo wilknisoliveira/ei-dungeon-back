@@ -9,5 +9,6 @@ namespace ei_back.Core.Application.Repository
         Task<int> CountPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
         Task<List<Play>> GetPlayWhereCreatedAtIsUpperThan(Guid gameId, DateTime createdAt, CancellationToken cancellationToken);
         Task<List<Play>> GetAllByGameId(Guid gameId, CancellationToken cancellationToken);
+        Task<List<Play>> GetLastNBeforeDate(Guid gameId, int limit, DateTime limitDate, CancellationToken cancellationToken);
     }
 }
