@@ -144,14 +144,14 @@ namespace ei_back.Core.Application.UseCase.Play
                         promptList.Add(new AiPromptRequest(AiRole.System, "#Resume\n" + play.Prompt));
                         break;
                     case PlayerType.RealPlayer:
-                        promptList.Add(new AiPromptRequest(AiRole.System, $"#{play.Player.Name}(player)\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(AiRole.User, $"#{play.Player.Name}(player)\n" + play.Prompt));
                         break;
                     case PlayerType.Master:
                         promptList.Add(new AiPromptRequest(AiRole.Assistant, $"#Master Table\n" + play.Prompt));
                         break;
                 }
             }
-            promptList.Add(new AiPromptRequest(AiRole.User, MasterPlayCommand()));
+            promptList.Add(new AiPromptRequest(AiRole.System, MasterPlayCommand()));
             
             var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 650, cancellationToken);
 

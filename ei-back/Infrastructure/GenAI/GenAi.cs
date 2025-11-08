@@ -1,4 +1,5 @@
 ﻿using ei_back.Core.Application.Interfaces;
+using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
@@ -61,8 +62,7 @@ public class GenAi : IGenAi
         var messages = GetChatMessages(prompts);
         messages.Insert(0, new ChatMessage(ChatRole.System, GetOutputCharactersPrompt(maxOutputCharacters)));
         
-        var result = await _genAiClient.GetResponseAsync(messages, cancellationToken: cancellationToken);
-        return result.Text;
+        return await GetResponseAsync(messages, cancellationToken: cancellationToken);
     }
 
     private List<ChatMessage> GetChatMessages(List<AiPromptRequest> prompts)
@@ -74,5 +74,18 @@ public class GenAi : IGenAi
     {
         return $"Your final answer must contain no more than {maxOutputCharacters} characters (counting all letters, numbers, spaces and punctuation). " +
                $"Do not include explanations about the limit. Do not say you are limiting the answer. Just output the final answer.";
+    }
+
+    private async Task<string> GetResponseAsync(List<ChatMessage> messages, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _genAiClient.GetResponseAsync(messages, cancellationToken: cancellationToken);
+            return result.Text;
+        }
+        catch (Exception e)
+        {
+            throw new BadGatewayException("The LLM API failed to respond.");
+        }
     }
 }
