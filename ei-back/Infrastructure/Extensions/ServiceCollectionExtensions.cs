@@ -3,6 +3,7 @@ using ei_back.Core.Application.Repository;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Context.Repository;
 using ei_back.Infrastructure.Context;
+using ei_back.Infrastructure.GenAI;
 using ei_back.Core.Application.Service.User.Interfaces;
 using ei_back.Core.Application.Service.User;
 using ei_back.Infrastructure.Token;
@@ -22,7 +23,6 @@ using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play;
 using ei_back.Core.Application.UseCase.GameInfo.Interfaces;
 using ei_back.Core.Application.UseCase.GameInfo;
-using GeminiDotnet;
 
 namespace ei_back.Infrastructure.Extensions
 {
@@ -78,10 +78,9 @@ namespace ei_back.Infrastructure.Extensions
             return services;
         }
 
-        public static IServiceCollection AddGenAiClient(this IServiceCollection services, GeminiClient geminiClient)
+        public static IServiceCollection AddGenAiClient(this IServiceCollection services)
         {
-            services.AddSingleton(geminiClient);
-            services.AddScoped<IGenAi, GenAI.GenAi>();
+            services.AddScoped<IGenAi, GenAi>();
             return services;
         }
     }

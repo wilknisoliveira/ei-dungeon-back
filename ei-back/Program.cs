@@ -145,23 +145,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
 });
 
-var aiModel = builder.Configuration["GenAISettings:AiModel"];
-var apiToken = builder.Configuration["keys:GeminiApiKey"];
-if (aiModel.IsNullOrEmpty() || apiToken.IsNullOrEmpty())
-    throw new ArgumentException("AIModel and apiToken must be set");
-
-var geminiOptions = new GeminiClientOptions
-{
-    ApiKey = apiToken!,
-    ModelId = aiModel!,
-};
-var geminiClient = new GeminiClient(geminiOptions);
-
 builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddUseCases();
 builder.Services.AddInfraHttpClients();
-builder.Services.AddGenAiClient(geminiClient);
+builder.Services.AddGenAiClient();
 
 var app = builder.Build();
 

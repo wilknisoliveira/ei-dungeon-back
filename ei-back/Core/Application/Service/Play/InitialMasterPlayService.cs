@@ -23,10 +23,10 @@ namespace ei_back.Core.Application.Service.Play
             List<AiPromptRequest> promptList =
             [
                 new(AiRole.System, prompt),
-                new(AiRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações do player repassadas como contexto para definição do background da história. A resposta deve conter no máximo 900 tokens.")
+                new(AiRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações do player repassadas como contexto para definição do background da história.")
             ];
 
-            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, cancellationToken);
+            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 650, cancellationToken);
             
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");

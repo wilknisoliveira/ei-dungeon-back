@@ -153,7 +153,7 @@ namespace ei_back.Core.Application.UseCase.Play
             }
             promptList.Add(new AiPromptRequest(AiRole.User, MasterPlayCommand()));
             
-            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, cancellationToken);
+            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 650, cancellationToken);
 
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");
@@ -167,7 +167,7 @@ namespace ei_back.Core.Application.UseCase.Play
         private static string MasterPlayCommand()
         {
             //Blocked the dices
-            return $"Você é um mestre de mesa (Master table) em um jogo de RPG Dungeons & Dragons. Nas informações repassadas, encontra-se um breve resumo de partidas anteriores, bem como as jogadas mais recentes. Sua função é de conduzir a história, desenvolver o enredo, interpretar os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações relativas a uma mestre de Mesa. \nObservações: 1. Você como Mestre da Mesa, nunca deve interpretar o papel do Player! Também nunca deve ditar as ações do Player!; 2. Não será utilizado mecanismos de rolagem de dados. \n Agora, prossiga com a próxima orientação do Mestre da Mesa!";
+            return $"Você é um mestre de mesa (Master table) em um jogo de RPG Dungeons & Dragons. Nas informações repassadas, encontra-se um breve resumo de partidas anteriores, bem como as jogadas mais recentes. Sua função é de conduzir a história, desenvolver o enredo, interpretar os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações relativas a uma mestre de Mesa. \nObservações: 1. Você como Mestre da Mesa, nunca deve interpretar o papel do Player! Também nunca deve ditar as ações do Player!; 2. Não será utilizado mecanismos de rolagem de dados; \n Agora, prossiga com a próxima orientação do Mestre da Mesa!";
         }
 
         private int CountTokensFromPlays(List<Domain.Entity.Play> plays)

@@ -60,7 +60,7 @@ namespace ei_back.Core.Application.Service.Play
             var iaResponse = "";
             try
             {
-                iaResponse = await _genAi.GenFromMultiplePrompts(promptList, cancellationToken);
+                iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 2000, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -85,9 +85,9 @@ namespace ei_back.Core.Application.Service.Play
 
         private static string PromptCommand()
         {
-            var maxOutputTokens = 2000;
-            var minOutputTokens = 500;
-            return $"Você está observando uma partida de RPG de mesa. Faça um resumo de todas as informações passadas. O resumo gerado deve ter no mínimo {minOutputTokens} tokens e no máximo {maxOutputTokens} tokens. O texto a ser gerado será utilizado posteriormente por uma IA generativa como base de dados para geração de novos resumos, ou seja, a linguagem e síntese utilizada deve ser direcionado para leitura por IA. Utilize bem a quantidade máxima de {maxOutputTokens} tokens, de forma a registrar a história e os detalhes importantes.";
+            const int minOutputTokens = 500;
+            // LLMs better understand characters instead of tokens. So it's why we convert it by inference.
+            return $"Você está observando uma partida de RPG de mesa. Faça um resumo de todas as informações passadas. O resumo gerado deve ter no mínimo {minOutputTokens * 4} caracteres. O texto a ser gerado será utilizado posteriormente por uma IA generativa como base de dados para geração de novos resumos, ou seja, a linguagem e síntese utilizada deve ser direcionado para leitura por IA. Não se preocupe em economizar tokens, priorizando o registro da história e os detalhes importantes.";
         }
     }
 }
