@@ -31,29 +31,32 @@ namespace ei_back.Core.Application.Service.Play
             var systemPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.System)) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to get the system player entity");
 
-            var newPlay = new Domain.Entity.Play(game.Id, systemPlayer.Id, "");
-            newPlay.SetCreatedDate(DateTime.Now);
-
+            // It's necessary instantiate the PLay at the beginning to ensure the createdAt date
+            var newPlay = new Domain.Entity.Play(game, systemPlayer, "");
+            
             var lastSystemPlay = plays.FirstOrDefault(x => x.Player.Type.Equals(PlayerType.System));
 
             List<AiPromptRequest> promptList = [];
             if (lastSystemPlay != null)
-                promptList.Add(new AiPromptRequest(AiRole.Assistant, "#Resume\n" + lastSystemPlay.Prompt));
-
+                promptList.Add(new AiPromptRequest(AiRole.Assistant, lastSystemPlay.Prompt));
+            
+            var systemPrompt = "";
             if (!initialAddicionalInfo.IsNullOrEmpty())
-                promptList.Add(new AiPromptRequest(AiRole.System, "#Additional Info\n" + initialAddicionalInfo));
-
-            var lastPlays = "#Last Plays\n";
+                systemPrompt += $"<additional-info>\n{initialAddicionalInfo}\n</additional-info>\n\n";
+            
+            var lastPlays = "# Last Plays\n";
             foreach (var play in plays.Where(x => !x.Player.Type.Equals(PlayerType.System)))
             {
                 if (play.Player.Type.Equals(PlayerType.Master))
-                    lastPlays += $"Master Table: \n";
+                    lastPlays += $"## Master Table: \n";
                 else
-                    lastPlays += $"{play.Player.Name}(player): \n";
+                    lastPlays += $"## {play.Player.Name}(player): \n";
 
                 lastPlays += play.Prompt + "\n\n";
             }
-            promptList.Add(new AiPromptRequest(AiRole.System, lastPlays));
+
+            systemPrompt += $"<plays>\n{lastPlays}\n</plays>";
+            promptList.Add(new AiPromptRequest(AiRole.System, systemPrompt));
 
             promptList.Add(new AiPromptRequest(AiRole.User, PromptCommand()));
 
@@ -64,22 +67,25 @@ namespace ei_back.Core.Application.Service.Play
             }
             catch (Exception ex)
             {
-                _logger.LogError("Something went wrong while attempting to generate resume: " + ex);
+                _logger.LogError("Something went wrong while attempting to generate resume: {ex}", ex);
+                return;
             }
 
             if (iaResponse.IsNullOrEmpty())
-                throw new BadGatewayException("No content was returned by the gateway");
+            {
+                _logger.LogError("Something went wrong while attempting to generate resume.");
+                return;
+            }
 
             newPlay.SetPrompt(iaResponse);
 
-            var response = await _playService.CreatePlay(newPlay, cancellationToken) ??
+            _ = await _playService.CreatePlay(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
 
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
             {
-                var errorMessage = "Something went wrong while attempting to create the user play.";
-                _logger.LogError(errorMessage);
+                _logger.LogError("Something went wrong while attempting to create the user play.");
             }
         }
 

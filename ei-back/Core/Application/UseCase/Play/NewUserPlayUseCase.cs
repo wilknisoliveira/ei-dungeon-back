@@ -8,7 +8,6 @@ using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using Microsoft.IdentityModel.Tokens;
-using System.Text.Json;
 using ei_back.Core.Application.Interfaces;
 using Tiktoken;
 
@@ -110,7 +109,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
             if (numberOfTokens > _limitTokens)
             {
-                var playerDescription = new AiPromptRequest(AiRole.System, $"<player-info>\n{realPlayer.InfoToString()}\n</player-info>");
+                var playerDescription = $"<player-info>\n{realPlayer.InfoToString()}\n</player-info>";
 
                 var timeSpan = TimeSpan.FromMinutes(2);
                 var cancellationTokenTask = new CancellationTokenSource(timeSpan);
@@ -122,7 +121,7 @@ namespace ei_back.Core.Application.UseCase.Play
                     using (var scope = _serviceProvider.CreateScope())
                     {
                         var newGeneratePlaysResumeService = scope.ServiceProvider.GetRequiredService<IGeneratePlaysResumeService>();
-                        await newGeneratePlaysResumeService.Handler(game.Plays, game, playerDescription.Content, cancellationTokenService.Token);
+                        await newGeneratePlaysResumeService.Handler(game.Plays, game, playerDescription, cancellationTokenService.Token);
                     };
                 }, cancellationTokenTask.Token);
 
@@ -139,10 +138,12 @@ namespace ei_back.Core.Application.UseCase.Play
         private async Task<Domain.Entity.Play> GenerateMasterPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
         {
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
-            List<AiPromptRequest> promptList =
-            [
-                new(AiRole.System, $"<player-info>\n{realPlayer!.InfoToString()}\n</player-info>")
-            ];
+
+            var systemPrompt = $"<master-instruction>\n{MasterPlayCommand()}\n</master-instruction>\n" +
+                               $"<player-info>\n{realPlayer!.InfoToString()}\n</player-info>\n" + 
+                               $"<world-info>\n{game.WorldInfo}\n</world-info>\n";
+            
+            List<AiPromptRequest> promptList = [];
 
             foreach (var play in plays)
             {
@@ -151,17 +152,18 @@ namespace ei_back.Core.Application.UseCase.Play
                 switch (playerType)
                 {
                     case PlayerType.System:
-                        promptList.Add(new AiPromptRequest(AiRole.System, "#Resume\n" + play.Prompt));
+                        systemPrompt += $"\n<summary>\n{play.Prompt}\n</summary>";
                         break;
                     case PlayerType.RealPlayer:
-                        promptList.Add(new AiPromptRequest(AiRole.User, $"#{play.Player.Name}(player)\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(AiRole.User, play.Prompt));
                         break;
                     case PlayerType.Master:
-                        promptList.Add(new AiPromptRequest(AiRole.Assistant, $"#Master Table\n" + play.Prompt));
+                        promptList.Add(new AiPromptRequest(AiRole.Assistant, play.Prompt));
                         break;
                 }
             }
-            promptList.Add(new AiPromptRequest(AiRole.System, MasterPlayCommand()));
+            
+            promptList.Insert(0, new AiPromptRequest(AiRole.System, systemPrompt));
             
             var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 650, cancellationToken);
 

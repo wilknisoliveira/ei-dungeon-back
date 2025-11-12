@@ -18,12 +18,16 @@ namespace ei_back.Core.Application.Service.Play
             var player = gameEntity.Players.Find(x => x.Type.Equals(PlayerType.RealPlayer));
             string playerDescription = "<player>\n" + player!.InfoToString() + "\n" + @"<\/player>" + "\n";
 
-            string prompt = initialGuidance + playerDescription;
-
+            string prompt = $"{initialGuidance}\n{playerDescription}\n" +
+                            $"<world-info>\n{gameEntity.WorldInfo}\n</world-info>";
+            
             List<AiPromptRequest> promptList =
             [
                 new(AiRole.System, prompt),
-                new(AiRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha. Tome como base todas as informações do player repassadas como contexto para definição do background da história.")
+                new(
+                    AiRole.User, 
+                    "Crie uma introdução para o jogo como se fosse o início da campanha. " + 
+                    "Tome como base todas as informações repassadas como contexto para crição da introdução.")
             ];
 
             var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 650, cancellationToken);

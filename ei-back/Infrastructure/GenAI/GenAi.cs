@@ -54,15 +54,22 @@ public class GenAi : IGenAi
         int maxOutputTokens, 
         CancellationToken cancellationToken)
     {
-        // The better approach is to pass the maxOutputTokens to the ChatOptions. But gemini implementation doesn't
-        // work well with maxOutputTokens. Therefore, the solution is to pass the limit as a system prompt.
-        // LLMs better understand characters quantity instead of token quantities, so let's convert it by inference.
-        var maxOutputCharacters = maxOutputTokens * 4;
+        var maxOutputCharacters = ConvertTokensToCharactersQuantity(maxOutputTokens);
         
         var messages = GetChatMessages(prompts);
         messages.Insert(0, new ChatMessage(ChatRole.System, GetOutputCharactersPrompt(maxOutputCharacters)));
         
         return await GetResponseAsync(messages, cancellationToken: cancellationToken);
+    }
+
+    public async Task<string> GenFromMultiplePrompts<T>(List<AiPromptRequest> prompts, int maxOutputTokens, CancellationToken cancellationToken)
+    {
+        var maxOutputCharacters = ConvertTokensToCharactersQuantity(maxOutputTokens);
+        
+        var messages = GetChatMessages(prompts);
+        messages.Insert(0, new ChatMessage(ChatRole.System, GetOutputCharactersPrompt(maxOutputCharacters)));
+        
+        return await GetResponseAsync<T>(messages, cancellationToken: cancellationToken);
     }
 
     private List<ChatMessage> GetChatMessages(List<AiPromptRequest> prompts)
@@ -76,11 +83,32 @@ public class GenAi : IGenAi
                $"Do not include explanations about the limit. Do not say you are limiting the answer. Just output the final answer.";
     }
 
+    private int ConvertTokensToCharactersQuantity(int maxOutputTokens)
+    {
+        // The better approach is to pass the maxOutputTokens to the ChatOptions. But gemini implementation doesn't
+        // work well with maxOutputTokens. Therefore, the solution is to pass the limit as a system prompt.
+        // LLMs better understand characters quantity instead of token quantities, so let's convert it by inference.
+        return maxOutputTokens * 4;
+    }
+
     private async Task<string> GetResponseAsync(List<ChatMessage> messages, CancellationToken cancellationToken = default)
     {
         try
         {
             var result = await _genAiClient.GetResponseAsync(messages, cancellationToken: cancellationToken);
+            return result.Text;
+        }
+        catch (Exception e)
+        {
+            throw new BadGatewayException("The LLM API failed to respond.");
+        }
+    }
+    
+    private async Task<string> GetResponseAsync<T>(List<ChatMessage> messages, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await _genAiClient.GetResponseAsync<T>(messages, cancellationToken: cancellationToken);
             return result.Text;
         }
         catch (Exception e)

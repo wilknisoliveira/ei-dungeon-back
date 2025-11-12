@@ -1,6 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-
-namespace ei_back.Core.Domain.Entity
+﻿namespace ei_back.Core.Domain.Entity
 {
     public class Game : Base
     {
@@ -24,7 +22,7 @@ namespace ei_back.Core.Domain.Entity
         public string Name { get; private set; }
         public User OwnerUser { get; private set; }
         public Guid OwnerUserId { get; private set; }
-
+        public string WorldInfo { get; private set; } = "";
 
         public List<Player> Players { get; private set; }
         public List<Play> Plays { get; private set; } = [];
@@ -33,6 +31,11 @@ namespace ei_back.Core.Domain.Entity
         {
             OwnerUser = user;
             OwnerUserId = user.Id;
+        }
+
+        public void SetWorldInfo(string worldInfo)
+        {
+            WorldInfo = worldInfo;
         }
 
         public void SetPlayers(List<Player> players)

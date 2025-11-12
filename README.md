@@ -57,6 +57,7 @@ $ git clone https://github.com/wilknisoliveira/ei-dungeon-back.git
 ## Migrations
 To run migrations, install dotnet ef as global. Follow the commands in the Infra project:
 ```
+cd .\ei-back\
 dotnet ef migrations add <migration_name> --context EIContext
 dotnet ef database update --context EIContext
 ```
