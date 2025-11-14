@@ -4,23 +4,27 @@ namespace ei_back.Infrastructure.ExternalAPIs.Client.Core
 {
     public class ExternalApiWebClient
     {
-        private readonly HttpClient _httpClient; 
+        private readonly IHttpClientFactory _httpClientFactory; 
         
-        public ExternalApiWebClient(HttpClient httpClient)
+        public ExternalApiWebClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+            _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         }
 
         public async Task<T?> Get<T>(string uri, CancellationToken cancellationToken)
         {
-            var response = await _httpClient.GetAsync(uri, cancellationToken);
+            var httpClient = _httpClientFactory.CreateClient();
+            
+            var response = await httpClient.GetAsync(uri, cancellationToken);
 
             return await Deserialize<T>(response, cancellationToken);
         }
 
         public async Task<T?> Post<T, A>(string uri, A data, CancellationToken cancellationToken)
         {
-            var response = await _httpClient.PostAsJsonAsync(uri, data, cancellationToken);
+            var httpClient = _httpClientFactory.CreateClient();
+            
+            var response = await httpClient.PostAsJsonAsync(uri, data, cancellationToken);
             
             return await Deserialize<T>(response, cancellationToken);
         }
