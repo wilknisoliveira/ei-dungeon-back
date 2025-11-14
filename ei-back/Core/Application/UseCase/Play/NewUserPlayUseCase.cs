@@ -109,8 +109,6 @@ namespace ei_back.Core.Application.UseCase.Play
 
             if (numberOfTokens > _limitTokens)
             {
-                var playerDescription = $"<player-info>\n{realPlayer.InfoToString()}\n</player-info>";
-
                 var timeSpan = TimeSpan.FromMinutes(2);
                 var cancellationTokenTask = new CancellationTokenSource(timeSpan);
 
@@ -118,11 +116,15 @@ namespace ei_back.Core.Application.UseCase.Play
                 {
                     using var cancellationTokenService = new CancellationTokenSource(timeSpan);
 
-                    using (var scope = _serviceProvider.CreateScope())
-                    {
-                        var newGeneratePlaysResumeService = scope.ServiceProvider.GetRequiredService<IGeneratePlaysResumeService>();
-                        await newGeneratePlaysResumeService.Handler(game.Plays, game, playerDescription, cancellationTokenService.Token);
-                    };
+                    using var summaryScope = _serviceProvider.CreateScope();
+                    //using var worldInfoScope = _serviceProvider.CreateScope();
+                    var newGeneratePlaysSummaryService = summaryScope.ServiceProvider.GetRequiredService<IGeneratePlaysSummaryService>();
+                    //var upsertWorldInfoService = worldInfoScope.ServiceProvider.GetRequiredService<IUpsertWorldInfoService>();
+                        
+                    await newGeneratePlaysSummaryService.Handler(game.Id, plays, cancellationTokenService.Token);
+                    //var worldInfoTask = upsertWorldInfoService.Handler(game.Id, plays, cancellationTokenService.Token);
+                        
+                    //await Task.WhenAll(summaryTask, worldInfoTask);
                 }, cancellationTokenTask.Token);
 
                 // Other ways to use async operations without create a new context:
@@ -165,7 +167,7 @@ namespace ei_back.Core.Application.UseCase.Play
             
             promptList.Insert(0, new AiPromptRequest(AiRole.System, systemPrompt));
             
-            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 650, cancellationToken);
+            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 400, cancellationToken);
 
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");

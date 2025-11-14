@@ -49,8 +49,9 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IGameService, GameService>();
             services.AddScoped<IPlayService, PlayService>();
-            services.AddScoped<IGeneratePlaysResumeService, GeneratePlaysResumeService>();
+            services.AddScoped<IGeneratePlaysSummaryService, GeneratePlaysSummaryService>();
             services.AddScoped<IInitialMasterPlayService, InitialMasterPlayService>();
+            services.AddScoped<IUpsertWorldInfoService, UpsertWorldInfoService>();
 
             return services;
         }
