@@ -52,6 +52,7 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IGeneratePlaysSummaryService, GeneratePlaysSummaryService>();
             services.AddScoped<IInitialMasterPlayService, InitialMasterPlayService>();
             services.AddScoped<IUpsertWorldInfoService, UpsertWorldInfoService>();
+            services.AddScoped<IPlayAnalyzerService, PlayAnalyzerService>();
 
             return services;
         }

@@ -36,7 +36,7 @@ public class UpsertWorldInfoService(
             new(AiRole.User, GetWorldInfoGenerationPrompt())
         ];
             
-        var iaResponse = await _genAi.GenFromMultiplePrompts<WorldInfoDtoResponse>(promptList, 2000, cancellationToken);
+        var iaResponse = await _genAi.GetResponse<WorldInfoDtoResponse>(promptList, 2000, cancellationToken);
             
         if (iaResponse.IsNullOrEmpty())
             throw new BadGatewayException("No content was returned by the gateway");
@@ -78,7 +78,7 @@ public class UpsertWorldInfoService(
         var iaResponse = "";
         try
         {
-            iaResponse = await _genAi.GenFromMultiplePrompts<WorldInfoDtoResponse>(
+            iaResponse = await _genAi.GetResponse<WorldInfoDtoResponse>(
                 promptList, 
                 2000, 
                 cancellationToken);

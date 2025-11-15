@@ -30,7 +30,7 @@ namespace ei_back.Core.Application.Service.Play
                     "Tome como base todas as informações repassadas como contexto para crição da introdução.")
             ];
 
-            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 650, cancellationToken);
+            var iaResponse = await _genAi.GetResponse(promptList, 650, cancellationToken);
             
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");

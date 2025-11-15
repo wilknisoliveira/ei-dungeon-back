@@ -24,6 +24,7 @@ namespace ei_back.Core.Application.UseCase.Play
         private readonly IServiceProvider _serviceProvider;
         private readonly int _limitTokens;
         private readonly IGenAi _genAi;
+        private readonly IPlayAnalyzerService _playAnalyzerService;
 
         public NewUserPlayUseCase(
             IMapper mapper,
@@ -34,7 +35,8 @@ namespace ei_back.Core.Application.UseCase.Play
             ILogger<NewUserPlayUseCase> logger,
             IServiceProvider serviceProvider,
             IConfiguration configuration,
-            IGenAi genAi)
+            IGenAi genAi, 
+            IPlayAnalyzerService playAnalyzerService)
         {
             _mapper = mapper;
             _playService = playService;
@@ -44,6 +46,7 @@ namespace ei_back.Core.Application.UseCase.Play
             _logger = logger;
             _serviceProvider = serviceProvider;
             _genAi = genAi;
+            _playAnalyzerService = playAnalyzerService;
 
             var errorMessage = "Verify if all the string connections was registered properly in the appsettings.";
 
@@ -91,7 +94,12 @@ namespace ei_back.Core.Application.UseCase.Play
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
             plays.Add(newPlay);
             
-            var masterPlay = await GenerateMasterPlay(plays, game, cancellationToken);
+            AnalyzerDtoResponse analyzerDtoResponse = await _playAnalyzerService.Handler(
+                plays, 
+                game, 
+                cancellationToken);
+            
+            var masterPlay = await GenerateMasterPlay(plays, game, analyzerDtoResponse, cancellationToken);
             _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
             plays.Add(masterPlay);
@@ -137,7 +145,11 @@ namespace ei_back.Core.Application.UseCase.Play
             return response;
         }
 
-        private async Task<Domain.Entity.Play> GenerateMasterPlay(List<Domain.Entity.Play> plays, Domain.Entity.Game game, CancellationToken cancellationToken)
+        private async Task<Domain.Entity.Play> GenerateMasterPlay(
+            List<Domain.Entity.Play> plays, 
+            Domain.Entity.Game game,
+            AnalyzerDtoResponse analyzerDtoResponse,
+            CancellationToken cancellationToken)
         {
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
 
@@ -164,10 +176,43 @@ namespace ei_back.Core.Application.UseCase.Play
                         break;
                 }
             }
-            
+
+            var maxOutputTokens = 400;
+            var analysis = "<analysis>\n";
+            if (analyzerDtoResponse.Result == AnalyzerResult.InvalidPlay)
+            {
+                analysis += $"A nova jogada do player é inválida pela seguinte razão: {analyzerDtoResponse.Reason}\n" +
+                            $"Negue a jogada do player, explique o motivo e dê a ele opções válidas.";
+                maxOutputTokens = 100;
+            }
+            else if (analyzerDtoResponse.Result == AnalyzerResult.RollDice)
+            {
+                var random = new Random();
+                // Dice d20
+                var dicesResult = random.Next(1, 21);
+
+                analysis += $"A nova jogada é crítica pelo seguinte motivo: {analyzerDtoResponse.Reason}\n\n" +
+                            $"Por isso, você solicitou que o player jogasse o dado d20 para determinar o resultado" +
+                            $"da jogada.\n" +
+                            $"O player jogou o dado d20 para e o resultado foi: {dicesResult}!\n" +
+                            $"O início da sua resposta como mestre deve ter a seguinte estrutura:\n" +
+                            $"'A sua jogada é crítica pois [aqui explique o motivo...]. Por isso é necessário jogar" +
+                            $"um dado d20!\n" +
+                            $"Jogando o dado... O resultado foi [coloque aqui o resultado do dado]!'\n\n" +
+                            $"Na sua narração seguinte, considere o resultado dos dados para ditar o resultado" +
+                            $"da jogada.";
+
+            }
+            else
+            {
+                analysis += "Tudo certo com a jogada do player. Pode prosseguir normalmente.";
+            }
+            analysis += "\n</analysis>";
+            systemPrompt += analysis;
+
             promptList.Insert(0, new AiPromptRequest(AiRole.System, systemPrompt));
             
-            var iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 400, cancellationToken);
+            var iaResponse = await _genAi.GetResponse(promptList, maxOutputTokens, cancellationToken);
 
             if (iaResponse.IsNullOrEmpty())
                 throw new BadGatewayException("No content was returned by the gateway");
@@ -181,11 +226,25 @@ namespace ei_back.Core.Application.UseCase.Play
         private static string MasterPlayCommand()
         {
             //Blocked the dices
-            return $"Você é um mestre de mesa (Master table) em um jogo de RPG Dungeons & Dragons. Nas informações repassadas, encontra-se um breve resumo de partidas anteriores, bem como as jogadas mais recentes. Sua função é de conduzir a história, desenvolver o enredo, interpretar os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações relativas a uma mestre de Mesa. \nObservações: 1. Você como Mestre da Mesa, nunca deve interpretar o papel do Player! Também nunca deve ditar as ações do Player!; 2. Não será utilizado mecanismos de rolagem de dados; \n Agora, prossiga com a próxima orientação do Mestre da Mesa!";
+            return $"Você é um mestre de mesa (Master table) em um jogo de RPG Dungeons & Dragons. " +
+                   $"Sua função é conduzir a história, desenvolver o enredo, interpretar " +
+                   $"os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações " +
+                   $"relativas a uma mestre de Mesa.\n" +
+                   $"IMPORTANTE: Você como Mestre da Mesa, NUNCA deve interpretar o papel do Player! " +
+                   $"Você também NUNCA deve ditar as ações do Player!;\n\n" +
+                   $"Você tem algumas informações importantes que são primordiais para seu papel como Mestre de Mesa:\n" +
+                   $"- Em <world-info> estão todas as informações que você como mestre criou a respeito do mundo do jogo. " +
+                   $"Utilize essas informações de forma estratégica para direcionar a história" +
+                   $"- Em <summary> encontra-se um breve resumo de partidas anteriores.\n" +
+                   $"- Em <analysis> está uma análise que você fez previamente sobre a nova jogada do usuário." +
+                   $"Nela está o resultado da jogada e como você enquanto mestre deve prosseguir.\n\n" +
+                   $"Agora, prossiga com a próxima orientação do Mestre da Mesa!";
         }
 
         private int CountTokensFromPlays(List<Domain.Entity.Play> plays)
         {
+            // TikToken doesn't have support to the gemini models. Therefore, is used an OpenAi model to get
+            // a similar result
             const string model = "gpt-4";
             Encoder? encoder = null;
             try

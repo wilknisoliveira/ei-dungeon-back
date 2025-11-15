@@ -69,7 +69,7 @@ namespace ei_back.Core.Application.Service.Play
             var iaResponse = "";
             try
             {
-                iaResponse = await _genAi.GenFromMultiplePrompts(promptList, 2000, cancellationToken);
+                iaResponse = await _genAi.GetResponse(promptList, 2000, cancellationToken);
             }
             catch (Exception ex)
             {

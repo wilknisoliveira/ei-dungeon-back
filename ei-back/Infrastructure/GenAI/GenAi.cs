@@ -34,14 +34,14 @@ public class GenAi : IGenAi
         _genAiClient = new ChatClientBuilder(geminiClient).Build();
     }
 
-    public async Task<string> GenFromOnePrompt(string prompt, CancellationToken cancellationToken)
+    public async Task<string> GetResponse(string prompt, CancellationToken cancellationToken)
     {
         var result = await _genAiClient.GetResponseAsync(prompt, cancellationToken: cancellationToken);
 
         return result.Text;
     }
     
-    public async Task<string> GenFromMultiplePrompts(List<AiPromptRequest> prompts, CancellationToken cancellationToken)
+    public async Task<string> GetResponse(List<AiPromptRequest> prompts, CancellationToken cancellationToken)
     {
         var messages = GetChatMessages(prompts);
         
@@ -49,32 +49,52 @@ public class GenAi : IGenAi
         return result.Text;
     }
 
-    public async Task<string> GenFromMultiplePrompts(
+    public async Task<string> GetResponse(
         List<AiPromptRequest> prompts, 
         int maxOutputTokens, 
         CancellationToken cancellationToken)
     {
-        var maxOutputCharacters = ConvertTokensToCharactersQuantity(maxOutputTokens);
-        
-        var messages = GetChatMessages(prompts);
-        messages.Insert(0, new ChatMessage(ChatRole.System, GetOutputCharactersPrompt(maxOutputCharacters)));
+        var messages = GetChatMessages(prompts, maxOutputTokens);
         
         return await GetResponseAsync(messages, cancellationToken: cancellationToken);
     }
 
-    public async Task<string> GenFromMultiplePrompts<T>(List<AiPromptRequest> prompts, int maxOutputTokens, CancellationToken cancellationToken)
+    public async Task<string> GetResponse<T>(List<AiPromptRequest> prompts, int maxOutputTokens, CancellationToken cancellationToken)
     {
-        var maxOutputCharacters = ConvertTokensToCharactersQuantity(maxOutputTokens);
-        
-        var messages = GetChatMessages(prompts);
-        messages.Insert(0, new ChatMessage(ChatRole.System, GetOutputCharactersPrompt(maxOutputCharacters)));
+        var messages = GetChatMessages(prompts, maxOutputTokens);
         
         return await GetResponseAsync<T>(messages, cancellationToken: cancellationToken);
     }
 
-    private List<ChatMessage> GetChatMessages(List<AiPromptRequest> prompts)
+    public async Task<T> GetStructureResponse<T>(List<AiPromptRequest> prompts, int maxOutputTokens, CancellationToken cancellationToken)
     {
-        return prompts.Select(prompt => new ChatMessage(_chatRoleDict[prompt.Role], prompt.Content)).ToList();
+        var messages = GetChatMessages(prompts);
+        
+        try
+        {
+            var result = await _genAiClient.GetResponseAsync<T>(messages, cancellationToken: cancellationToken);
+            return result.Result;
+        }
+        catch (Exception e)
+        {
+            throw new BadGatewayException("The LLM API failed to respond.");
+        }
+    }
+
+    private List<ChatMessage> GetChatMessages(List<AiPromptRequest> prompts, int? maxOutputTokens = null)
+    {
+        return prompts.Select(prompt =>
+        {
+            var content = prompt.Content;
+
+            if (maxOutputTokens.HasValue && prompt.Role == AiRole.System)
+            {
+                content += "\n\n" + GetOutputCharactersPrompt(
+                    ConvertTokensToCharactersQuantity(maxOutputTokens!.Value));
+            }
+
+            return new ChatMessage(_chatRoleDict[prompt.Role], content);
+        }).ToList();
     }
 
     private string GetOutputCharactersPrompt(int maxOutputCharacters)
