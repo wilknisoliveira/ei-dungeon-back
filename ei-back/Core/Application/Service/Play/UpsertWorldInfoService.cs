@@ -28,6 +28,7 @@ public class UpsertWorldInfoService(
     {
         var systemPrompt = GetMasterPersonality();
         systemPrompt += "\n\n<player>\n" + playerInfo + "\n" + @"<\/player>" + "\n";
+        systemPrompt += $"\n{GetResponseDetailsPrompt()}";
 
         List<AiPromptRequest> promptList =
         [
@@ -134,5 +135,39 @@ public class UpsertWorldInfoService(
                "dados de <world-info> inalterados, preservando sua coerência e consistência narrativa. \nNão " +
                "reescreva o mundo inteiro — apenas modifique o necessário para que <world-info> permaneça atualizado " +
                "e fiel aos eventos recentes.\n Caso <world-info> esteja vazio, crie o mundo completamente do zero.";
+    }
+
+    private static string GetResponseDetailsPrompt()
+    {
+        return "Abaixo segue uma explicação sobre como o mundo deve ser criado. \n" +
+               "Onde estiver indicando MIN-x, significa que devem ser gerados no mínimo 'x' objetos para o array." +
+               "Ex: MIN-3 - deve gerar no mínimo 3 objetos; MIN-5 - deve gerar no mínimo 5 objetos. \n\n" +
+               "# CampaignStyle: enum ['Epic', 'Dark', 'Exploration', 'Politic', 'Mystery', 'Horror']\n" +
+               "# MagicLevel: enum ['High', 'Medium', 'Low']\n" +
+               "# SocietalEntities: MIN-3\n" +
+               "## SocietalType: enum ['Faction', 'Alliance', 'Guild', 'Kingdom', 'Priest', 'Organization', 'Peoples']\n" +
+               "## Name: nome da sociedade\n" +
+               "## Background: História, objetivos, motivações internas, conflitos, inimigos e impacto no mundo.\n" +
+               "# NPCs: MIN-5\n" +
+               "## Name: nome do NPC\n" +
+               "## Background: Breve história, papel social, origem e eventos marcantes de sua vida.\n" +
+               "## Race: Raça do NPC (humano, elfo, anão, tiefling etc.).\n" +
+               "## Profession: Ocupação atual ou papel que exerce no mundo (mago, comerciante, espião, rei, pesquisador etc.).\n" +
+               "## Personality: Traços de personalidade marcantes: comportamento, vícios, virtudes, medos e objetivos.\n" +
+               "# Events: MIN-5 Lista de eventos relevantes ocorridos no mundo recentemente ou no passado que " +
+               "influenciam a narrativa. Podem ser guerras, desastres, descobertas, assassinatos, aparições mágicas, profecias etc.\n" +
+               "# Consequences: MIN-5 Prevê resultados para possíveis ações do jogador\n" +
+               "## Action: Ação que pode acontecer no futuro\n" +
+               "## Consequence: Consequência caso o jogado realize a ação.\n" +
+               "# Locations: MIN-5 Locais significativos do mundo, pode ser cidades, ruínas, territórios, estabelecimentos e etc...\n" +
+               "## Name: nome da locação\n" +
+               "## Background: Descrição geral, história do local, reputação e importância.\n" +
+               "## MainPoints: MIN-3 Pontos de interesse dentro da localização (marcos, áreas importantes, estruturas, perigos).\n" +
+               "## CurrentEvents: MIN-3 O que está acontecendo no local no momento: conflitos, problemas, rumores, crises, oportunidades.\n" +
+               "# Treasures: MIN-3 Tesouros, relíquias ou artefatos importantes e únicos dentro do mundo.\n" +
+               "## Name: Nome do tesouro.\n" +
+               "## Background: Origem, lenda ou história por trás do item.\n" +
+               "## Location: Onde o tesouro pode ser encontrado atualmente.\n" +
+               "## Properties: Poderes, efeitos, utilidades ou maldições associadas ao item.\n";
     }
 }
