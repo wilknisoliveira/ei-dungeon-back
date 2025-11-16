@@ -98,6 +98,10 @@ namespace ei_back.Core.Application.UseCase.Play
                 plays, 
                 game, 
                 cancellationToken);
+            if (analyzerDtoResponse.Result == AnalyzerResult.PlayerDied)
+            {
+                game.KillPlayer();
+            }
             
             var masterPlay = await GenerateMasterPlay(plays, game, analyzerDtoResponse, cancellationToken);
             _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
@@ -179,33 +183,47 @@ namespace ei_back.Core.Application.UseCase.Play
 
             var maxOutputTokens = 400;
             var analysis = "<analysis>\n";
-            if (analyzerDtoResponse.Result == AnalyzerResult.InvalidPlay)
+            switch (analyzerDtoResponse.Result)
             {
-                analysis += $"A nova jogada do player é inválida pela seguinte razão: {analyzerDtoResponse.Reason}\n" +
-                            $"Negue a jogada do player, explique o motivo e dê a ele opções válidas.";
-                maxOutputTokens = 100;
-            }
-            else if (analyzerDtoResponse.Result == AnalyzerResult.RollDice)
-            {
-                var random = new Random();
-                // Dice d20
-                var dicesResult = random.Next(1, 21);
+                case AnalyzerResult.InvalidPlay:
+                    analysis += $"A nova jogada do player é inválida pela seguinte razão: {analyzerDtoResponse.Reason}\n" +
+                                $"Negue a jogada do player, explique o motivo e dê a ele opções válidas.";
+                    maxOutputTokens = 100;
+                    break;
+                case AnalyzerResult.RollDice:
+                {
+                    var random = new Random();
+                    // Dice d20
+                    var dicesResult = random.Next(1, 21);
 
-                analysis += $"A nova jogada é crítica pelo seguinte motivo: {analyzerDtoResponse.Reason}\n\n" +
-                            $"Por isso, você solicitou que o player jogasse o dado d20 para determinar o resultado" +
-                            $"da jogada.\n" +
-                            $"O player jogou o dado d20 para e o resultado foi: {dicesResult}!\n" +
-                            $"O início da sua resposta como mestre deve ter a seguinte estrutura:\n" +
-                            $"'A sua jogada é crítica pois [aqui explique o motivo...]. Por isso é necessário jogar" +
-                            $"um dado d20!\n" +
-                            $"Jogando o dado... O resultado foi [coloque aqui o resultado do dado]!'\n\n" +
-                            $"Na sua narração seguinte, considere o resultado dos dados para ditar o resultado" +
-                            $"da jogada.";
-
-            }
-            else
-            {
-                analysis += "Tudo certo com a jogada do player. Pode prosseguir normalmente.";
+                    analysis += $"A nova jogada é crítica pelo seguinte motivo: {analyzerDtoResponse.Reason}\n\n" +
+                                $"Por isso, você solicitou que o player jogasse o dado d20 para determinar o resultado " +
+                                $"da jogada.\n" +
+                                $"O player jogou o dado d20 para e o resultado foi: {dicesResult}!\n" +
+                                $"O início da sua resposta como mestre deve ter a seguinte estrutura:\n" +
+                                $"'A sua jogada é crítica pois [aqui explique o motivo...]. Por isso é necessário jogar " +
+                                $"um dado d20!\n" +
+                                $"Jogando o dado... O resultado foi [coloque aqui o resultado do dado]!'\n\n" +
+                                $"Na sua narração seguinte, considere o resultado dos dados para ditar o resultado" +
+                                $"da jogada.";
+                    break;
+                }
+                case AnalyzerResult.ClarificationNeeded:
+                    analysis += $"A nova jogada do player é insuficiente pela seguinte razão: " +
+                                $"{analyzerDtoResponse.Reason}\n\n" +
+                                $"Solicite mais informações sobre a ação ou jogada do player, de forma a esclarecer suas " +
+                                $"intenções.";
+                    maxOutputTokens = 100;
+                    break;
+                case AnalyzerResult.PlayerDied:
+                    analysis += $"O personagem do player morreu pela seguinte razão: {analyzerDtoResponse.Reason}\n\n" +
+                                $"Finalize o jogo dando um encerramento de acordo com o clima do jogo e com a coerência " +
+                                $"narrativa necessária.\n" +
+                                $"Ao final agradeça ao player e o convide para iniciar um novo jogo.";
+                    break;
+                default:
+                    analysis += "Tudo certo com a jogada do player. Pode prosseguir normalmente.";
+                    break;
             }
             analysis += "\n</analysis>";
             systemPrompt += analysis;

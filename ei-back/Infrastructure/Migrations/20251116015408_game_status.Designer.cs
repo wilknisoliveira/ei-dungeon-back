@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ei_back.Infrastructure.Context;
@@ -11,9 +12,11 @@ using ei_back.Infrastructure.Context;
 namespace ei_back.Infrastructure.Migrations
 {
     [DbContext(typeof(EIContext))]
-    partial class EIContextModelSnapshot : ModelSnapshot
+    [Migration("20251116015408_game_status")]
+    partial class game_status
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,8 +38,7 @@ namespace ei_back.Infrastructure.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<short>("GameStatus")
-                        .HasColumnType("smallint")
-                        .HasColumnName("game_status");
+                        .HasColumnType("smallint");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -53,8 +55,7 @@ namespace ei_back.Infrastructure.Migrations
 
                     b.Property<string>("WorldInfo")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("world_info");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

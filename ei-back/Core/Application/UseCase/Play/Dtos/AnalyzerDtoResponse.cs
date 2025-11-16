@@ -11,4 +11,6 @@ public enum AnalyzerResult
     Ok,
     InvalidPlay,
     RollDice,
+    ClarificationNeeded,
+    PlayerDied
 }

@@ -71,10 +71,11 @@ public class PlayAnalyzerService(ILogger<PlayAnalyzerService> logger, IGenAi gen
                "- InvalidPlay: Jogada que tenta quebrar as regras fundamentais, como controlar NPCs, definir " +
                "consequências diretamente, alterar o mundo sem permissão, assumir poderes irreais, burlar a " +
                "coerência narrativa;\n" +
-               "- RollDice: Jogada possível, mas com risco e incerteza. Exige rolagem de dados;" +
+               "- RollDice: Jogada possível, mas com risco e incerteza. Exige rolagem de dados;\n" +
                "- ClarificationNeeded: Quando a jogada é ambígua ou incompleta. Ex: “Tento me esconder” <- onde? " +
                "como? de quem? | “Ataco ele” <- qual arma? qual alvo? | “Procuro coisas úteis” <- onde? " +
-               "como você procura?\n\n" +
+               "como você procura?\n" +
+               "- PlayerDied: Quando o personagem do jogador morreu.\n\n" +
                "Além de responder o resultado, esclareça o motivo da sua análise. Ex:\n" +
                "{'Result': 'RollDices', 'Reason': 'O personagem está tentando realizar uma ação ousada que " +
                "depende de fatores incertos'}"; 

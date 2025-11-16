@@ -1,4 +1,6 @@
-﻿namespace ei_back.Core.Domain.Entity
+﻿using ei_back.Core.Domain.Enums;
+
+namespace ei_back.Core.Domain.Entity
 {
     public class Game : Base
     {
@@ -23,6 +25,7 @@
         public User OwnerUser { get; private set; }
         public Guid OwnerUserId { get; private set; }
         public string WorldInfo { get; private set; } = "";
+        public GameStatus GameStatus { get; private set; } = GameStatus.Active;
 
         public List<Player> Players { get; private set; }
         public List<Play> Plays { get; private set; } = [];
@@ -46,6 +49,11 @@
         public void AddPlay(Play play)
         {
             Plays.Add(play);
+        }
+
+        public void KillPlayer()
+        {
+            GameStatus = GameStatus.PlayerDied;
         }
     }
 }
