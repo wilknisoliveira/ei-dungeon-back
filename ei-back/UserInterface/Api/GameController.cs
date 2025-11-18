@@ -18,19 +18,22 @@ namespace ei_back.UserInterface.Api
         private readonly ICreateGameUseCase _createGameUseCase;
         private readonly IGetUserNameUseCase _getUserNameUseCase;
         private readonly IGetGamesUseCase _getGamesUseCase;
+        private readonly IGetGameByIdAndUserUseCase _getGameByIdAndUserUseCase;
 
         public GameController(
             ILogger<GameController> logger,
             IUnitOfWork unitOfWork,
             ICreateGameUseCase createGameUseCase,
             IGetUserNameUseCase getUserNameUseCase,
-            IGetGamesUseCase getGamesUseCase)
+            IGetGamesUseCase getGamesUseCase, 
+            IGetGameByIdAndUserUseCase getGameByIdAndUserUseCase)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _createGameUseCase = createGameUseCase;
             _getUserNameUseCase = getUserNameUseCase;
             _getGamesUseCase = getGamesUseCase;
+            _getGameByIdAndUserUseCase = getGameByIdAndUserUseCase;
         }
 
         [HttpPost]
@@ -88,6 +91,20 @@ namespace ei_back.UserInterface.Api
 
             var response = await _getGamesUseCase.Handler(sortDirection, pageSize, page, userName, cancellationToken);
 
+            return Ok(response);
+        }
+
+        [HttpGet("{gameId}")]
+        [ProducesResponseType(typeof(GameDtoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
+        public async Task<IActionResult> Get(Guid gameId, CancellationToken cancellationToken)
+        {
+            var userName = _getUserNameUseCase.Handler(User);
+            
+            _logger.LogDebug("Get the info from game {gameId}", gameId);
+            
+            GameDtoResponse response = await _getGameByIdAndUserUseCase.Handler(gameId, userName, cancellationToken);
             return Ok(response);
         }
     }

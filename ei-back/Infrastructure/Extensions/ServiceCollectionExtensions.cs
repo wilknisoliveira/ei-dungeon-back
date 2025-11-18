@@ -71,6 +71,7 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
             services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
             services.AddScoped<ICreateGameInfoUseCase, CreateGameInfoUseCase>();
+            services.AddScoped<IGetGameByIdAndUserUseCase, GetGameByIdAndUserUseCase>();
 
             return services;
         }
