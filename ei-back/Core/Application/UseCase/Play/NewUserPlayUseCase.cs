@@ -9,6 +9,7 @@ using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using Microsoft.IdentityModel.Tokens;
 using ei_back.Core.Application.Interfaces;
+using ei_back.Core.Domain.Enums;
 using Tiktoken;
 
 namespace ei_back.Core.Application.UseCase.Play
@@ -62,6 +63,9 @@ namespace ei_back.Core.Application.UseCase.Play
             var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken) ??
                 throw new NotFoundException($"No game found with id {playDtoRequest.GameId} to user name {userName}.");
 
+            if (!game.GameStatus.Equals(GameStatus.Active))
+                throw new ForbiddenException($"Game '{game.Id}' is not active.");
+
             var lastSummary = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.System, cancellationToken);
             if (lastSummary != null)
             {
@@ -112,9 +116,7 @@ namespace ei_back.Core.Application.UseCase.Play
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
             {
-                var errorMessage = "Something went wrong while attempting to create the user play.";
-                _logger.LogError(errorMessage);
-                throw new InternalServerErrorException(errorMessage);
+                throw new InternalServerErrorException("Something went wrong while attempting to create the user play.");
             }
 
             int numberOfTokens = CountTokensFromPlays(plays);
@@ -273,7 +275,7 @@ namespace ei_back.Core.Application.UseCase.Play
             {
                 var errorMessage = $"Something went wrong while attempting to create a encoder for {model} model.";
                 _logger.LogError(errorMessage + " Error: " + ex);
-                throw new InternalServerErrorException(errorMessage + " Error: " + ex.Message);
+                throw new InternalServerErrorException(errorMessage);
             }
 
             var prompts = "";
