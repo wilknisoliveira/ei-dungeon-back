@@ -14,7 +14,7 @@ namespace ei_back.Infrastructure.Context.Map
 
             builder.Property(x => x.GameId).HasColumnName("game_id").IsRequired();
             builder.Property(x => x.PlayerId).HasColumnName("player_id").IsRequired();
-            builder.Property(x => x.Prompt).HasColumnName("promt").IsRequired();
+            builder.Property(x => x.Prompt).HasColumnName("prompt").IsRequired();
 
             builder.HasOne(x=> x.Game)
                 .WithMany(x => x.Plays)
@@ -24,7 +24,7 @@ namespace ei_back.Infrastructure.Context.Map
             builder.HasOne(x => x.Player)
                 .WithMany(x => x.Plays)
                 .HasForeignKey(x => x.PlayerId)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

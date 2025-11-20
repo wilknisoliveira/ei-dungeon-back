@@ -19,6 +19,7 @@ namespace ei_back.UserInterface.Api
         private readonly IGetUserNameUseCase _getUserNameUseCase;
         private readonly IGetGamesUseCase _getGamesUseCase;
         private readonly IGetGameByIdAndUserUseCase _getGameByIdAndUserUseCase;
+        private readonly IDeleteGameUseCase _deleteGameUseCase;
 
         public GameController(
             ILogger<GameController> logger,
@@ -26,7 +27,8 @@ namespace ei_back.UserInterface.Api
             ICreateGameUseCase createGameUseCase,
             IGetUserNameUseCase getUserNameUseCase,
             IGetGamesUseCase getGamesUseCase, 
-            IGetGameByIdAndUserUseCase getGameByIdAndUserUseCase)
+            IGetGameByIdAndUserUseCase getGameByIdAndUserUseCase, 
+            IDeleteGameUseCase deleteGameUseCase)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -34,6 +36,7 @@ namespace ei_back.UserInterface.Api
             _getUserNameUseCase = getUserNameUseCase;
             _getGamesUseCase = getGamesUseCase;
             _getGameByIdAndUserUseCase = getGameByIdAndUserUseCase;
+            _deleteGameUseCase = deleteGameUseCase;
         }
 
         [HttpPost]
@@ -98,7 +101,7 @@ namespace ei_back.UserInterface.Api
         [ProducesResponseType(typeof(GameDtoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
-        public async Task<IActionResult> Get(Guid gameId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetById(Guid gameId, CancellationToken cancellationToken)
         {
             var userName = _getUserNameUseCase.Handler(User);
             
@@ -107,5 +110,31 @@ namespace ei_back.UserInterface.Api
             GameDtoResponse response = await _getGameByIdAndUserUseCase.Handler(gameId, userName, cancellationToken);
             return Ok(response);
         }
+
+        [HttpDelete("{gameId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
+        public async Task<IActionResult> Delete(Guid gameId, CancellationToken cancellationToken)
+        {
+            var userName = _getUserNameUseCase.Handler(User);
+            
+            _logger.LogDebug("Delete the game '{gameId}'", gameId);
+            
+            await _deleteGameUseCase.Handler(gameId, userName, cancellationToken);
+            
+            var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
+            if (changedItems == 0)
+            {
+                _logger.LogError("Something went wrong while attempting to delete the game.");
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError, 
+                    "Something went wrong while attempting to delete the game.");
+            }
+            
+            _logger.LogDebug("Game '{gameId}' deleted successfully.'", gameId);
+            return NoContent();
+        }
+        
     }
 }
