@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ei_back.Core.Domain.Enums;
 
 namespace ei_back.Core.Application.UseCase.Game.Dtos
 {
@@ -13,5 +14,38 @@ namespace ei_back.Core.Application.UseCase.Game.Dtos
         [Required]
         [StringLength(20, MinimumLength = 2)]
         public required string Name { get; set; }
+        [Required]
+        public CharacterRace Race { get; set; }
+        [Required]
+        public SkillsDtoRequest Skills { get; set; }
+        
+    }
+
+    public record SkillsDtoRequest
+    {
+        [Required]
+        [MinLength(0)]
+        [MaxLength(10)]
+        public int Strength { get; set; }
+        [Required]
+        [MinLength(8)]
+        [MaxLength(10)]
+        public int Dexterity { get; set; }
+        [Required]
+        [MinLength(8)]
+        [MaxLength(10)]
+        public int Intelligence { get; set; }
+        [Required]
+        [MinLength(8)]
+        [MaxLength(10)]
+        public int Constitution { get; set; }
+        [Required]
+        [MinLength(8)]
+        [MaxLength(10)]
+        public int Charisma { get; set; }
+        [Required]
+        [MinLength(8)]
+        [MaxLength(10)]
+        public int Wisdom { get; set; }
     }
 }

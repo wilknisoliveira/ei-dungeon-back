@@ -5,6 +5,7 @@ using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.Service.User.Interfaces;
 using ei_back.Core.Application.UseCase.Game.Dtos;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
+using ei_back.Core.Domain.DomainExceptions.Player;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 
@@ -45,13 +46,32 @@ namespace ei_back.Core.Application.UseCase.Game
             game.SetOwnerUser(user);
 
             var players = new List<Player>();
-            var systemPlayer = new Player("System", "System", PlayerType.System, game);
+            var systemPlayer = new Player("System", "System", PlayerType.System);
             players.Add(systemPlayer);
             
             Player master = new("Table Master", "RPG Table Master", PlayerType.Master);
             players.Add(master);
             
-            var realPlayer = new Player(gameDtoRequest.CharacterName, gameDtoRequest.CharacterDescription, PlayerType.RealPlayer, game);
+            var realPlayer = new Player(
+                gameDtoRequest.CharacterName, 
+                gameDtoRequest.CharacterDescription, 
+                gameDtoRequest.Race, 
+                PlayerType.RealPlayer);
+            try
+            {
+                realPlayer.SetSkillPoints(
+                    gameDtoRequest.Skills.Strength,
+                    gameDtoRequest.Skills.Dexterity,
+                    gameDtoRequest.Skills.Intelligence, 
+                    gameDtoRequest.Skills.Constitution,
+                    gameDtoRequest.Skills.Charisma,
+                    gameDtoRequest.Skills.Wisdom);
+            }
+            catch (AttributePointsNotValidException ex)
+            {
+                throw new BadRequestException(ex.Message);
+            }
+            
             players.Add(realPlayer);
             
             game.SetPlayers(players);

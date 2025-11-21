@@ -197,15 +197,19 @@ namespace ei_back.Core.Application.UseCase.Play
                     var random = new Random();
                     // Dice d20
                     var dicesResult = random.Next(1, 21);
+                    var skill = analyzerDtoResponse.Skill ?? Skill.Intelligence;
+                    var modifier = realPlayer.GetModifier(skill);
+                    var result = (dicesResult + modifier) >= dicesResult ? "SUCCESS" : "FAIL";
 
                     analysis += $"A nova jogada é crítica pelo seguinte motivo: {analyzerDtoResponse.Reason}\n\n" +
-                                $"Por isso, você solicitou que o player jogasse o dado d20 para determinar o resultado " +
-                                $"da jogada.\n" +
-                                $"O player jogou o dado d20 para e o resultado foi: {dicesResult}!\n" +
-                                $"O início da sua resposta como mestre deve ter a seguinte estrutura:\n" +
+                                $"O início da sua resposta como mestre deve ser parecida com essa:\n" +
                                 $"'A sua jogada é crítica pois [aqui explique o motivo...]. Por isso é necessário jogar " +
                                 $"um dado d20!\n" +
-                                $"Jogando o dado... O resultado foi [coloque aqui o resultado do dado]!'\n\n" +
+                                $"Para isso será necessário uma classe de dificuldade de " +
+                                $"{analyzerDtoResponse.DifficultyClass ?? 12} e você poderá usar a skill {skill}.\n" +
+                                $"Jogando o dado... O resultado foi {dicesResult}!\n" +
+                                $"Para a Skill {skill} seu modificador é {modifier}.\n" +
+                                $"Então sua jogada foi - {result}! - '\n\n" +
                                 $"Na sua narração seguinte, considere o resultado dos dados para ditar o resultado" +
                                 $"da jogada.";
                     break;
