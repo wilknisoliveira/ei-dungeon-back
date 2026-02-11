@@ -17,7 +17,7 @@ using System.Reflection;
 using System.Text;
 using ei_back.UserInterface.Hubs;
 using ei_back.Infrastructure.Extensions;
-using GeminiDotnet;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,7 +103,11 @@ builder.Services.AddCors( options => options.AddDefaultPolicy(builder =>
 }));
 
 //Native
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    // Support for requests with enum description
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddInfrastructureSwagger();

@@ -23,29 +23,17 @@ namespace ei_back.Core.Application.UseCase.Game.Dtos
 
     public record SkillsDtoRequest
     {
-        [Required]
-        [MinLength(8)]
-        [MaxLength(18)]
+        [Range(8, 18)]
         public int Strength { get; set; }
-        [Required]
-        [MinLength(8)]
-        [MaxLength(18)]
+        [Range(8, 18)]
         public int Dexterity { get; set; }
-        [Required]
-        [MinLength(8)]
-        [MaxLength(18)]
+        [Range(8, 18)]
         public int Intelligence { get; set; }
-        [Required]
-        [MinLength(8)]
-        [MaxLength(18)]
+        [Range(8, 18)]
         public int Constitution { get; set; }
-        [Required]
-        [MinLength(8)]
-        [MaxLength(18)]
+        [Range(8, 18)]
         public int Charisma { get; set; }
-        [Required]
-        [MinLength(8)]
-        [MaxLength(18)]
+        [Range(8, 18)]
         public int Wisdom { get; set; }
     }
 }
