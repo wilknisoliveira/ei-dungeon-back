@@ -69,21 +69,22 @@ namespace ei_back.Core.Domain.Entity
             int charisma, 
             int wisdom)
         {
+            var numberOfSkills = 6;
             var skillBase = 8;
+            var maxOfAllocatedPoints = 30;
+            var sumOfSkills = strength + dexterity + intelligence + constitution + charisma + wisdom;
             
-            // 30 is the maximum of allocated points
-            // 6 is the number of skills
-            if (strength + dexterity + intelligence + constitution + charisma + wisdom != (30 + 6 * skillBase))
+            if (sumOfSkills != (maxOfAllocatedPoints + numberOfSkills * skillBase))
             {
                 throw new AttributePointsNotValidException();
             }
 
-            Strength = skillBase + strength;
-            Dexterity = skillBase + dexterity;
-            Intelligence = skillBase + intelligence;
-            Constitution = skillBase + constitution;
-            Charisma = skillBase + charisma;
-            Wisdom = skillBase + wisdom;
+            Strength = strength;
+            Dexterity = dexterity;
+            Intelligence = intelligence;
+            Constitution = constitution;
+            Charisma = charisma;
+            Wisdom = wisdom;
 
             switch (Race)
             {
