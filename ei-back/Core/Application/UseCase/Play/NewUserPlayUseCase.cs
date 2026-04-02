@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using ei_back.Core.Application.Interfaces;
 using ei_back.Core.Domain.Enums;
 using Tiktoken;
+using System.Runtime.CompilerServices;
 
 namespace ei_back.Core.Application.UseCase.Play
 {
@@ -56,15 +57,35 @@ namespace ei_back.Core.Application.UseCase.Play
                 throw new InternalServerErrorException(errorMessage);
         }
 
-        public async Task<List<PlayDtoResponse>> Handler(PlayDtoRequest playDtoRequest, string userName, CancellationToken cancellationToken)
+        public async IAsyncEnumerable<StreamPlayDtoResponse> Handler(
+            PlayDtoRequest playDtoRequest, 
+            string userName, 
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             List<Domain.Entity.Play> plays = [];
              
-            var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken) ??
-                throw new NotFoundException($"No game found with id {playDtoRequest.GameId} to user name {userName}.");
+            var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken);
+            if (game == null)
+            {
+                yield return new StreamPlayDtoResponse 
+                { 
+                    EventType = EventType.Error, 
+                    Content = $"No game found with id {playDtoRequest.GameId} to user name {userName}." 
+                };
+
+                yield break;
+            }
 
             if (!game.GameStatus.Equals(GameStatus.Active))
-                throw new ForbiddenException($"Game '{game.Id}' is not active.");
+            {
+                yield return new StreamPlayDtoResponse 
+                { 
+                    EventType = EventType.Error, 
+                    Content = $"Game '{game.Id}' is not active."
+                };
+
+                yield break;
+            }
 
             var lastSummary = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.System, cancellationToken);
             if (lastSummary != null)
@@ -107,16 +128,56 @@ namespace ei_back.Core.Application.UseCase.Play
                 game.KillPlayer();
             }
             
-            var masterPlay = await GenerateMasterPlay(plays, game, analyzerDtoResponse, cancellationToken);
+            var masterPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
+                throw new NotFoundException($"No Master player was found to the game {game.Id}");
+            
+            var completedMasterResponse = "";
+
+            yield return new StreamPlayDtoResponse
+            {
+                EventType = EventType.Start,
+            };
+
+            await foreach (var chunk in 
+                StreamGenerateMasterPlay(plays, game, analyzerDtoResponse, cancellationToken)
+                .WithCancellation(cancellationToken))
+            {
+                if (chunk.EventType == AIStreamEventType.Error)
+                {
+                    yield return new StreamPlayDtoResponse
+                    {
+                        EventType = EventType.Error,
+                        Content = chunk.Content
+                    };
+                    yield break;
+                } 
+                else
+                {
+                    completedMasterResponse += chunk.Content;
+                    yield return new StreamPlayDtoResponse
+                    {
+                        EventType = EventType.Chunk,
+                        Content = chunk.Content,
+                    };
+                }
+            }
+
+            var masterPlay = new Domain.Entity.Play(game, masterPlayer, completedMasterResponse);
+
             _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
             plays.Add(masterPlay);
-            var response = new List<PlayDtoResponse> { _mapper.Map<PlayDtoResponse>(masterPlay) };
 
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
             {
-                throw new InternalServerErrorException("Something went wrong while attempting to create the user play.");
+                yield return new StreamPlayDtoResponse 
+                { 
+                    EventType = EventType.Error, 
+                    Content = "Something went wrong while attempting to create the user play."
+                };
+
+                yield break;
             }
 
             int numberOfTokens = CountTokensFromPlays(plays);
@@ -147,15 +208,13 @@ namespace ei_back.Core.Application.UseCase.Play
                 // For operatons with external services like http or DbContext:
                 // _ = _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, ctsg.Token);
             }
-
-            return response;
         }
 
-        private async Task<Domain.Entity.Play> GenerateMasterPlay(
+        private async IAsyncEnumerable<StreamAIDtoResponse> StreamGenerateMasterPlay(
             List<Domain.Entity.Play> plays, 
             Domain.Entity.Game game,
             AnalyzerDtoResponse analyzerDtoResponse,
-            CancellationToken cancellationToken)
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
 
@@ -235,16 +294,13 @@ namespace ei_back.Core.Application.UseCase.Play
             systemPrompt += analysis;
 
             promptList.Insert(0, new AiPromptRequest(AiRole.System, systemPrompt));
-            
-            var iaResponse = await _genAi.GetResponse(promptList, maxOutputTokens, cancellationToken);
 
-            if (iaResponse.IsNullOrEmpty())
-                throw new BadGatewayException("No content was returned by the gateway");
-
-            var masterPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
-                throw new NotFoundException($"No Master player was found to the game {game.Id}");
-
-            return new Domain.Entity.Play(game, masterPlayer, iaResponse);
+            await foreach (var chunk in _genAi
+                .StreamGetResponse(promptList, maxOutputTokens, cancellationToken)
+                .WithCancellation(cancellationToken))
+            {
+                yield return chunk;
+            }
         }
 
         private static string MasterPlayCommand()

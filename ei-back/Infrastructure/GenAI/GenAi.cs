@@ -1,4 +1,5 @@
-﻿using ei_back.Core.Application.Interfaces;
+﻿using System.Runtime.CompilerServices;
+using ei_back.Core.Application.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using GeminiDotnet;
 using GeminiDotnet.Extensions.AI;
@@ -78,6 +79,34 @@ public class GenAi : IGenAi
         catch (Exception e)
         {
             throw new BadGatewayException("The LLM API failed to respond.");
+        }
+    }
+
+    public async IAsyncEnumerable<StreamAIDtoResponse> StreamGetResponse(
+        List<AiPromptRequest> prompts, 
+        int maxOutputTokens, 
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var messages = GetChatMessages(prompts, maxOutputTokens);
+        
+        await foreach (var chunk in _genAiClient
+            .GetStreamingResponseAsync(messages, cancellationToken: cancellationToken)
+            .WithCancellation(cancellationToken))
+        {
+            if (!string.IsNullOrEmpty(chunk.Text))
+                yield return new StreamAIDtoResponse
+                {
+                    EventType = AIStreamEventType.Chunk,
+                    Content = chunk.Text
+                };
+            else
+            {
+                yield return new StreamAIDtoResponse
+                {
+                    EventType = AIStreamEventType.Error,
+                    Content = "Something went wrong while attempting to get the response from the LLM API."
+                };
+            }
         }
     }
 

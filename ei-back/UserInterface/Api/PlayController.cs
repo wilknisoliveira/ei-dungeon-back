@@ -1,4 +1,5 @@
-﻿using ei_back.Core.Application.UseCase.Play.Dtos;
+﻿using System.Runtime.CompilerServices;
+using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Application.UseCase.User.Interfaces;
 using ei_back.Infrastructure.Context;
@@ -60,12 +61,11 @@ namespace ei_back.UserInterface.Api
             return Ok(response);
         }
 
-
         [HttpPost]
-        [ProducesResponseType(typeof(List<PlayDtoResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IAsyncEnumerable<StreamPlayDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Roles = "Admin, PremiumUser")]
-        public async Task<IActionResult> CreateUserPlay([FromBody] PlayDtoRequest playDtoRequest, CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<StreamPlayDtoResponse> CreateUserPlay([FromBody] PlayDtoRequest playDtoRequest, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var userName = _getUserNameUseCase.Handler(User);
 
@@ -73,18 +73,26 @@ namespace ei_back.UserInterface.Api
             {
                 var errorMessage = "Something went wrong while attempting to get the user logged credential.";
                 _logger.LogError(errorMessage);
-                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+
+                yield return new StreamPlayDtoResponse { EventType = EventType.Error, Content = errorMessage };
+
+                yield break;
             }
 
             _logger.LogInformation($"New play by user {userName} to game {playDtoRequest.GameId}.");
 
-            var response = await _newUserPlayUseCase.Handler(playDtoRequest, userName, cancellationToken);
+            await foreach (var chunk in _newUserPlayUseCase.Handler(playDtoRequest, userName, cancellationToken))
+            {
+                yield return chunk;
+            }
 
             _logger.LogInformation($"User play process success.");
 
-            return Ok(response);
+            yield return new StreamPlayDtoResponse
+            {
+                EventType = EventType.End,
+            };
         }
-
 
     }
 }
