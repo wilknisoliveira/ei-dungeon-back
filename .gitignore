@@ -484,3 +484,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# AI
+PROMPT.md
+LOCAL_GUIDES.md
+.opencode/

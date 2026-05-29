@@ -28,3 +28,9 @@ README.md
 !.git/config
 !.git/packed-refs
 !.git/refs/heads/**
+
+# AI
+PROMPT.md
+LOCAL_GUIDES.md
+.claude/*
+spec/*

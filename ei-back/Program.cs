@@ -26,7 +26,12 @@ builder.Logging.ClearProviders();
 var logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
-    .WriteTo.File("Infrastructure/Logs/logs.txt", rollingInterval: RollingInterval.Day)
+    .WriteTo.File(
+        "Infrastructure/Logs/logs.txt", 
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7, 
+        fileSizeLimitBytes: 10_000_000, // 10 MB
+        rollOnFileSizeLimit: true)
     .CreateLogger();
 
 builder.Logging.ClearProviders();
@@ -95,11 +100,16 @@ builder.Services.AddAuthorization(auth =>
 });
 
 //Cors
-builder.Services.AddCors( options => options.AddDefaultPolicy(builder =>
+var allowedOrigins = builder.Configuration["Cors:AllowedOrigins"] ?? "";
+var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+builder.Services.AddCors(options => options.AddDefaultPolicy(builder =>
 {
-    builder.AllowAnyOrigin()
+    builder.WithOrigins(origins.Length > 0 ? origins : ["http://localhost:8000"])
         .AllowAnyMethod()
-        .AllowAnyHeader();
+        .WithHeaders(["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Cookie"])
+        .AllowCredentials()
+        .SetPreflightMaxAge(TimeSpan.FromHours(1));
 }));
 
 //Native
