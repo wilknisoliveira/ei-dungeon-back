@@ -1,13 +1,10 @@
 <!--
   Sync Impact Report
-  Version change: (none) → 1.0.0 (initial constitution)
-  Modified principles: N/A (first draft)
-  Added sections: Core Principles (5 principles), Security & Authentication, Development Workflow, Governance
+  Version change: 1.0.0 → 1.1.0 (streaming use-case exception)
+  Modified principles: Principle II (UseCase commit responsibility), Principle III (transaction owner)
+  Added sections: N/A
   Removed sections: N/A
-  Templates requiring updates: plan-template.md (⚠ pending — Constitution Check gates auto-resolved per-plan),
-    spec-template.md (✅ no changes needed),
-    tasks-template.md (✅ no changes needed),
-    commands/ (✅ directory does not exist)
+  Templates requiring updates: N/A
   Follow-up TODOs: None
 -->
 
@@ -24,15 +21,18 @@ context, GenAI client, and external concerns belong in Infrastructure.
 
 ### II. UseCase-Mediated Controller Logic
 Controllers MUST NOT contain business logic. They parse HTTP input, call a
-single UseCase, invoke IUnitOfWork.Commit()/CommitAsync(), and return a DTO.
-UseCases coordinate domain Services, enforce business rules, and call Repository
-interfaces. All DTO mappings go through AutoMapper (MappingsProfile.cs).
+single UseCase, and return a DTO. UseCases coordinate domain Services, enforce
+business rules, and call Repository interfaces. All DTO mappings go through
+AutoMapper (MappingsProfile.cs). Streaming use cases (e.g., NewUserPlayUseCase)
+handle their own IUnitOfWork.CommitAsync() internally since atomic persistence
+must occur before the stream finalizes.
 
 ### III. Repository + Unit of Work
 All data access flows through Repository interfaces — never direct DbContext
 references in application code. EIContext is the single EF Core DbContext.
-Transactions are managed via IUnitOfWork committed by the controller after
-UseCase execution (either Commit() or CommitAsync()).
+Transactions are managed via IUnitOfWork committed after UseCase execution —
+typically by the controller, but streaming use cases commit internally
+(see Principle II exception).
 
 ### IV. Testable Dependencies (NON-NEGOTIABLE)
 Services and UseCases MUST accept all dependencies via constructor injection.
@@ -71,4 +71,4 @@ This constitution supersedes all other development guidance. Amendments require:
 affected, (c) version bump per semantic versioning. Non-negotiable principles
 require explicit exception approval with documented rationale.
 
-**Version**: 1.0.0 | **Ratified**: 2026-05-29 | **Last Amended**: 2026-05-29
+**Version**: 1.1.0 | **Ratified**: 2026-05-29 | **Last Amended**: 2026-06-01

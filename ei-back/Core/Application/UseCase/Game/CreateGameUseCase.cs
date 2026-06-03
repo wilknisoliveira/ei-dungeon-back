@@ -16,7 +16,6 @@ namespace ei_back.Core.Application.UseCase.Game
         private readonly IMapper _mapper;
         private readonly IGameService _gameService;
         private readonly IUserService _userService;
-        private readonly IInitialMasterPlayService _initialMasterPlayService;
         private readonly IGenAi _genAi;
         private readonly IUpsertWorldInfoService _upsertWorldInfoService;
 
@@ -24,14 +23,12 @@ namespace ei_back.Core.Application.UseCase.Game
             IMapper mapper,
             IGameService gameService,
             IUserService userService,
-            IInitialMasterPlayService initialMasterPlayService,
             IGenAi genAi, 
             IUpsertWorldInfoService upsertWorldInfoService)
         {
             _mapper = mapper;
             _gameService = gameService;
             _userService = userService;
-            _initialMasterPlayService = initialMasterPlayService;
             _genAi = genAi;
             _upsertWorldInfoService = upsertWorldInfoService;
         }
@@ -77,10 +74,6 @@ namespace ei_back.Core.Application.UseCase.Game
             game.SetPlayers(players);
 
             game.SetWorldInfo(await _upsertWorldInfoService.Handler(realPlayer.InfoToString(), cancellationToken));
-            
-            var masterPlay = await _initialMasterPlayService.Handler(game, cancellationToken) ??
-                throw new InternalServerErrorException("Something went wrong while attempting to generate the initial master play.");
-            game.AddPlay(masterPlay);
 
             var gameResponse = await _gameService.CreateAsync(game, cancellationToken);
 

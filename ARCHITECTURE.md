@@ -37,7 +37,7 @@ ei-back/
 
 ## Conventions
 - Async methods suffix with `Async` only for EF/IO-bound operations; some sync UseCases exist (`Signin`).
-- `IUnitOfWork.Commit()` / `CommitAsync()` called in controllers after use case handlers.
+- `IUnitOfWork.Commit()` / `CommitAsync()` called in controllers after use case handlers. **Exception**: `NewUserPlayUseCase` handles its own commit internally for both first-play and subsequent-play flows, since streaming requires atomic persistence before the stream finalizes.
 - Enums serialized as strings (`JsonStringEnumConverter`).
 - All responses include `application/json` content type.
 

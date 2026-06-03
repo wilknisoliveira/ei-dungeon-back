@@ -489,3 +489,5 @@ $RECYCLE.BIN/
 PROMPT.md
 LOCAL_GUIDES.md
 .opencode/
+specs/*
+.specify/feature.json

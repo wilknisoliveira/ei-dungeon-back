@@ -7,7 +7,6 @@ using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
-using Microsoft.IdentityModel.Tokens;
 using ei_back.Core.Application.Interfaces;
 using ei_back.Core.Domain.Enums;
 using Tiktoken;
@@ -27,6 +26,7 @@ namespace ei_back.Core.Application.UseCase.Play
         private readonly int _limitTokens;
         private readonly IGenAi _genAi;
         private readonly IPlayAnalyzerService _playAnalyzerService;
+        private readonly IInitialMasterPlayService _initialMasterPlayService;
 
         public NewUserPlayUseCase(
             IMapper mapper,
@@ -38,7 +38,8 @@ namespace ei_back.Core.Application.UseCase.Play
             IServiceProvider serviceProvider,
             IConfiguration configuration,
             IGenAi genAi, 
-            IPlayAnalyzerService playAnalyzerService)
+            IPlayAnalyzerService playAnalyzerService,
+            IInitialMasterPlayService initialMasterPlayService)
         {
             _mapper = mapper;
             _playService = playService;
@@ -49,6 +50,7 @@ namespace ei_back.Core.Application.UseCase.Play
             _serviceProvider = serviceProvider;
             _genAi = genAi;
             _playAnalyzerService = playAnalyzerService;
+            _initialMasterPlayService = initialMasterPlayService;
 
             var errorMessage = "Verify if all the string connections was registered properly in the appsettings.";
 
@@ -111,6 +113,48 @@ namespace ei_back.Core.Application.UseCase.Play
                 plays.AddRange(allGamePlays);
             }
 
+            yield return new StreamPlayDtoResponse
+            {
+                EventType = EventType.Start,
+            };
+            var changedItems = 0;
+
+            if (plays.Count == 0)
+            {
+                await foreach (var chunk in _initialMasterPlayService
+                    .ExecuteStreamingAsync(game, cancellationToken)
+                    .WithCancellation(cancellationToken))
+                {
+                    if (chunk.EventType == AIStreamEventType.Error)
+                    {
+                        yield return new StreamPlayDtoResponse
+                        {
+                            EventType = EventType.Error,
+                            Content = chunk.Content
+                        };
+                        yield break;
+                    }
+                    yield return new StreamPlayDtoResponse
+                    {
+                        EventType = EventType.Chunk,
+                        Content = chunk.Content,
+                    };
+                }
+
+                changedItems = await _unitOfWork.CommitAsync(cancellationToken);
+                if (changedItems == 0)
+                {
+                    yield return new StreamPlayDtoResponse
+                    {
+                        EventType = EventType.Error,
+                        Content = "Something went wrong while attempting to create the user play."
+                    };
+                    yield break;
+                }
+
+                yield break;
+            }
+
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer)) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to get the real player info");
 
@@ -132,11 +176,6 @@ namespace ei_back.Core.Application.UseCase.Play
                 throw new NotFoundException($"No Master player was found to the game {game.Id}");
             
             var completedMasterResponse = "";
-
-            yield return new StreamPlayDtoResponse
-            {
-                EventType = EventType.Start,
-            };
 
             await foreach (var chunk in 
                 StreamGenerateMasterPlay(plays, game, analyzerDtoResponse, cancellationToken)
@@ -168,7 +207,7 @@ namespace ei_back.Core.Application.UseCase.Play
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
             plays.Add(masterPlay);
 
-            var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
+            changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
             {
                 yield return new StreamPlayDtoResponse 
