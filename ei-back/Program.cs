@@ -105,7 +105,7 @@ var origins = allowedOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries);
 
 builder.Services.AddCors(options => options.AddDefaultPolicy(builder =>
 {
-    builder.WithOrigins(origins.Length > 0 ? origins : ["http://localhost:8000"])
+    builder.WithOrigins(origins.Length > 0 ? origins : ["http://localhost:4200"])
         .AllowAnyMethod()
         .WithHeaders(["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Cookie"])
         .AllowCredentials()

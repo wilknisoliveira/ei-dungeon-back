@@ -1,10 +1,12 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.ClientModel;
+using System.Runtime.CompilerServices;
 using ei_back.Core.Application.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
-using GeminiDotnet;
-using GeminiDotnet.Extensions.AI;
 using Microsoft.Extensions.AI;
 using Microsoft.IdentityModel.Tokens;
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using OpenAI;
+using OpenAI.Chat;
 
 namespace ei_back.Infrastructure.GenAI;
 
@@ -21,18 +23,16 @@ public class GenAi : IGenAi
     public GenAi(IConfiguration configuration)
     {
         var aiModel = configuration["GenAISettings:AiModel"];
-        var apiToken = configuration["keys:GeminiApiKey"];
+        var apiToken = configuration["keys:OpenRouterApiKey"];
         if (aiModel.IsNullOrEmpty() || apiToken.IsNullOrEmpty())
             throw new ArgumentException("AIModel and apiToken must be set");
-        
-        var geminiOptions = new GeminiClientOptions
+
+        var openAiClient = new ChatClient(aiModel!, new ApiKeyCredential(apiToken!), new OpenAIClientOptions
         {
-            ApiKey = apiToken!,
-            ModelId = aiModel!,
-        };
-        var geminiClient = new GeminiChatClient(geminiOptions);
-        
-        _genAiClient = new ChatClientBuilder(geminiClient).Build();
+            Endpoint = new Uri("https://openrouter.ai/api/v1"),
+        });
+
+        _genAiClient = new ChatClientBuilder(openAiClient.AsIChatClient()).Build();
     }
 
     public async Task<string> GetResponse(string prompt, CancellationToken cancellationToken)

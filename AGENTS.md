@@ -38,7 +38,7 @@ dotnet ef database update --context EIContext
 ## Pre-Setup
 1. Create Postgres schema `ei_db`
 2. Enable `uuid-ossp` extension: `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
-3. Configure `PostgresConnection:PostgresConnectionString` and `keys:GeminiApiKey`
+3. Configure `PostgresConnection:PostgresConnectionString` and `keys:OpenRouterApiKey`
 4. Default login: `admin` / `admin123`
 5. Seed game info: `POST /api/game/GameInfo` with body from `Infrastructure/Utils/GameInfoSeeding.json`
 
@@ -59,9 +59,9 @@ dotnet test .\ei-back.Tests\ei-back.Tests.csproj --filter "FullyQualifiedName~Us
 ## Config Values (appsettings.json)
 - `PostgresConnection:PostgresConnectionString`
 - `TokenConfigurations:Secret` (min ~64 chars for HS256)
-- `keys:GeminiApiKey`
-- `GenAISettings:AiModel` (default: `gpt-3.5-turbo-0125` but GeminiDotnet overrides to Gemini model)
-- `Gateways:GeminiGenerativeApi` — Gemini endpoint URL
+- `keys:OpenRouterApiKey`
+- `GenAISettings:AiModel` (default: `gpt-3.5-turbo-0125`; passed to OpenRouter via OpenAI connector)
+- `Gateways:OpenRouterApi` — OpenRouter endpoint URL (`https://openrouter.ai/api/v1`)
 - `PlayOptions:LimitTokens` (default: 10000)
 - `Cors:AllowedOrigins` — comma-separated; defaults to `http://localhost:8000`
 - User secrets ID: `aef84015-3b51-4aa5-8200-b13cd0be70b9`
