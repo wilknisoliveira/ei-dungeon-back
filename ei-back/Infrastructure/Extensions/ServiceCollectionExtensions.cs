@@ -23,6 +23,7 @@ using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play;
 using ei_back.Core.Application.UseCase.GameInfo.Interfaces;
 using ei_back.Core.Application.UseCase.GameInfo;
+using Microsoft.Extensions.Configuration;
 
 namespace ei_back.Infrastructure.Extensions
 {
@@ -57,7 +58,7 @@ namespace ei_back.Infrastructure.Extensions
             return services;
         }
 
-        public static IServiceCollection AddUseCases(this IServiceCollection services)
+        public static IServiceCollection AddUseCases(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<ICreateUserUseCase, CreateUserUseCase>();
             services.AddScoped<IGetUserUseCase, GetUserUseCase>();
@@ -69,7 +70,13 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<ICreateGameUseCase, CreateGameUseCase>();
             services.AddScoped<IGetGamesUseCase, GetGamesUseCase>();
             services.AddScoped<IGetPlaysUseCase, GetPlaysUseCase>();
-            services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
+
+            var bypassLlm = configuration.GetValue<bool>("Features:BypassLlmGenerator");
+            if (bypassLlm)
+                services.AddScoped<INewUserPlayUseCase, BypassNewUserPlayUseCase>();
+            else
+                services.AddScoped<INewUserPlayUseCase, NewUserPlayUseCase>();
+
             services.AddScoped<ICreateGameInfoUseCase, CreateGameInfoUseCase>();
             services.AddScoped<IGetGameByIdAndUserUseCase, GetGameByIdAndUserUseCase>();
             services.AddScoped<IDeleteGameUseCase, DeleteGameUseCase>();

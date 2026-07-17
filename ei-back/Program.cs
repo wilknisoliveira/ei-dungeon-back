@@ -161,7 +161,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 builder.Services.AddRepositories();
 builder.Services.AddServices();
-builder.Services.AddUseCases();
+builder.Services.AddUseCases(builder.Configuration);
 builder.Services.AddInfraHttpClients();
 builder.Services.AddGenAiClient();
 
