@@ -48,6 +48,12 @@ namespace ei_back.Infrastructure.Context.Repository
                 .SingleOrDefaultAsync(x => x.UserName.Equals(userName), cancellationToken);
         }
 
+        public async Task<User?> FindByEmail(string email, CancellationToken cancellationToken = default)
+        {
+            return await _context.Users
+                .SingleOrDefaultAsync(x => x.Email.Equals(email), cancellationToken);
+        }
+
         public async Task<Dictionary<UserRole, List<string>>> GetUsersNameGroupByRole()
         {
             return await _context.Users

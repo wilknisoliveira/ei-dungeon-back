@@ -3,11 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ei_back.Core.Application.UseCase.Role.Dtos
 {
-    public class ApplyRoleDtoRequest
+    public record ApplyRoleDtoRequest
     {
         [Required]
-        public Guid Id { get; set; }
+        public required Guid Id { get; set; }
         [Required]
-        public UserRole role { get; set; }
+        public required UserRole role { get; set; }
     }
 }

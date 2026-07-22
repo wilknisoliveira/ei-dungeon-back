@@ -9,6 +9,7 @@ namespace ei_back.Core.Application.Repository
         User RefreshUserInfo(User user);
         Task<User?> GetUserAndRolesAsync(Guid userId, CancellationToken cancellationToken = default);
         Task<User?> FindByUserName(string userName, CancellationToken cancellationToken = default);
+        Task<User?> FindByEmail(string email, CancellationToken cancellationToken = default);
         Task<Dictionary<UserRole, List<string>>> GetUsersNameGroupByRole();
     }
 }

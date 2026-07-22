@@ -2,7 +2,7 @@
 
 namespace ei_back.Core.Application.UseCase.User.Dtos
 {
-    public class UserDtoRequest
+    public record UserDtoRequest
     {
         [Required]
         [StringLength(20, MinimumLength = 4)]

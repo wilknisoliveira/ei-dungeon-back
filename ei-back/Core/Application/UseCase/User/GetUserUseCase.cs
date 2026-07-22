@@ -1,4 +1,5 @@
-﻿using ei_back.Core.Application.Service.User.Interfaces;
+﻿using AutoMapper;
+using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.UseCase.User.Dtos;
 using ei_back.Core.Application.UseCase.User.Interfaces;
 using ei_back.Infrastructure.Context;
@@ -7,11 +8,13 @@ namespace ei_back.Core.Application.UseCase.User
 {
     public class GetUserUseCase : IGetUserUseCase
     {
-        private readonly IUserService _userService;
+        private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
 
-        public GetUserUseCase(IUserService userService)
+        public GetUserUseCase(IUserRepository userRepository, IMapper mapper)
         {
-            _userService = userService;
+            _userRepository = userRepository;
+            _mapper = mapper;
         }
 
         public async Task<PagedSearchDto<UserGetDtoResponse>> Handler(string? name, string sortDirection, int pageSize, int page)
@@ -22,7 +25,28 @@ namespace ei_back.Core.Application.UseCase.User
             var size = pagedSearchDto.ValidateSize(pageSize);
             var offset = pagedSearchDto.ValidateOffset(page, pageSize);
 
-            return await _userService.FindWithPagedSearch(name, sort, size, offset, page);
+            var users = await _userRepository.FindWithPagedSearchAsync(
+                sort,
+                size,
+                page,
+                offset,
+                name,
+                "user_name",
+                "users");
+
+            int totalResults = await _userRepository.GetCountAsync(
+                name,
+                "user_name",
+                "users");
+
+            return new PagedSearchDto<UserGetDtoResponse>
+            {
+                CurrentPage = page,
+                List = users.Select(user => _mapper.Map<UserGetDtoResponse>(user)).ToList(),
+                PageSize = size,
+                SortDirections = sort,
+                TotalResults = totalResults
+            };
         }
     }
 }

@@ -22,9 +22,6 @@ namespace ei_back.Core.Domain.Entity
         public string Email { get; set; }
         public string Password { get; set; }
         public UserRole Role { get; set; }
-        public string? RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiryTime { get; set; }
-
 
         public List<Game> Games { get; set; } = new();
     }

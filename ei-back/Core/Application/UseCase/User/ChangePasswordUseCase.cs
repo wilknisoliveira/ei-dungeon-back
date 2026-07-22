@@ -1,34 +1,45 @@
 ﻿using AutoMapper;
-using ei_back.Core.Application.Service.User.Interfaces;
+using ei_back.Core.Application.Repository;
+using ei_back.Core.Application.Service.Encryption.Interfaces;
 using ei_back.Core.Application.UseCase.User.Dtos;
 using ei_back.Core.Application.UseCase.User.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System.Net;
-using System.Security.Cryptography;
 
 namespace ei_back.Core.Application.UseCase.User
 {
     public class ChangePasswordUseCase(
-        IUserService userService,
+        IUserRepository userRepository,
+        IEncryptionService encryptionService,
         IMapper mapper) : IChangePasswordUseCase
     {
-        private readonly IUserService _userService = userService;
+        private readonly IUserRepository _userRepository = userRepository;
+        private readonly IEncryptionService _encryptionService = encryptionService;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<UserGetDtoResponse> Handler(PasswordDtoRequest passwordDtoRequest)
+        public async Task<UserGetDtoResponse> Handler(string userName, PasswordDtoRequest passwordDtoRequest)
         {
-            var user = await _userService.FindByIdAsync(passwordDtoRequest.Id) ??
-                throw new NotFoundException($"The user id '{passwordDtoRequest.Id}' doesn't exist.");
+            var user = await _userRepository.FindByUserName(userName) ??
+                throw new NotFoundException($"User '{userName}' not found.");
 
-            var currentPasswordEncrypted = _userService.ComputeHash(passwordDtoRequest.CurrentPassword, SHA256.Create());
+            string storedHash = user.Password;
+            bool validPassword;
 
-            if (currentPasswordEncrypted != user.Password)
+            if (storedHash.StartsWith("$2"))
+            {
+                validPassword = _encryptionService.VerifyBcryptHash(passwordDtoRequest.CurrentPassword, storedHash);
+            }
+            else
+            {
+                validPassword = _encryptionService.ComputeSha256(passwordDtoRequest.CurrentPassword) == storedHash;
+            }
+
+            if (!validPassword)
                 throw new BadRequestException("Wrong password!");
 
-            user.Password = _userService.ComputeHash(passwordDtoRequest.NewPassword, SHA256.Create());
+            user.Password = _encryptionService.ComputeBcryptHash(passwordDtoRequest.NewPassword);
+            user.UpdatedAt = DateTime.Now;
 
-            var response = _userService.Update(user);
+            var response = _userRepository.Update(user);
 
             return _mapper.Map<UserGetDtoResponse>(response);
         }

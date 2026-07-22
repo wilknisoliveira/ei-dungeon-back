@@ -10,6 +10,7 @@ namespace ei_back.Infrastructure.Context
         public EIContext(DbContextOptions<EIContext> options) : base(options) { }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<Play> Plays { get; set; }

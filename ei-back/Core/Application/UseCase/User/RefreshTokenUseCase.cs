@@ -1,64 +1,56 @@
-﻿using ei_back.Core.Application.Repository;
+using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.Encryption.Interfaces;
 using ei_back.Core.Application.UseCase.User.Dtos;
 using ei_back.Core.Application.UseCase.User.Interfaces;
+using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using ei_back.Infrastructure.Extensions;
 using ei_back.Infrastructure.Token;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace ei_back.Core.Application.UseCase.User
 {
-    public class SigninUseCase : ISignInUseCase
+    public class RefreshTokenUseCase : IRefreshTokenUseCase
     {
         private const string DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-        private readonly TokenConfiguration _tokenConfiguration;
-        private readonly IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
-        private readonly IEncryptionService _encryptionService;
+        private readonly IUserRepository _userRepository;
         private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly TokenConfiguration _tokenConfiguration;
+        private readonly IEncryptionService _encryptionService;
 
-        public SigninUseCase(
-            TokenConfiguration tokenConfiguration,
-            IUserRepository userRepository,
+        public RefreshTokenUseCase(
             ITokenService tokenService,
-            IEncryptionService encryptionService,
-            IRefreshTokenRepository refreshTokenRepository)
+            IUserRepository userRepository,
+            IRefreshTokenRepository refreshTokenRepository,
+            TokenConfiguration tokenConfiguration,
+            IEncryptionService encryptionService)
         {
-            _tokenConfiguration = tokenConfiguration;
-            _userRepository = userRepository;
             _tokenService = tokenService;
-            _encryptionService = encryptionService;
+            _userRepository = userRepository;
             _refreshTokenRepository = refreshTokenRepository;
+            _tokenConfiguration = tokenConfiguration;
+            _encryptionService = encryptionService;
         }
 
-        public TokenDtoReponse Handler(LoginDtoRequest userDtoRequest)
+        public TokenDtoReponse Handler(RefreshTokenDtoRequest request)
         {
-            var user = _userRepository.FindByUserName(userDtoRequest.UserName).Result;
-            if (user == null) return null;
+            var principal = _tokenService.GetPrincipalFromExpiredToken(request.AccessToken);
+            var userName = principal.Identity?.Name;
+            if (string.IsNullOrEmpty(userName))
+                throw new UnauthorizedException("Invalid credentials.");
 
-            string storedHash = user.Password;
-            bool validPassword;
+            var user = _userRepository.FindByUserName(userName).Result;
+            if (user == null)
+                throw new UnauthorizedException("Invalid credentials.");
 
-            if (storedHash.StartsWith("$2"))
-            {
-                validPassword = _encryptionService.VerifyBcryptHash(userDtoRequest.Password, storedHash);
-            }
-            else
-            {
-                var shaHash = _encryptionService.ComputeSha256(userDtoRequest.Password);
-                validPassword = shaHash == storedHash;
-                if (validPassword)
-                {
-                    user.Password = _encryptionService.ComputeBcryptHash(userDtoRequest.Password);
-                    user.UpdatedAt = DateTime.Now;
-                    _userRepository.RefreshUserInfo(user);
-                }
-            }
+            var refreshTokenHash = _encryptionService.ComputeSha256Hash(request.RefreshToken);
+            var storedToken = _refreshTokenRepository.FindByTokenHash(refreshTokenHash).Result;
+            if (storedToken == null || storedToken.ExpiresAt < DateTime.Now)
+                throw new UnauthorizedException("Invalid credentials.");
 
-            if (!validPassword) return null;
+            _refreshTokenRepository.Delete(storedToken.Id);
 
             var claims = new List<Claim>
             {
@@ -71,13 +63,13 @@ namespace ei_back.Core.Application.UseCase.User
             claims.Add(new Claim("roles", JsonSerializer.Serialize(roles)));
 
             var accessToken = _tokenService.GenerateAccessToken(claims);
-            var refreshToken = _tokenService.GenerateRefreshToken();
-            var refreshTokenHash = _encryptionService.ComputeSha256Hash(refreshToken);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+            var newRefreshTokenHash = _encryptionService.ComputeSha256Hash(newRefreshToken);
 
             _refreshTokenRepository.Create(new Domain.Entity.RefreshToken
             {
                 UserId = user.Id,
-                TokenHash = refreshTokenHash,
+                TokenHash = newRefreshTokenHash,
                 ExpiresAt = DateTime.Now.AddDays(_tokenConfiguration.DaysToExpiry),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
@@ -91,7 +83,7 @@ namespace ei_back.Core.Application.UseCase.User
                 createDate.ToString(DATE_FORMAT),
                 expirationDate.ToString(DATE_FORMAT),
                 accessToken,
-                refreshToken
+                newRefreshToken
             );
         }
     }

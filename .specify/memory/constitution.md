@@ -64,6 +64,17 @@ implementation if their information is outdated. Build commands: dotnet build (p
 5231), dotnet test. EF migrations require cd ei-back before running. Default
 login: admin / admin123. Seed game info via POST /api/game/GameInfo.
 
+### VI. Swagger Documentation
+All API endpoints MUST include:
+- `/// &lt;summary&gt;` — brief endpoint title
+- `/// &lt;remarks&gt;` — detailed description covering request/response
+  shapes, required roles, rate limits, parameters, and behavior
+- `[ProducesResponseType(typeof(...))]` — typed response for 200 status
+- `[ProducesResponseType(StatusCodes.StatusXXX)]` — error responses
+
+XML doc generation is enabled in the project file; the output XML is
+consumed by Swashbuckle at `/swagger/v1/swagger.json`.
+
 ## Governance
 
 This constitution supersedes all other development guidance. Amendments require:
@@ -71,4 +82,4 @@ This constitution supersedes all other development guidance. Amendments require:
 affected, (c) version bump per semantic versioning. Non-negotiable principles
 require explicit exception approval with documented rationale.
 
-**Version**: 1.1.0 | **Ratified**: 2026-05-29 | **Last Amended**: 2026-06-01
+**Version**: 1.2.0 | **Ratified**: 2026-05-29 | **Last Amended**: 2026-07-21

@@ -18,6 +18,7 @@ using System.Text;
 using ei_back.UserInterface.Hubs;
 using ei_back.Infrastructure.Extensions;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -159,6 +160,24 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.AddPolicy("PublicApi", context =>
+        RateLimitPartition.GetSlidingWindowLimiter(
+            partitionKey: context.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                          ?? context.Connection.RemoteIpAddress?.ToString()
+                          ?? "unknown",
+            factory: _ => new SlidingWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6,
+                QueueLimit = 0
+            }));
+});
+
 builder.Services.AddRepositories();
 builder.Services.AddServices();
 builder.Services.AddUseCases(builder.Configuration);
@@ -195,6 +214,8 @@ app.UseExceptionHandler(_ => { });
 app.UseHttpsRedirection();
 
 app.UseCors();
+
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
