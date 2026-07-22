@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using ei_back.Core.Application.Interfaces;
 using ei_back.Core.Application.Repository;
-using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Game.Dtos;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
@@ -14,20 +13,20 @@ namespace ei_back.Core.Application.UseCase.Game
     public class CreateGameUseCase : ICreateGameUseCase
     {
         private readonly IMapper _mapper;
-        private readonly IGameService _gameService;
+        private readonly IGameRepository _gameRepository;
         private readonly IUserRepository _userRepository;
         private readonly IGenAi _genAi;
         private readonly IUpsertWorldInfoService _upsertWorldInfoService;
 
         public CreateGameUseCase(
             IMapper mapper,
-            IGameService gameService,
+            IGameRepository gameRepository,
             IUserRepository userRepository,
             IGenAi genAi, 
             IUpsertWorldInfoService upsertWorldInfoService)
         {
             _mapper = mapper;
-            _gameService = gameService;
+            _gameRepository = gameRepository;
             _userRepository = userRepository;
             _genAi = genAi;
             _upsertWorldInfoService = upsertWorldInfoService;
@@ -75,7 +74,8 @@ namespace ei_back.Core.Application.UseCase.Game
 
             game.SetWorldInfo(await _upsertWorldInfoService.Handler(realPlayer.InfoToString(), cancellationToken));
 
-            var gameResponse = await _gameService.CreateAsync(game, cancellationToken);
+            game.SetCreatedDate(DateTime.Now);
+            var gameResponse = await _gameRepository.CreateAsync(game, cancellationToken);
 
             return _mapper.Map<GameDtoResponse>(gameResponse);
         }

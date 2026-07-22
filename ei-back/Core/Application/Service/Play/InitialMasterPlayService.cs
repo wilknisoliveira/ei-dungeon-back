@@ -1,4 +1,5 @@
 using ei_back.Core.Application.Interfaces;
+using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
 using ei_back.Core.Domain.Enums;
@@ -11,16 +12,16 @@ namespace ei_back.Core.Application.Service.Play
     {
         private readonly ILogger<InitialMasterPlayService> _logger;
         private readonly IGenAi _genAi;
-        private readonly IPlayService _playService;
+        private readonly IPlayRepository _playRepository;
 
         public InitialMasterPlayService(
             ILogger<InitialMasterPlayService> logger,
             IGenAi genAi,
-            IPlayService playService)
+            IPlayRepository playRepository)
         {
             _logger = logger;
             _genAi = genAi;
-            _playService = playService;
+            _playRepository = playRepository;
         }
 
         public async IAsyncEnumerable<StreamAIDtoResponse> ExecuteStreamingAsync(
@@ -60,7 +61,7 @@ namespace ei_back.Core.Application.Service.Play
                 throw new NotFoundException($"No Master player was found to the game {game.Id}");
 
             var masterPlay = new Domain.Entity.Play(game, masterPlayer, completedResponse);
-            _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
+            _ = await _playRepository.CreateAsync(masterPlay, cancellationToken) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to create the master play");
         }
 

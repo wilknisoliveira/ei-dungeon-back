@@ -19,5 +19,21 @@ namespace ei_back.Infrastructure.Context.Repository
         {
             return await _context.Games.Include(x => x.Players).Include(x => x.OwnerUser).FirstOrDefaultAsync(x => x.Id.Equals(id) && x.OwnerUser.UserName.Equals(userName), cancellationToken: cancellationToken);
         }
+
+        public async Task<List<Game>> FindWithPagedSearchAsync(string sort, int size, int offset, Guid ownerUserId, CancellationToken cancellationToken = default)
+        {
+            IQueryable<Game> query = _context.Games.Where(x => x.OwnerUserId.Equals(ownerUserId));
+
+            query = sort == "desc"
+                ? query.OrderByDescending(x => x.UpdatedAt)
+                : query.OrderBy(x => x.UpdatedAt);
+
+            return await query.Skip(offset).Take(size).ToListAsync(cancellationToken);
+        }
+
+        public async Task<int> GetCountAsync(Guid ownerUserId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Games.Where(x => x.OwnerUserId.Equals(ownerUserId)).CountAsync(cancellationToken);
+        }
     }
 }

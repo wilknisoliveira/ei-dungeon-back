@@ -1,17 +1,17 @@
-﻿using ei_back.Core.Application.Service.Play.Interfaces;
+﻿using ei_back.Core.Application.Interfaces;
+using ei_back.Core.Application.Repository;
+using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using Microsoft.IdentityModel.Tokens;
-using ei_back.Core.Application.Interfaces;
-using ei_back.Core.Application.Repository;
 
 namespace ei_back.Core.Application.Service.Play
 {
     public class GeneratePlaysSummaryService : IGeneratePlaysSummaryService
     {
         private readonly ILogger<GeneratePlaysSummaryService> _logger;
-        private readonly IPlayService _playService;
+        private readonly IPlayRepository _playRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenAi _genAi;
         private readonly IGameRepository _gameRepository;
@@ -19,12 +19,12 @@ namespace ei_back.Core.Application.Service.Play
         public GeneratePlaysSummaryService(
             ILogger<GeneratePlaysSummaryService> logger,
             IUnitOfWork unitOfWork,
-            IPlayService playService,
+            IPlayRepository playRepository,
             IGenAi genAi, IGameRepository gameRepository)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _playService = playService;
+            _playRepository = playRepository;
             _genAi = genAi;
             _gameRepository = gameRepository;
         }
@@ -85,7 +85,7 @@ namespace ei_back.Core.Application.Service.Play
 
             newPlay.SetPrompt(iaResponse);
 
-            _ = await _playService.CreatePlay(newPlay, cancellationToken) ??
+            _ = await _playRepository.CreateAsync(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
 
             var changedItems = await _unitOfWork.CommitAsync(cancellationToken);

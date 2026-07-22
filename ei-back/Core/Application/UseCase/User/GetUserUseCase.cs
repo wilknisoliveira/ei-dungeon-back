@@ -2,7 +2,7 @@
 using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.UseCase.User.Dtos;
 using ei_back.Core.Application.UseCase.User.Interfaces;
-using ei_back.Infrastructure.Context;
+using ei_back.Core.Application.Utils;
 
 namespace ei_back.Core.Application.UseCase.User
 {
@@ -17,34 +17,31 @@ namespace ei_back.Core.Application.UseCase.User
             _mapper = mapper;
         }
 
-        public async Task<PagedSearchDto<UserGetDtoResponse>> Handler(string? name, string sortDirection, int pageSize, int page)
+        public async Task<PagedSearchDto<UserGetDtoResponse>> Handler(string? name, string sortDirection, int pageSize, int page, CancellationToken cancellationToken)
         {
             var pagedSearchDto = new PagedSearchDto<UserGetDtoResponse>();
 
-            var sort = pagedSearchDto.ValidateSort(sortDirection);
-            var size = pagedSearchDto.ValidateSize(pageSize);
-            var offset = pagedSearchDto.ValidateOffset(page, pageSize);
+            var sort = PaginationHelper.ValidateSort(sortDirection);
+            var size = PaginationHelper.ValidateSize(pageSize);
+            var offset = PaginationHelper.ValidateOffset(page, pageSize);
 
             var users = await _userRepository.FindWithPagedSearchAsync(
                 sort,
                 size,
-                page,
                 offset,
                 name,
-                "user_name",
-                "users");
+                cancellationToken);
 
             int totalResults = await _userRepository.GetCountAsync(
                 name,
-                "user_name",
-                "users");
+                cancellationToken);
 
             return new PagedSearchDto<UserGetDtoResponse>
             {
                 CurrentPage = page,
-                List = users.Select(user => _mapper.Map<UserGetDtoResponse>(user)).ToList(),
+                Items = users.Select(user => _mapper.Map<UserGetDtoResponse>(user)).ToList(),
                 PageSize = size,
-                SortDirections = sort,
+                SortDirection = sort,
                 TotalResults = totalResults
             };
         }

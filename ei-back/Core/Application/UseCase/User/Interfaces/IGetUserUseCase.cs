@@ -1,5 +1,5 @@
 ﻿using ei_back.Core.Application.UseCase.User.Dtos;
-using ei_back.Infrastructure.Context;
+using ei_back.Core.Application.Utils;
 
 namespace ei_back.Core.Application.UseCase.User.Interfaces
 {
@@ -9,6 +9,7 @@ namespace ei_back.Core.Application.UseCase.User.Interfaces
             string? name,
             string sortDirection,
             int pageSize,
-            int page);
+            int page,
+            CancellationToken cancellationToken);
     }
 }

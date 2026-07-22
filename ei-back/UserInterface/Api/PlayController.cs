@@ -2,7 +2,7 @@
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Application.UseCase.User.Interfaces;
-using ei_back.Infrastructure.Context;
+using ei_back.Core.Application.Utils;
 using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,14 +35,37 @@ namespace ei_back.UserInterface.Api
             _newUserPlayUseCase = newUserPlayUseCase;
         }
 
-        [HttpGet("{gameId}/{pageSize}")]
+        /// <summary>Lists plays with paginated search</summary>
+        /// <remarks>
+        /// Requires authentication. Roles: Admin, CommonUser, PremiumUser.
+        /// The game must belong to the authenticated user or a 404 is returned.
+        ///
+        /// Query parameters:
+        ///   - gameId (guid, required): filters plays by game
+        ///   - sortDirection (string): "asc" or "desc"
+        ///   - pageSize (int): results per page
+        ///   - page (int): page number (1-based)
+        ///
+        /// Response 200 (PagedSearchDto&lt;PlayDtoResponse&gt;):
+        ///   - CurrentPage (int)
+        ///   - PageSize (int)
+        ///   - TotalResults (int)
+        ///   - SortDirection (string)
+        ///   - Items (PlayDtoResponse[]): Id, Prompt, CreatedAt, Player (PlayerDtoResponse)
+        ///
+        /// Response 400: Invalid sort direction, page size, or page number.
+        /// Response 404: Game not found or not owned by the authenticated user.
+        /// </remarks>
+        [HttpGet]
         [ProducesResponseType(typeof(PagedSearchDto<PlayDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
         public async Task<IActionResult> Get(
-            Guid gameId,
-            int pageSize,
+            [FromQuery] Guid gameId,
+            [FromQuery] string sortDirection,
+            [FromQuery] int pageSize,
+            [FromQuery] int page,
             CancellationToken cancellationToken)
         {
             var userName = _getUserNameUseCase.Handler(User);
@@ -56,7 +79,7 @@ namespace ei_back.UserInterface.Api
 
             _logger.LogInformation($"Get the play list of the game {gameId} to user {userName}");
 
-            var response = await _getPlaysUseCase.Handler(gameId, pageSize, userName, cancellationToken);
+            var response = await _getPlaysUseCase.Handler(gameId, sortDirection, pageSize, page, userName, cancellationToken);
 
             return Ok(response);
         }

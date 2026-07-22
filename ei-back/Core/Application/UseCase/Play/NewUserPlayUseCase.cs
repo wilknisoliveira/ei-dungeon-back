@@ -1,14 +1,13 @@
 ﻿using AutoMapper;
+using ei_back.Core.Application.Interfaces;
 using ei_back.Core.Application.Repository;
-using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
+using ei_back.Core.Domain.Enums;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
-using ei_back.Core.Application.Interfaces;
-using ei_back.Core.Domain.Enums;
 using Tiktoken;
 using System.Runtime.CompilerServices;
 
@@ -17,8 +16,7 @@ namespace ei_back.Core.Application.UseCase.Play
     public class NewUserPlayUseCase : INewUserPlayUseCase
     {
         private readonly IMapper _mapper;
-        private readonly IPlayService _playService;
-        private readonly IGameService _gameService;
+        private readonly IGameRepository _gameRepository;
         private readonly IPlayRepository _playRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<NewUserPlayUseCase> _logger;
@@ -30,8 +28,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
         public NewUserPlayUseCase(
             IMapper mapper,
-            IPlayService playService,
-            IGameService gameService,
+            IGameRepository gameRepository,
             IPlayRepository playRepository,
             IUnitOfWork unitOfWork,
             ILogger<NewUserPlayUseCase> logger,
@@ -42,8 +39,7 @@ namespace ei_back.Core.Application.UseCase.Play
             IInitialMasterPlayService initialMasterPlayService)
         {
             _mapper = mapper;
-            _playService = playService;
-            _gameService = gameService;
+            _gameRepository = gameRepository;
             _playRepository = playRepository;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -66,7 +62,7 @@ namespace ei_back.Core.Application.UseCase.Play
         {
             List<Domain.Entity.Play> plays = [];
              
-            var game = await _gameService.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken);
+            var game = await _gameRepository.GetGameByIdAndOwnerUserName(playDtoRequest.GameId, userName, cancellationToken);
             if (game == null)
             {
                 yield return new StreamPlayDtoResponse 
@@ -159,7 +155,7 @@ namespace ei_back.Core.Application.UseCase.Play
                 throw new InternalServerErrorException($"Something went wrong while attempting to get the real player info");
 
             var newPlay = new Domain.Entity.Play(game, realPlayer, playDtoRequest.Prompt);
-            _ = await _playService.CreatePlay(newPlay, cancellationToken) ??
+            _ = await _playRepository.CreateAsync(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
             plays.Add(newPlay);
             
@@ -203,7 +199,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
             var masterPlay = new Domain.Entity.Play(game, masterPlayer, completedMasterResponse);
 
-            _ = await _playService.CreatePlay(masterPlay, cancellationToken) ??
+            _ = await _playRepository.CreateAsync(masterPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
             plays.Add(masterPlay);
 

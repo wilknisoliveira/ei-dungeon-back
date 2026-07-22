@@ -11,5 +11,7 @@ namespace ei_back.Core.Application.Repository
         Task<User?> FindByUserName(string userName, CancellationToken cancellationToken = default);
         Task<User?> FindByEmail(string email, CancellationToken cancellationToken = default);
         Task<Dictionary<UserRole, List<string>>> GetUsersNameGroupByRole();
+        Task<List<User>> FindWithPagedSearchAsync(string sort, int size, int offset, string? name, CancellationToken cancellationToken = default);
+        Task<int> GetCountAsync(string? name, CancellationToken cancellationToken = default);
     }
 }

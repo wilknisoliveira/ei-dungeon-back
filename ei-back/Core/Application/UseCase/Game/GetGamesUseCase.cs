@@ -1,20 +1,22 @@
-﻿using ei_back.Core.Application.Repository;
-using ei_back.Core.Application.Service.Game.Interfaces;
+﻿using AutoMapper;
+using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.UseCase.Game.Dtos;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
-using ei_back.Infrastructure.Context;
+using ei_back.Core.Application.Utils;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 
 namespace ei_back.Core.Application.UseCase.Game
 {
     public class GetGamesUseCase : IGetGamesUseCase
     {
-        private readonly IGameService _gameService;
+        private readonly IMapper _mapper;
+        private readonly IGameRepository _gameRepository;
         private readonly IUserRepository _userRepository;
 
-        public GetGamesUseCase(IGameService gameService, IUserRepository userRepository)
+        public GetGamesUseCase(IMapper mapper, IGameRepository gameRepository, IUserRepository userRepository)
         {
-            _gameService = gameService;
+            _mapper = mapper;
+            _gameRepository = gameRepository;
             _userRepository = userRepository;
         }
 
@@ -23,13 +25,24 @@ namespace ei_back.Core.Application.UseCase.Game
             var user = await _userRepository.FindByUserName(userName) ??
                 throw new NotFoundException($"No user found to user name {userName}.");
 
-            var pagedSearchDto = new PagedSearchDto<GameDtoResponse>();
+            var sort = PaginationHelper.ValidateSort(sortDirection);
+            var size = PaginationHelper.ValidateSize(pageSize);
+            var offset = PaginationHelper.ValidateOffset(page, size);
 
-            var sort = pagedSearchDto.ValidateSort(sortDirection);
-            var size = pagedSearchDto.ValidateSize(pageSize);
-            var offset = pagedSearchDto.ValidateOffset(page, pageSize);
+            var games = await _gameRepository.FindWithPagedSearchAsync(
+                sort, size, offset, user.Id, cancellationToken);
 
-            return await _gameService.FindWithPagedSearch(user.Id, "owner_user_id", sort, size, offset, page, cancellationToken);
+            int totalResults = await _gameRepository.GetCountAsync(
+                user.Id, cancellationToken);
+
+            return new PagedSearchDto<GameDtoResponse>
+            {
+                CurrentPage = page,
+                Items = games.Select(_mapper.Map<GameDtoResponse>).ToList(),
+                PageSize = size,
+                SortDirection = sort,
+                TotalResults = totalResults
+            };
         }
     }
 }

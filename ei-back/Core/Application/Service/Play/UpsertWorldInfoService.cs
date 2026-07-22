@@ -1,6 +1,5 @@
 ﻿using ei_back.Core.Application.Interfaces;
 using ei_back.Core.Application.Repository;
-using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Domain.Entity;
@@ -12,14 +11,12 @@ namespace ei_back.Core.Application.Service.Play;
 
 public class UpsertWorldInfoService(
     ILogger<UpsertWorldInfoService> logger,
-    IPlayService playService,
     IUnitOfWork unitOfWork,
     IGenAi genAi,
     IGameRepository gameRepository)
     : IUpsertWorldInfoService
 {
     private readonly ILogger<UpsertWorldInfoService> _logger = logger;
-    private readonly IPlayService _playService = playService;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IGenAi _genAi = genAi;
     private readonly IGameRepository _gameRepository = gameRepository;

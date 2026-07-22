@@ -1,7 +1,6 @@
 ﻿using ei_back.Core.Application.Repository;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace ei_back.Infrastructure.Context.Repository
@@ -12,13 +11,16 @@ namespace ei_back.Infrastructure.Context.Repository
         {
         }
 
-        public Task<List<Play>> GetPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken)
+        public Task<List<Play>> GetPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, int offset, string sort, CancellationToken cancellationToken)
         {
-            return _context.Plays.Include(x => x.Player)
-                .Where(x => x.GameId.Equals(gameId) && !x.Player.Type.Equals(PlayerType.System))
-                .OrderByDescending(x => x.CreatedAt)
-                .Take(size)
-                .ToListAsync(cancellationToken);
+            IQueryable<Play> query = _context.Plays.Include(x => x.Player)
+                .Where(x => x.GameId.Equals(gameId) && !x.Player.Type.Equals(PlayerType.System));
+
+            query = sort == "desc"
+                ? query.OrderByDescending(x => x.CreatedAt)
+                : query.OrderBy(x => x.CreatedAt);
+
+            return query.Skip(offset).Take(size).ToListAsync(cancellationToken);
         }
 
         public Task<Play?> GetLastPlayByPlayerTypeAndGameId(Guid gameId, PlayerType playerType, CancellationToken cancellationToken)
@@ -29,7 +31,7 @@ namespace ei_back.Infrastructure.Context.Repository
                .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public Task<int> CountPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken)
+        public Task<int> CountPlaysByGameButSystemPlay(Guid gameId, CancellationToken cancellationToken)
         {
             return _context.Plays.Include(x => x.Player)
                 .Where(x => x.GameId.Equals(gameId) && !x.Player.Type.Equals(PlayerType.System))

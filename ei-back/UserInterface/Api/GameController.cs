@@ -1,7 +1,7 @@
 ﻿using ei_back.Core.Application.UseCase.Game.Dtos;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
 using ei_back.Core.Application.UseCase.User.Interfaces;
-using ei_back.Infrastructure.Context;
+using ei_back.Core.Application.Utils;
 using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -71,14 +71,33 @@ namespace ei_back.UserInterface.Api
             return Ok(gameDtoResponse);
         }
 
-        [HttpGet("{sortDirection}/{pageSize}/{page}")]
+        /// <summary>Lists games with paginated search</summary>
+        /// <remarks>
+        /// Requires authentication. Roles: Admin, CommonUser, PremiumUser.
+        /// Results are scoped to the authenticated user's games.
+        ///
+        /// Query parameters:
+        ///   - sortDirection (string): "asc" or "desc"
+        ///   - pageSize (int): results per page
+        ///   - page (int): page number (1-based)
+        ///
+        /// Response 200 (PagedSearchDto&lt;GameDtoResponse&gt;):
+        ///   - CurrentPage (int)
+        ///   - PageSize (int)
+        ///   - TotalResults (int)
+        ///   - SortDirection (string)
+        ///   - Items (GameDtoResponse[]): Id, Name, OwnerUserId, GameStatus
+        ///
+        /// Response 400: Invalid sort direction, page size, or page number.
+        /// </remarks>
+        [HttpGet]
         [ProducesResponseType(typeof(PagedSearchDto<GameDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
         public async Task<IActionResult> Get(
-            string sortDirection,
-            int pageSize,
-            int page,
+            [FromQuery] string sortDirection,
+            [FromQuery] int pageSize,
+            [FromQuery] int page,
             CancellationToken cancellationToken)
         {
             var userName = _getUserNameUseCase.Handler(User);

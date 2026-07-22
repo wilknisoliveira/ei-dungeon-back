@@ -2,12 +2,8 @@
 using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.Encryption;
 using ei_back.Core.Application.Service.Encryption.Interfaces;
-using ei_back.Core.Application.Service.Game;
-using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Play;
 using ei_back.Core.Application.Service.Play.Interfaces;
-using ei_back.Core.Application.Service.Player;
-using ei_back.Core.Application.Service.Player.Interfaces;
 using ei_back.Core.Application.UseCase.Game;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
 using ei_back.Core.Application.UseCase.GameInfo;
@@ -47,9 +43,6 @@ namespace ei_back.Infrastructure.Extensions
         {
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEncryptionService, EncryptionService>();
-            services.AddScoped<IPlayerService, PlayerService>();
-            services.AddScoped<IGameService, GameService>();
-            services.AddScoped<IPlayService, PlayService>();
             services.AddScoped<IGeneratePlaysSummaryService, GeneratePlaysSummaryService>();
             services.AddScoped<IInitialMasterPlayService, InitialMasterPlayService>();
             services.AddScoped<IUpsertWorldInfoService, UpsertWorldInfoService>();

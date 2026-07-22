@@ -63,5 +63,29 @@ namespace ei_back.Infrastructure.Context.Repository
                     group => group.Select(x => x.UserName).ToList()  
                 );
         }
+
+        public async Task<List<User>> FindWithPagedSearchAsync(string sort, int size, int offset, string? name, CancellationToken cancellationToken = default)
+        {
+            IQueryable<User> query = _context.Users;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(x => EF.Functions.ILike(x.UserName, $"%{name}%"));
+
+            query = sort == "desc"
+                ? query.OrderByDescending(x => x.UpdatedAt)
+                : query.OrderBy(x => x.UpdatedAt);
+
+            return await query.Skip(offset).Take(size).ToListAsync(cancellationToken);
+        }
+
+        public async Task<int> GetCountAsync(string? name, CancellationToken cancellationToken = default)
+        {
+            IQueryable<User> query = _context.Users;
+
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(x => EF.Functions.ILike(x.UserName, $"%{name}%"));
+
+            return await query.CountAsync(cancellationToken);
+        }
     }
 }

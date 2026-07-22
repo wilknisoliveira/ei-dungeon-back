@@ -1,7 +1,6 @@
 using AutoMapper;
 using ei_back.Core.Application.Interfaces;
 using ei_back.Core.Application.Repository;
-using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play;
 using ei_back.Core.Application.UseCase.Play.Dtos;
@@ -15,8 +14,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
 {
     public class NewUserPlayUseCaseTests
     {
-        private readonly IPlayService _playService;
-        private readonly IGameService _gameService;
+        private readonly IGameRepository _gameRepository;
         private readonly IPlayRepository _playRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenAi _genAi;
@@ -26,8 +24,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
 
         public NewUserPlayUseCaseTests()
         {
-            _playService = A.Fake<IPlayService>();
-            _gameService = A.Fake<IGameService>();
+            _gameRepository = A.Fake<IGameRepository>();
             _playRepository = A.Fake<IPlayRepository>();
             _unitOfWork = A.Fake<IUnitOfWork>();
             _genAi = A.Fake<IGenAi>();
@@ -42,8 +39,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
 
             _useCase = new NewUserPlayUseCase(
                 mapper,
-                _playService,
-                _gameService,
+                _gameRepository,
                 _playRepository,
                 _unitOfWork,
                 logger,
@@ -64,7 +60,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
 
             var game = CreateGameWithPlayers(gameId);
 
-            A.CallTo(() => _gameService.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
+            A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
                 .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
@@ -102,7 +98,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
 
             var game = CreateGameWithPlayers(gameId);
 
-            A.CallTo(() => _gameService.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
+            A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
                 .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
@@ -134,7 +130,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
 
             var game = CreateGameWithPlayers(gameId);
 
-            A.CallTo(() => _gameService.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
+            A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
                 .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
@@ -172,7 +168,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             var realPlayer = game.Players[0];
             var systemSummary = new PlayEntity(game, systemPlayer, "summary");
 
-            A.CallTo(() => _gameService.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
+            A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
                 .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
@@ -184,7 +180,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             A.CallTo(() => _playRepository.GetLastNBeforeDate(gameId, 3, systemSummary.CreatedAt, cancellationToken))
                 .Returns(Task.FromResult<List<PlayEntity>>([]));
 
-            A.CallTo(() => _playService.CreatePlay(A<PlayEntity>._, cancellationToken))
+            A.CallTo(() => _playRepository.CreateAsync(A<PlayEntity>._, cancellationToken))
                 .Returns(Task.FromResult(A.Fake<PlayEntity>()));
 
             A.CallTo(() => _playAnalyzerService.Handler(A<List<PlayEntity>>._, game, cancellationToken))

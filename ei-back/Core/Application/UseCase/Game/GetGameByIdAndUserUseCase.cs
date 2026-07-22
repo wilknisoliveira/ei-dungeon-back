@@ -1,5 +1,4 @@
 ﻿using ei_back.Core.Application.Repository;
-using ei_back.Core.Application.Service.Game.Interfaces;
 using ei_back.Core.Application.UseCase.Game.Dtos;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;

@@ -1,6 +1,6 @@
 ﻿using ei_back.Core.Application.UseCase.User.Dtos;
 using ei_back.Core.Application.UseCase.User.Interfaces;
-using ei_back.Infrastructure.Context;
+using ei_back.Core.Application.Utils;
 using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -96,39 +96,38 @@ namespace ei_back.UserInterface.Api
         /// <remarks>
         /// Requires authentication with Admin role.
         ///
-        /// Route parameters:
+        /// Query parameters:
         ///   - sortDirection (string): "asc" or "desc"
         ///   - pageSize (int): results per page
         ///   - page (int): page number (1-based)
-        ///
-        /// Query parameters:
         ///   - name (string?, optional): filters results by username
         ///
         /// Response 200 (PagedSearchDto&lt;UserGetDtoResponse&gt;):
         ///   - CurrentPage (int)
         ///   - PageSize (int)
         ///   - TotalResults (int)
-        ///   - SortDirections (string)
-        ///   - List (UserGetDtoResponse[]): array of users with Id, UserName,
+        ///   - SortDirection (string)
+        ///   - Items (UserGetDtoResponse[]): array of users with Id, UserName,
         ///     FullName, Email
         ///
         /// Response 400: Invalid sort direction, page size, or page number.
         /// Sort direction defaults to "desc" if not "asc".
         /// Page size defaults to 10 if less than 1.
         /// </remarks>
-        [HttpGet("{sortDirection}/{pageSize}/{page}")]
+        [HttpGet]
         [ProducesResponseType(typeof(PagedSearchDto<UserGetDtoResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Get(
             [FromQuery] string? name,
-            string sortDirection,
-            int pageSize,
-            int page)
+            [FromQuery] string sortDirection,
+            [FromQuery] int pageSize,
+            [FromQuery] int page,
+            CancellationToken cancellationToken)
         {
             _logger.LogInformation("API: Getting paged user list");
 
-            return Ok(await _getUserUseCase.Handler(name, sortDirection, pageSize, page));
+            return Ok(await _getUserUseCase.Handler(name, sortDirection, pageSize, page, cancellationToken));
         }
     }
 }

@@ -4,9 +4,9 @@ namespace ei_back.Core.Application.Repository
 {
     public interface IPlayRepository : IRepository<Play>
     {
-        Task<List<Play>> GetPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
+        Task<List<Play>> GetPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, int offset, string sort, CancellationToken cancellationToken);
         Task<Play?> GetLastPlayByPlayerTypeAndGameId(Guid gameId, PlayerType playerType, CancellationToken cancellationToken);
-        Task<int> CountPlaysByGameAndSizeButSystemPlay(Guid gameId, int size, CancellationToken cancellationToken);
+        Task<int> CountPlaysByGameButSystemPlay(Guid gameId, CancellationToken cancellationToken);
         Task<List<Play>> GetPlayWhereCreatedAtIsUpperThan(Guid gameId, DateTime createdAt, CancellationToken cancellationToken);
         Task<List<Play>> GetAllByGameId(Guid gameId, CancellationToken cancellationToken);
         Task<List<Play>> GetLastNBeforeDate(Guid gameId, int limit, DateTime limitDate, CancellationToken cancellationToken);
