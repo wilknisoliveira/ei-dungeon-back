@@ -6,10 +6,12 @@ using ei_back.Core.Application.Utils;
 using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ei_back.UserInterface.Api
 {
+    [EnableRateLimiting("Authenticated")]
     [Route("api/[controller]")]
     [ApiController]
     public class PlayController : ControllerBase

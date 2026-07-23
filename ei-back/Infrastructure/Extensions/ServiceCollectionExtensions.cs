@@ -19,7 +19,10 @@ using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Context.Repository;
 using ei_back.Infrastructure.GenAI;
 using ei_back.Infrastructure.Token;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
+using System.Threading.RateLimiting;
 
 namespace ei_back.Infrastructure.Extensions
 {
@@ -89,6 +92,78 @@ namespace ei_back.Infrastructure.Extensions
         {
             services.AddScoped<IGenAi, GenAi>();
             return services;
+        }
+
+        public static IServiceCollection AddRateLimitingPolicies(this IServiceCollection services)
+        {
+            services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = 429;
+
+                options.AddPolicy("Login", context =>
+                    RateLimitPartition.GetSlidingWindowLimiter(
+                        partitionKey: GetClientIp(context),
+                        factory: _ => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            Window = TimeSpan.FromMinutes(1),
+                            SegmentsPerWindow = 6,
+                            QueueLimit = 0
+                        }));
+
+                options.AddPolicy("Signup", context =>
+                    RateLimitPartition.GetSlidingWindowLimiter(
+                        partitionKey: GetClientIp(context),
+                        factory: _ => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 3,
+                            Window = TimeSpan.FromMinutes(1),
+                            SegmentsPerWindow = 6,
+                            QueueLimit = 0
+                        }));
+
+                options.AddPolicy("Refresh", context =>
+                    RateLimitPartition.GetSlidingWindowLimiter(
+                        partitionKey: GetClientIp(context),
+                        factory: _ => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 10,
+                            Window = TimeSpan.FromMinutes(1),
+                            SegmentsPerWindow = 6,
+                            QueueLimit = 0
+                        }));
+
+                options.AddPolicy("UsernameCheck", context =>
+                    RateLimitPartition.GetSlidingWindowLimiter(
+                        partitionKey: GetClientIp(context),
+                        factory: _ => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 20,
+                            Window = TimeSpan.FromMinutes(1),
+                            SegmentsPerWindow = 6,
+                            QueueLimit = 0
+                        }));
+
+                options.AddPolicy("Authenticated", context =>
+                    RateLimitPartition.GetSlidingWindowLimiter(
+                        partitionKey: GetClientIp(context),
+                        factory: _ => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 120,
+                            Window = TimeSpan.FromMinutes(1),
+                            SegmentsPerWindow = 6,
+                            QueueLimit = 0
+                        }));
+            });
+
+            return services;
+        }
+
+        private static string GetClientIp(HttpContext context)
+        {
+            return context.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                   ?? context.Connection.RemoteIpAddress?.ToString()
+                   ?? "unknown";
         }
     }
 }

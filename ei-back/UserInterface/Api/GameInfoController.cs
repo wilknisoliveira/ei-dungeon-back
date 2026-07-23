@@ -5,10 +5,12 @@ using ei_back.Core.Application.UseCase.User.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ei_back.UserInterface.Api
 {
+    [EnableRateLimiting("Authenticated")]
     [Route("api/game/[controller]")]
     [ApiController]
     public class GameInfoController : ControllerBase

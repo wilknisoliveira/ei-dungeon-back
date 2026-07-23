@@ -43,7 +43,7 @@ namespace ei_back.UserInterface.Api
 
         /// <summary>Authenticates a user and returns a JWT token pair</summary>
         /// <remarks>
-        /// Rate limited: 10 requests per minute sliding window (PublicApi policy).
+        /// Rate limited: 5 requests per minute sliding window (Login policy).
         ///
         /// Request body (LoginDtoRequest):
         ///   - UserName (string, 4-20 characters, required)
@@ -62,7 +62,7 @@ namespace ei_back.UserInterface.Api
         /// passwords are automatically re-hashed to BCrypt on successful login.
         /// No authentication required (public endpoint).
         /// </remarks>
-        [EnableRateLimiting("PublicApi")]
+        [EnableRateLimiting("Login")]
         [HttpPost]
         [ProducesResponseType(typeof(TokenDtoReponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -84,7 +84,7 @@ namespace ei_back.UserInterface.Api
 
         /// <summary>Refreshes an expired JWT access token using a valid refresh token</summary>
         /// <remarks>
-        /// Rate limited: 10 requests per minute sliding window (PublicApi policy).
+        /// Rate limited: 10 requests per minute sliding window (Refresh policy).
         ///
         /// Request body (RefreshTokenDtoRequest):
         ///   - AccessToken (string, expired JWT, required)
@@ -98,7 +98,7 @@ namespace ei_back.UserInterface.Api
         ///
         /// No authentication required (public endpoint).
         /// </remarks>
-        [EnableRateLimiting("PublicApi")]
+        [EnableRateLimiting("Refresh")]
         [HttpPost]
         [Route("refresh")]
         [ProducesResponseType(typeof(TokenDtoReponse), StatusCodes.Status200OK)]
@@ -126,6 +126,7 @@ namespace ei_back.UserInterface.Api
         ///
         /// Response 200: Logout successful.
         /// </remarks>
+        [EnableRateLimiting("Authenticated")]
         [HttpPost]
         [Route("logout")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -159,6 +160,7 @@ namespace ei_back.UserInterface.Api
         /// Supports both BCrypt and legacy SHA256 verification of the current
         /// password. The new password is always BCrypt-hashed.
         /// </remarks>
+        [EnableRateLimiting("Authenticated")]
         [HttpPatch]
         [ProducesResponseType(typeof(UserGetDtoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

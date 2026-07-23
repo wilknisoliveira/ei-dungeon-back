@@ -3,9 +3,11 @@ using ei_back.Core.Application.UseCase.Role.Interfaces;
 using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ei_back.UserInterface.Api
 {
+    [EnableRateLimiting("Authenticated")]
     [ApiController]
     [Route("api/user/[controller]")]
     public class RoleController : ControllerBase

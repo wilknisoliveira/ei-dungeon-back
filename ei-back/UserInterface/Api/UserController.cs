@@ -34,6 +34,7 @@ namespace ei_back.UserInterface.Api
 
         /// <summary>Creates a new user account</summary>
         /// <remarks>
+        /// Rate limited: 3 requests per minute sliding window (Signup policy).
         /// Registration endpoint. No authentication required.
         ///
         /// Request body (UserDtoRequest):
@@ -53,6 +54,7 @@ namespace ei_back.UserInterface.Api
         /// a generic "Invalid registration data." message to prevent user
         /// enumeration. New users default to CommonUser role.
         /// </remarks>
+        [EnableRateLimiting("Signup")]
         [HttpPost]
         [ProducesResponseType(typeof(UserDtoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -69,7 +71,7 @@ namespace ei_back.UserInterface.Api
 
         /// <summary>Checks availability of username and/or email</summary>
         /// <remarks>
-        /// Rate limited: 10 requests per minute sliding window (PublicApi policy).
+        /// Rate limited: 20 requests per minute sliding window (UsernameCheck policy).
         /// No authentication required. Public endpoint.
         ///
         /// Query parameters (both optional):
@@ -83,7 +85,7 @@ namespace ei_back.UserInterface.Api
         /// Only checks parameters that are provided. Omitted parameters
         /// default to available (true).
         /// </remarks>
-        [EnableRateLimiting("PublicApi")]
+        [EnableRateLimiting("UsernameCheck")]
         [HttpGet("check-userinfo")]
         [ProducesResponseType(typeof(UserInfoCheckResponseDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> CheckUserInfo([FromQuery] string? username, [FromQuery] string? email)
