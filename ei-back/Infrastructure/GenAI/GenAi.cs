@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using ei_back.Core.Application.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 using OpenAI;
@@ -13,6 +14,7 @@ namespace ei_back.Infrastructure.GenAI;
 public class GenAi : IGenAi
 {
     private readonly IChatClient _genAiClient;
+    private readonly ILogger<GenAi> _logger;
     private readonly Dictionary<AiRole, ChatRole> _chatRoleDict = new()
     {
         [AiRole.System] = ChatRole.System,
@@ -20,8 +22,10 @@ public class GenAi : IGenAi
         [AiRole.Assistant] = ChatRole.Assistant,
     };
     
-    public GenAi(IConfiguration configuration)
+    public GenAi(IConfiguration configuration, ILogger<GenAi> logger)
     {
+        _logger = logger;
+
         var aiModel = configuration["GenAISettings:AiModel"];
         var apiToken = configuration["keys:OpenRouterApiKey"];
         if (aiModel.IsNullOrEmpty() || apiToken.IsNullOrEmpty())
@@ -99,8 +103,9 @@ public class GenAi : IGenAi
                     EventType = AIStreamEventType.Chunk,
                     Content = chunk.Text
                 };
-            else
+            else if (chunk.FinishReason == null)
             {
+                _logger.LogError("LLM returned an empty response chunk");
                 yield return new StreamAIDtoResponse
                 {
                     EventType = AIStreamEventType.Error,

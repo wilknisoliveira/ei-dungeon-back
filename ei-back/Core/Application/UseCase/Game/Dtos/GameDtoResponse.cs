@@ -8,5 +8,6 @@ namespace ei_back.Core.Application.UseCase.Game.Dtos
         public string Name { get; set; }
         public Guid OwnerUserId { get; set; }
         public GameStatus GameStatus { get; set; }
+        public DateTimeOffset? LastPlayedAt { get; set; }
     }
 }

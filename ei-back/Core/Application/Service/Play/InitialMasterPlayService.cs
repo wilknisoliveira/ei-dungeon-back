@@ -42,6 +42,7 @@ namespace ei_back.Core.Application.Service.Play
             {
                 if (chunk.EventType == AIStreamEventType.Error)
                 {
+                    _logger.LogError("LLM streaming error in initial master play: {Content}", chunk.Content);
                     yield return new StreamAIDtoResponse
                     {
                         EventType = AIStreamEventType.Error,

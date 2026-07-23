@@ -16,6 +16,9 @@ namespace ei_back.Infrastructure.Context.Map
             builder.Property(x => x.OwnerUserId).HasColumnName("owner_user_id").IsRequired();
             builder.Property(x => x.WorldInfo).HasColumnName("world_info").IsRequired();
             builder.Property(x => x.GameStatus).HasColumnName("game_status").IsRequired();
+            builder.Property(x => x.LastPlayedAt)
+                .HasColumnName("last_played_at")
+                .HasColumnType("timestamp with time zone");
 
             builder.HasOne(x => x.OwnerUser)
                 .WithMany(x => x.Games)

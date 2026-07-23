@@ -26,6 +26,7 @@ namespace ei_back.Core.Domain.Entity
         public Guid OwnerUserId { get; private set; }
         public string WorldInfo { get; private set; } = "";
         public GameStatus GameStatus { get; private set; } = GameStatus.Active;
+        public DateTimeOffset? LastPlayedAt { get; private set; }
 
         public List<Player> Players { get; private set; }
         public List<Play> Plays { get; private set; } = [];
@@ -39,6 +40,11 @@ namespace ei_back.Core.Domain.Entity
         public void SetWorldInfo(string worldInfo)
         {
             WorldInfo = worldInfo;
+        }
+
+        public void SetLastPlayedAt(DateTimeOffset lastPlayedAt)
+        {
+            LastPlayedAt = lastPlayedAt;
         }
 
         public void SetPlayers(List<Player> players)

@@ -19,7 +19,8 @@ public class GetGameByIdAndUserUseCase(IGameRepository gameRepository) : IGetGam
             GameStatus = game.GameStatus,
             Id = game.Id,
             Name = game.Name,
-            OwnerUserId = game.OwnerUserId
+            OwnerUserId = game.OwnerUserId,
+            LastPlayedAt = game.LastPlayedAt
         };
     }
 }

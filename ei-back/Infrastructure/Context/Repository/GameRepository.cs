@@ -25,8 +25,8 @@ namespace ei_back.Infrastructure.Context.Repository
             IQueryable<Game> query = _context.Games.Where(x => x.OwnerUserId.Equals(ownerUserId));
 
             query = sort == "desc"
-                ? query.OrderByDescending(x => x.UpdatedAt)
-                : query.OrderBy(x => x.UpdatedAt);
+                ? query.OrderByDescending(x => x.LastPlayedAt ?? x.UpdatedAt)
+                : query.OrderBy(x => x.LastPlayedAt ?? x.UpdatedAt);
 
             return await query.Skip(offset).Take(size).ToListAsync(cancellationToken);
         }

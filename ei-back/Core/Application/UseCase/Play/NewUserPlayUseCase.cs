@@ -121,21 +121,24 @@ namespace ei_back.Core.Application.UseCase.Play
                     .ExecuteStreamingAsync(game, cancellationToken)
                     .WithCancellation(cancellationToken))
                 {
-                    if (chunk.EventType == AIStreamEventType.Error)
-                    {
-                        yield return new StreamPlayDtoResponse
-                        {
-                            EventType = EventType.Error,
-                            Content = chunk.Content
-                        };
-                        yield break;
-                    }
+                if (chunk.EventType == AIStreamEventType.Error)
+                {
+                    _logger.LogError("Initial master play streaming error: {Content}", chunk.Content);
                     yield return new StreamPlayDtoResponse
                     {
-                        EventType = EventType.Chunk,
-                        Content = chunk.Content,
+                        EventType = EventType.Error,
+                        Content = chunk.Content
                     };
+                    yield break;
                 }
+                yield return new StreamPlayDtoResponse
+                {
+                    EventType = EventType.Chunk,
+                    Content = chunk.Content,
+                };
+            }
+
+            game.SetLastPlayedAt(DateTimeOffset.UtcNow);
 
                 changedItems = await _unitOfWork.CommitAsync(cancellationToken);
                 if (changedItems == 0)
@@ -179,6 +182,7 @@ namespace ei_back.Core.Application.UseCase.Play
             {
                 if (chunk.EventType == AIStreamEventType.Error)
                 {
+                    _logger.LogError("Master play generation streaming error: {Content}", chunk.Content);
                     yield return new StreamPlayDtoResponse
                     {
                         EventType = EventType.Error,
@@ -202,6 +206,8 @@ namespace ei_back.Core.Application.UseCase.Play
             _ = await _playRepository.CreateAsync(masterPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
             plays.Add(masterPlay);
+
+            game.SetLastPlayedAt(DateTimeOffset.UtcNow);
 
             changedItems = await _unitOfWork.CommitAsync(cancellationToken);
             if (changedItems == 0)
@@ -334,6 +340,12 @@ namespace ei_back.Core.Application.UseCase.Play
                 .StreamGetResponse(promptList, maxOutputTokens, cancellationToken)
                 .WithCancellation(cancellationToken))
             {
+                if (chunk.EventType == AIStreamEventType.Error)
+                {
+                    _logger.LogError("LLM streaming error in StreamGenerateMasterPlay: {Content}", chunk.Content);
+                    yield return chunk;
+                    yield break;
+                }
                 yield return chunk;
             }
         }
