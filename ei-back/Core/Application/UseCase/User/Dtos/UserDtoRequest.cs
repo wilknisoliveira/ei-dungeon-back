@@ -11,7 +11,7 @@ namespace ei_back.Core.Application.UseCase.User.Dtos
         [StringLength(50, MinimumLength = 4)]
         public required string FullName { get; set; }
         [Required]
-        [StringLength(50, MinimumLength = 4)]
+        [StringLength(50, MinimumLength = 8)]
         public required string Password { get; set; }
         [Required]
         [EmailAddress(ErrorMessage = "Invalid Email Address")]
