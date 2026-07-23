@@ -7,7 +7,7 @@ namespace ei_back.Core.Application.UseCase.Play.Dtos
         public Guid Id { get; set; }
         public PlayerDtoResponse PlayerDtoResponse { get; set; }
         public string Prompt { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
     }
 
     public record PlayerDtoResponse

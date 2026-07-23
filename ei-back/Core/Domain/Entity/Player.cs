@@ -29,7 +29,7 @@ namespace ei_back.Core.Domain.Entity
             PlayerType type) : this(name, description, type)
         {
             Race = race;
-            SetCreatedDate(DateTime.Now);
+            SetCreatedDate(DateTimeOffset.UtcNow);
         }
 
         public string Name { get; private set; }

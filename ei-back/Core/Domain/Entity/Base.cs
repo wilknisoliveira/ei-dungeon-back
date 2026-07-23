@@ -4,17 +4,17 @@
     {
         public Guid Id { get; set; }
 
-        public DateTime CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
-        public DateTime UpdatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
 
-        public void SetCreatedDate(DateTime createdDate)
+        public void SetCreatedDate(DateTimeOffset createdDate)
         {
             CreatedAt = createdDate;
             UpdatedAt = createdDate;
         }
 
-        public void SetUpdatedDate(DateTime updatedDate)
+        public void SetUpdatedDate(DateTimeOffset updatedDate)
         {
             UpdatedAt = updatedDate;
         }

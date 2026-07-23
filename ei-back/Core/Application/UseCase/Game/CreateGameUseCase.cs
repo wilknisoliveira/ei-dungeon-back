@@ -74,7 +74,7 @@ namespace ei_back.Core.Application.UseCase.Game
 
             game.SetWorldInfo(await _upsertWorldInfoService.Handler(realPlayer.InfoToString(), cancellationToken));
 
-            game.SetCreatedDate(DateTime.Now);
+            game.SetCreatedDate(DateTimeOffset.UtcNow);
             var gameResponse = await _gameRepository.CreateAsync(game, cancellationToken);
 
             return _mapper.Map<GameDtoResponse>(gameResponse);

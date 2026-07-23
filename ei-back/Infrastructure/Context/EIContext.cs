@@ -32,7 +32,7 @@ namespace ei_back.Infrastructure.Context
                 0)
             {
                 Id = Guid.Parse("7d9ff283-6174-40a6-a317-f32a4a0620d0"),
-                CreatedAt = DateTime.Parse("2024-07-14 22:41:06.874402")
+                CreatedAt = DateTimeOffset.Parse("2024-07-14 22:41:06.874402")
             };
 
             modelBuilder.Entity<UserEntity>().HasData(adminUser);

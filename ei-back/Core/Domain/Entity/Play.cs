@@ -16,7 +16,7 @@
             PlayerId = player.Id;
             Player = player;
             Prompt = prompt;
-            SetCreatedDate(DateTime.Now);
+            SetCreatedDate(DateTimeOffset.UtcNow);
         }
 
         public Game Game { get; private set; }

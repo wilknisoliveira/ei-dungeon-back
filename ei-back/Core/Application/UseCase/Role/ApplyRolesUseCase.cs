@@ -21,7 +21,7 @@ namespace ei_back.Core.Application.UseCase.Role
             var user = await _userRepository.GetUserAndRolesAsync(applyRoleDtoRequest.Id);
 
             user.Role = applyRoleDtoRequest.role;
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTimeOffset.UtcNow;
 
             var userResponse = _userRepository.Update(user);
 

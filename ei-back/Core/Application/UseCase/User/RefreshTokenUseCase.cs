@@ -47,7 +47,7 @@ namespace ei_back.Core.Application.UseCase.User
 
             var refreshTokenHash = _encryptionService.ComputeSha256Hash(request.RefreshToken);
             var storedToken = _refreshTokenRepository.FindByTokenHash(refreshTokenHash).Result;
-            if (storedToken == null || storedToken.ExpiresAt < DateTime.Now)
+            if (storedToken == null || storedToken.ExpiresAt < DateTimeOffset.UtcNow)
                 throw new UnauthorizedException("Invalid credentials.");
 
             _refreshTokenRepository.Delete(storedToken.Id);
@@ -70,13 +70,13 @@ namespace ei_back.Core.Application.UseCase.User
             {
                 UserId = user.Id,
                 TokenHash = newRefreshTokenHash,
-                ExpiresAt = DateTime.Now.AddDays(_tokenConfiguration.DaysToExpiry),
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
+                ExpiresAt = DateTimeOffset.UtcNow.AddDays(_tokenConfiguration.DaysToExpiry),
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
             });
 
-            DateTime createDate = DateTime.Now;
-            DateTime expirationDate = createDate.AddMinutes(_tokenConfiguration.Minutes);
+            DateTimeOffset createDate = DateTimeOffset.UtcNow;
+            DateTimeOffset expirationDate = createDate.AddMinutes(_tokenConfiguration.Minutes);
 
             return new TokenDtoReponse(
                 true,

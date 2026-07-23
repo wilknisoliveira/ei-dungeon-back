@@ -11,8 +11,8 @@ namespace ei_back.Core.Domain.Entity
         {
             Type = type;
             Value = value;
-            CreatedAt = DateTime.Now;
-            UpdatedAt = DateTime.Now;
+            CreatedAt = DateTimeOffset.UtcNow;
+            UpdatedAt = DateTimeOffset.UtcNow;
         }
     }
 }

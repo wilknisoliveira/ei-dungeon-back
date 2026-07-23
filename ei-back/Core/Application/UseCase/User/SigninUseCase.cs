@@ -53,7 +53,7 @@ namespace ei_back.Core.Application.UseCase.User
                 if (validPassword)
                 {
                     user.Password = _encryptionService.ComputeBcryptHash(userDtoRequest.Password);
-                    user.UpdatedAt = DateTime.Now;
+                    user.UpdatedAt = DateTimeOffset.UtcNow;
                     _userRepository.RefreshUserInfo(user);
                 }
             }
@@ -78,13 +78,13 @@ namespace ei_back.Core.Application.UseCase.User
             {
                 UserId = user.Id,
                 TokenHash = refreshTokenHash,
-                ExpiresAt = DateTime.Now.AddDays(_tokenConfiguration.DaysToExpiry),
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
+                ExpiresAt = DateTimeOffset.UtcNow.AddDays(_tokenConfiguration.DaysToExpiry),
+                CreatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = DateTimeOffset.UtcNow
             });
 
-            DateTime createDate = DateTime.Now;
-            DateTime expirationDate = createDate.AddMinutes(_tokenConfiguration.Minutes);
+            DateTimeOffset createDate = DateTimeOffset.UtcNow;
+            DateTimeOffset expirationDate = createDate.AddMinutes(_tokenConfiguration.Minutes);
 
             return new TokenDtoReponse(
                 true,

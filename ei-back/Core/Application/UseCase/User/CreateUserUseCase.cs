@@ -28,8 +28,8 @@ namespace ei_back.Core.Application.UseCase.User
 
             user.Role = UserRole.CommonUser;
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
-            user.CreatedAt = DateTime.Now;
-            user.UpdatedAt = DateTime.Now;
+            user.CreatedAt = DateTimeOffset.UtcNow;
+            user.UpdatedAt = DateTimeOffset.UtcNow;
 
             var userResponse = await _userRepository.CreateAsync(user);
 

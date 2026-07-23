@@ -14,7 +14,7 @@ namespace ei_back.Infrastructure.Context.Map
 
             builder.HasIndex(x => x.TokenHash).IsUnique();
             builder.Property(x => x.TokenHash).HasColumnName("token_hash");
-            builder.Property(x => x.ExpiresAt).HasColumnName("expires_at").HasColumnType("timestamp without time zone");
+            builder.Property(x => x.ExpiresAt).HasColumnName("expires_at").HasColumnType("timestamp with time zone");
             builder.Property(x => x.UserId).HasColumnName("user_id");
             builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
         }

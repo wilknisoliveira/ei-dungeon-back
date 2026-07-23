@@ -32,7 +32,7 @@ namespace ei_back.Infrastructure.Token
                 issuer: _tokenConfiguration.Issuer,
                 audience: _tokenConfiguration.Audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(_tokenConfiguration.Minutes),
+                expires: DateTimeOffset.UtcNow.AddMinutes(_tokenConfiguration.Minutes).UtcDateTime,
                 signingCredentials: signinCredentials
             );
 

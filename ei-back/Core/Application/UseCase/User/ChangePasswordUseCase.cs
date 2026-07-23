@@ -37,7 +37,7 @@ namespace ei_back.Core.Application.UseCase.User
                 throw new BadRequestException("Wrong password!");
 
             user.Password = _encryptionService.ComputeBcryptHash(passwordDtoRequest.NewPassword);
-            user.UpdatedAt = DateTime.Now;
+            user.UpdatedAt = DateTimeOffset.UtcNow;
 
             var response = _userRepository.Update(user);
 

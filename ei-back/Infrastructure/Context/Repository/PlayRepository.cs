@@ -38,7 +38,7 @@ namespace ei_back.Infrastructure.Context.Repository
                 .CountAsync(cancellationToken);
         }
 
-        public Task<List<Play>> GetPlayWhereCreatedAtIsUpperThan(Guid gameId, DateTime createdAt, CancellationToken cancellationToken)
+        public Task<List<Play>> GetPlayWhereCreatedAtIsUpperThan(Guid gameId, DateTimeOffset createdAt, CancellationToken cancellationToken)
         {
             return _context.Plays.Include(x => x.Player)
                 .Where(x => x.GameId.Equals(gameId) && x.CreatedAt > createdAt)
@@ -54,7 +54,7 @@ namespace ei_back.Infrastructure.Context.Repository
                 .ToListAsync(cancellationToken);
         }
 
-        public Task<List<Play>> GetLastNBeforeDate(Guid gameId, int limit, DateTime limitDate, CancellationToken cancellationToken)
+        public Task<List<Play>> GetLastNBeforeDate(Guid gameId, int limit, DateTimeOffset limitDate, CancellationToken cancellationToken)
         {
             return _context.Plays.Include(x => x.Player)
                 .Where(x => x.GameId.Equals(gameId) && x.CreatedAt < limitDate)

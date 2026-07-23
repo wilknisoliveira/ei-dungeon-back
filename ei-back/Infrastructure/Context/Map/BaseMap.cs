@@ -24,11 +24,11 @@ namespace ei_back.Infrastructure.Context.Map
 
             builder.Property(x => x.CreatedAt)
                 .HasColumnName("created_at")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamp with time zone");
 
             builder.Property(x => x.UpdatedAt)
                 .HasColumnName("updated_at")
-                .HasColumnType("timestamp without time zone");
+                .HasColumnType("timestamp with time zone");
         }
     }
 }
