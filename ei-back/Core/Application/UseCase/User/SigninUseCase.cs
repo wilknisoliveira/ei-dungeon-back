@@ -7,7 +7,7 @@ using ei_back.Infrastructure.Token;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
-using System.Text.Json;
+
 
 namespace ei_back.Core.Application.UseCase.User
 {
@@ -63,12 +63,12 @@ namespace ei_back.Core.Application.UseCase.User
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName)
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
+                new Claim("sub", user.Id.ToString()),
+                new Claim("fullName", user.FullName),
+                new Claim("email", user.Email),
+                new Claim("role", user.Role.GetEnumDescription())
             };
-
-            List<string> roles = [user.Role.GetEnumDescription()];
-            claims.Add(new Claim(ClaimTypes.Role, user.Role.GetEnumDescription()));
-            claims.Add(new Claim("roles", JsonSerializer.Serialize(roles)));
 
             var accessToken = _tokenService.GenerateAccessToken(claims);
             var refreshToken = _tokenService.GenerateRefreshToken();
