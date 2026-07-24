@@ -5,6 +5,7 @@ using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using System.Security.Claims;
 
 namespace ei_back.UserInterface.Api
 {
@@ -17,19 +18,25 @@ namespace ei_back.UserInterface.Api
         private readonly ICreateUserUseCase _createUserUseCase;
         private readonly IGetUserUseCase _getUserUseCase;
         private readonly ICheckUserInfoUseCase _checkUserInfoUseCase;
+        private readonly IDeleteUserUseCase _deleteUserUseCase;
+        private readonly IGetUserNameUseCase _getUserNameUseCase;
 
         public UserController(
             ILogger<UserController> logger,
             ICreateUserUseCase createUserUseCase,
             IUnitOfWork unitOfWork,
             IGetUserUseCase getUserUseCase,
-            ICheckUserInfoUseCase checkUserInfoUseCase)
+            ICheckUserInfoUseCase checkUserInfoUseCase,
+            IDeleteUserUseCase deleteUserUseCase,
+            IGetUserNameUseCase getUserNameUseCase)
         {
             _logger = logger;
             _createUserUseCase = createUserUseCase;
             _unitOfWork = unitOfWork;
             _getUserUseCase = getUserUseCase;
             _checkUserInfoUseCase = checkUserInfoUseCase;
+            _deleteUserUseCase = deleteUserUseCase;
+            _getUserNameUseCase = getUserNameUseCase;
         }
 
         /// <summary>Creates a new user account</summary>
@@ -130,6 +137,57 @@ namespace ei_back.UserInterface.Api
             _logger.LogInformation("API: Getting paged user list");
 
             return Ok(await _getUserUseCase.Handler(name, sortDirection, pageSize, page, cancellationToken));
+        }
+
+        /// <summary>Deletes a user account and all associated data</summary>
+        /// <remarks>
+        /// Rate limited: 120 requests per minute sliding window (Authenticated policy).
+        /// Requires authentication. Roles: Admin, CommonUser, PremiumUser.
+        ///
+        /// Authorization logic:
+        ///   - Admin users can delete any user by ID.
+        ///   - Non-admin users can only delete their own account. If the
+        ///     route {id} does not match the authenticated user's ID, a
+        ///     403 Forbidden is returned.
+        ///
+        /// Route parameter:
+        ///   - id (Guid): the ID of the user to delete
+        ///
+        /// Behavior:
+        ///   - Cascades deletion to all associated data (games, players,
+        ///     plays, refresh tokens) via database cascade constraints.
+        ///
+        /// Response 200: Account deleted successfully.
+        /// Response 401: Not authenticated.
+        /// Response 403: Authenticated but not authorized (non-admin
+        ///   attempting to delete another user).
+        /// Response 404: No user found with the given ID.
+        /// </remarks>
+        [EnableRateLimiting("Authenticated")]
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
+        public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+        {
+            var requesterIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(requesterIdClaim) || !Guid.TryParse(requesterIdClaim, out var requesterId))
+                return Forbid();
+
+            var isAdmin = User.IsInRole("Admin");
+
+            if (!isAdmin && requesterId != id)
+                return Forbid();
+
+            await _deleteUserUseCase.Handler(id, cancellationToken);
+            await _unitOfWork.CommitAsync(cancellationToken);
+
+            _logger.LogInformation("API: User deleted - {UserId}", id);
+
+            return Ok();
         }
     }
 }

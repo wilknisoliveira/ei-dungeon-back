@@ -63,6 +63,7 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IRefreshTokenUseCase, RefreshTokenUseCase>();
             services.AddScoped<ILogoutUseCase, LogoutUseCase>();
             services.AddScoped<IChangePasswordUseCase, ChangePasswordUseCase>();
+            services.AddScoped<IDeleteUserUseCase, DeleteUserUseCase>();
             services.AddScoped<IGetUserNameUseCase, GetUserNameUseCase>();
             services.AddScoped<IApplyRolesUseCase, ApplyRolesUseCase>();
             services.AddScoped<IGetAllRoleUseCase, GetAllRoleUseCase>();

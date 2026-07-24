@@ -34,10 +34,13 @@
 ### 1.3 Anonymization, Blocking, or Deletion (Art. 18, IV)
 
 **Technical mechanism:**
+- Account deletion: `DELETE /api/user/{id}` (cascades to games, players, plays, refresh tokens)
 - Game deletion: `DELETE /api/game/{gameId}` (cascades to players and plays)
 
+**Authorization:**
+- Admin can delete any user; non-admin can only delete self
+
 **Limitation:**
-- No user account deletion
 - No individual play deletion
 - No anonymization mechanism
 
@@ -53,10 +56,10 @@
 ### 1.5 Deletion of Data Processed with Consent (Art. 18, VI)
 
 **Technical mechanism:**
-- Game deletion cascades to associated data
+- Account deletion: `DELETE /api/user/{id}` cascades to all associated data
+- Game deletion: `DELETE /api/game/{gameId}` cascades to associated players and plays
 
 **Limitation:**
-- No account deletion mechanism
 - No mechanism to delete data sent to third-party AI provider
 
 **Organizational procedure:** NOT_DEFINED
@@ -134,8 +137,8 @@ Based on technical evidence:
 |-------|----------|--------|-----|
 | Access (own data) | GET /api/game, GET /api/play | PARTIAL | No profile view, no export |
 | Correction | PATCH change-password | PARTIAL | Only password; no name/email |
+| Deletion (account) | DELETE /api/user/{id} | IMPLEMENTED | Cascades correctly |
 | Deletion (game) | DELETE /api/game/{id} | IMPLEMENTED | Cascades correctly |
-| Deletion (account) | None | NOT_IMPLEMENTED | No endpoint |
 | Portability | None | NOT_IMPLEMENTED | No export |
 | Consent revocation | POST logout | PARTIAL | Tokens only, not processing consent |
 | Information | None | NOT_IMPLEMENTED | No privacy notice |

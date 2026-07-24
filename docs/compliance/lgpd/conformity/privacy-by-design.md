@@ -119,10 +119,9 @@ The application has a solid foundation for privacy by design:
 
 The primary gaps are:
 1. **No data retention limits** — data persists indefinitely
-2. **No user deletion** — users cannot remove their accounts
-3. **No PII filtering** before LLM transmission
-4. **No transparency mechanisms** — no privacy policy or data processing disclosure
-5. **No consent management** — no granular consent for processing activities
+2. **No PII filtering** before LLM transmission
+3. **No transparency mechanisms** — no privacy policy or data processing disclosure
+4. **No consent management** — no granular consent for processing activities
 
 ---
 

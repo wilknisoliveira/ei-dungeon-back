@@ -37,9 +37,15 @@
 
 | Mechanism | Endpoint | What can be deleted | Limitation |
 |-----------|----------|-------------------|------------|
+| Delete account | `DELETE /api/user/{id}` | User + cascade to games, players, plays, refresh tokens | Cannot delete specific plays |
 | Delete game | `DELETE /api/game/{gameId}` | Game + cascade to players + plays | Cannot delete account or specific plays |
 
-**Status:** NOT_IMPLEMENTED — No user account deletion, no individual play deletion.
+**Authorization logic for account deletion:**
+- Admin users can delete any user by ID
+- Non-admin users can only delete their own account (route `id` must match JWT `sub` claim)
+- Returns 403 Forbidden if non-admin attempts to delete another user
+
+**Status:** PARTIALLY_CONFORMING — Account deletion is implemented with full cascade. Individual play deletion is not available.
 
 ### 1.4 Right to Data Portability (Art. 18, V — LGPD)
 
@@ -87,7 +93,7 @@
 |-------|-------------------|--------|
 | Access | Game/play listing endpoints (self-scoped) | PARTIALLY_CONFORMING |
 | Correction | Password change only | NOT_IMPLEMENTED |
-| Deletion | Game deletion (cascade) | PARTIALLY_CONFORMING |
+| Deletion | Account deletion (cascade) + game deletion (cascade) | PARTIALLY_CONFORMING |
 | Portability | No export mechanism | NOT_IMPLEMENTED |
 | Consent revocation | Token revocation via logout | PARTIALLY_CONFORMING |
 | Information | No privacy policy or notice | NOT_IMPLEMENTED |
@@ -102,10 +108,12 @@
 
 Users cannot:
 - Update their profile (name, email)
-- Delete their account
 - View all their data in one place
 - Export their data
 - See what processing occurs on their data
+
+Users can:
+- Delete their own account (cascades to all associated data)
 
 ### 3.2 Admin-Only User Listing
 
@@ -130,11 +138,11 @@ Game deletion (`DELETE /api/game/{gameId}`) cascades to delete players and plays
 
 | Right | Mechanism | Evidence | Status |
 |-------|-----------|----------|--------|
-| Access (profile) | GET /api/user (Admin only) | `UserController.cs:120-138` | PARTIALLY_CONFORMING |
-| Access (own data) | GET /api/game, GET /api/play | `GameController.cs:96-122`, `PlayController.cs:63-88` | PARTIALLY_CONFORMING |
-| Correction | PATCH change-password only | `AuthController.cs:165-185` | NOT_IMPLEMENTED |
-| Deletion (account) | None | No endpoint exists | NOT_IMPLEMENTED |
-| Deletion (game) | DELETE /api/game/{id} | `GameController.cs:135-158` | PARTIALLY_CONFORMING |
+| Access (profile) | GET /api/user (Admin only) | `UserController.cs:103-139` | PARTIALLY_CONFORMING |
+| Access (own data) | GET /api/game, GET /api/play | `GameController.cs`, `PlayController.cs` | PARTIALLY_CONFORMING |
+| Correction | PATCH change-password only | `AuthController.cs` | NOT_IMPLEMENTED |
+| Deletion (account) | DELETE /api/user/{id} | `UserController.cs:141-190`, `DeleteUserUseCase.cs` | PARTIALLY_CONFORMING |
+| Deletion (game) | DELETE /api/game/{id} | `GameController.cs` | PARTIALLY_CONFORMING |
 | Portability | None | No mechanism exists | NOT_IMPLEMENTED |
-| Consent revocation | POST logout | `AuthController.cs:130-148` | PARTIALLY_CONFORMING |
+| Consent revocation | POST logout | `AuthController.cs` | PARTIALLY_CONFORMING |
 | Information/notice | None | No privacy policy in repository | NOT_IMPLEMENTED |

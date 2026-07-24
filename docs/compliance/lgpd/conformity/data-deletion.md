@@ -34,7 +34,29 @@
   2. **Full logout:** Deletes ALL refresh tokens for the user
 - **Evidence:** `LogoutUseCase.cs:24-41`
 
-### 1.3 Refresh Token Rotation (Implicit Deletion)
+### 1.3 User Account Deletion
+
+- **Endpoint:** `DELETE /api/user/{id}`
+- **Authorization:** `Admin, CommonUser, PremiumUser`
+- **Use Case:** `DeleteUserUseCase.cs`
+- **Authorization Logic:**
+  - Admin users can delete any user by ID
+  - Non-admin users can only delete their own account (route `id` must match JWT `sub` claim)
+  - Returns 403 Forbidden if non-admin attempts to delete another user
+- **Behavior:**
+  1. Validates user exists (throws `NotFoundException` if not found)
+  2. Calls `_userRepository.Delete(userId)` — removes User entity from EF tracker
+  3. Controller calls `_unitOfWork.CommitAsync()` — cascade removes all associated data
+- **Cascade Behavior (via PostgreSQL FK constraints):**
+  - User → RefreshTokens: CASCADE DELETE (`refresh_tokens.user_id`)
+  - User → Games: CASCADE DELETE (`games.owner_user_id`)
+  - Game → Players: CASCADE DELETE (`players.game_id`)
+  - Game → Plays: CASCADE DELETE (`plays.game_id`)
+  - Player → Plays: CASCADE DELETE (`plays.player_id`)
+- **Result:** Deleting a user removes the user account and all associated data (games, players, plays, refresh tokens)
+- **Evidence:** `DeleteUserUseCase.cs`, `IDeleteUserUseCase.cs`, `UserController.cs:141-190`, `ServiceCollectionExtensions.cs:66`
+
+### 1.4 Refresh Token Rotation (Implicit Deletion)
 
 - **Endpoint:** `POST /api/user/auth/refresh`
 - **Use Case:** `RefreshTokenUseCase.cs`
@@ -45,17 +67,7 @@
 
 ## 2. Deletion Mechanisms NOT Found
 
-### 2.1 User Account Deletion
-
-- **Status:** NOT IMPLEMENTED
-- **Evidence:**
-  - `UserController.cs` has only `POST` (create), `GET` (list), and `GET check-userinfo`
-  - No `DELETE` endpoint exists
-  - No `DeleteUserUseCase` class exists
-  - No user-facing account deletion mechanism
-- **Impact:** Users cannot exercise the right to delete their personal data through the application
-
-### 2.2 Expired Refresh Token Cleanup
+### 2.1 Expired Refresh Token Cleanup
 
 - **Status:** NOT IMPLEMENTED
 - **Evidence:**
@@ -76,24 +88,30 @@
 ## 3. Cascade Delete Chain Analysis
 
 ```
-User (users.id)
-    ↓ CASCADE DELETE (if user deletion were implemented)
+User (users.id) ← DELETE /api/user/{id}
+    ↓ CASCADE DELETE
+RefreshToken (refresh_tokens.user_id)
+
+User (users.id) ← DELETE /api/user/{id}
+    ↓ CASCADE DELETE
 Game (games.owner_user_id)
     ↓ CASCADE DELETE
 Player (players.game_id)
     ↓ CASCADE DELETE
 Play (plays.player_id)
 
-Game (games.id)
+Game (games.id) ← DELETE /api/game/{gameId}
+    ↓ CASCADE DELETE
+Player (players.game_id)
+    ↓ CASCADE DELETE
+Play (plays.player_id)
+
+Game (games.id) ← DELETE /api/game/{gameId}
     ↓ CASCADE DELETE
 Play (plays.game_id)
-
-User (users.id)
-    ↓ CASCADE DELETE
-RefreshToken (refresh_tokens.user_id)
 ```
 
-**Observation:** The cascade chain is complete for Game deletion. If User deletion were implemented, the cascade would correctly remove all associated data. However, User deletion is not implemented.
+**Observation:** The cascade chain is complete for both User deletion and Game deletion. All associated data is removed at the database level via PostgreSQL FK constraints.
 
 ---
 
@@ -122,17 +140,17 @@ The application uses hard deletes only. There is no `IsDeleted` flag, `DeletedAt
 
 There is no mechanism for users to export or download their data. The only way to view data is through the API endpoints (game list, play history).
 
-### 5.3 No User-Initiated Deletion
+### 5.3 User-Initiated Deletion
 
-The only deletion a regular user can perform is:
-1. Deleting a game (which cascades to players and plays)
-2. Logging out (which revokes refresh tokens)
+Users can now perform the following deletions:
+1. Deleting their own account (cascades to refresh tokens, games, players, plays)
+2. Deleting a game (cascades to players and plays)
+3. Logging out (which revokes refresh tokens)
 
 There is no way for a user to:
-- Delete their account
 - Delete specific plays
-- Delete their profile data
-- Request admin deletion
+- Delete specific players
+- Request admin deletion of another user (Admin can delete anyone via the same endpoint)
 
 ---
 
@@ -140,10 +158,10 @@ There is no way for a user to:
 
 | Deletion Mechanism | Status | Evidence |
 |-------------------|--------|----------|
+| User account deletion (cascade) | IMPLEMENTED | `DeleteUserUseCase.cs`, `UserController.cs:141-190` |
 | Game deletion (cascade) | IMPLEMENTED | `DeleteGameUseCase.cs`, cascade FKs |
 | Refresh token revocation | IMPLEMENTED | `LogoutUseCase.cs` |
 | Refresh token rotation | IMPLEMENTED | `RefreshTokenUseCase.cs` |
-| User account deletion | NOT IMPLEMENTED | No endpoint, no use case |
 | Expired token cleanup | NOT IMPLEMENTED | No background services |
 | GameInfo cleanup | NOT IMPLEMENTED | No delete endpoint |
 | Data export/download | NOT IMPLEMENTED | No mechanism |
