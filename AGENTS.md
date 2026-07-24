@@ -73,9 +73,9 @@ dotnet test .\ei-back.Tests\ei-back.Tests.csproj --filter "FullyQualifiedName~Us
 - `appsettings.*.json` contains placeholder values — use User Secrets or env vars in development.
 
 <!-- SPECKIT START -->
-Active plan: `specs/001-stream-initial-master-play/plan.md`
-Feature: Stream initial master play — move from blocking CreateGameUseCase to
-streaming NewUserPlayUseCase on first play. See the plan for detailed context,
-constitution gates, project structure, and implementation quickstart.
-[x] All 16 tasks complete. Build 0 errors/0 warnings, 5/5 tests pass.
+Active plan: `specs/002-auth-improvements/plan.md`
+Feature: Auth improvements — BCrypt password hashing, refresh token rotation, session
+logout, redesigned password change, rate limiting, and bug fixes. See the plan for
+detailed context, constitution gates, project structure, and implementation quickstart.
+[x] All 41 tasks complete. Build 0 errors/0 warnings, 5/5 tests pass.
 <!-- SPECKIT END -->

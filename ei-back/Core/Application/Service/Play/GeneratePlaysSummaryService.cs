@@ -4,6 +4,7 @@ using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ei_back.Core.Application.Service.Play
@@ -15,18 +16,25 @@ namespace ei_back.Core.Application.Service.Play
         private readonly IUnitOfWork _unitOfWork;
         private readonly IGenAi _genAi;
         private readonly IGameRepository _gameRepository;
+        private readonly int _summaryMaxTokens;
 
         public GeneratePlaysSummaryService(
             ILogger<GeneratePlaysSummaryService> logger,
             IUnitOfWork unitOfWork,
             IPlayRepository playRepository,
-            IGenAi genAi, IGameRepository gameRepository)
+            IGenAi genAi, IGameRepository gameRepository,
+            IConfiguration configuration)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
             _playRepository = playRepository;
             _genAi = genAi;
             _gameRepository = gameRepository;
+
+            var errorMessage = "Verify if SummaryMaxTokens was set in the PlayOptions section of appsettings.";
+            var summaryMaxTokens = configuration["PlayOptions:SummaryMaxTokens"] ?? "";
+            if (!int.TryParse(summaryMaxTokens, out _summaryMaxTokens))
+                throw new InternalServerErrorException(errorMessage);
         }
 
         public async Task Handler(
@@ -69,7 +77,7 @@ namespace ei_back.Core.Application.Service.Play
             var iaResponse = "";
             try
             {
-                iaResponse = await _genAi.GetResponse(promptList, 2000, cancellationToken);
+                iaResponse = await _genAi.GetResponse(promptList, _summaryMaxTokens, cancellationToken);
             }
             catch (Exception ex)
             {
