@@ -491,3 +491,6 @@ LOCAL_GUIDES.md
 .opencode/
 specs/*
 .specify/feature.json
+
+# Compliance
+non-conformities.md
