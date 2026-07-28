@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ei_back.Core.Application.Interfaces;
 using ei_back.Core.Application.Repository;
+using ei_back.Core.Application.Service.Play;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
@@ -261,7 +262,8 @@ namespace ei_back.Core.Application.UseCase.Play
 
             var systemPrompt = $"<master-instruction>\n{MasterPlayCommand()}\n</master-instruction>\n" +
                                $"<player-info>\n{realPlayer!.InfoToString()}\n</player-info>\n" + 
-                               $"<world-info>\n{game.WorldInfo}\n</world-info>\n";
+                               $"<world-info>\n{game.WorldInfo}\n</world-info>\n" +
+                               $"<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
             
             List<AiPromptRequest> promptList = [];
 
@@ -288,8 +290,8 @@ namespace ei_back.Core.Application.UseCase.Play
             switch (analyzerDtoResponse.Result)
             {
                 case AnalyzerResult.InvalidPlay:
-                    analysis += $"A nova jogada do player é inválida pela seguinte razão: {analyzerDtoResponse.Reason}\n" +
-                                $"Negue a jogada do player, explique o motivo e dê a ele opções válidas.";
+                    analysis += $"The player's new play is invalid for the following reason: {analyzerDtoResponse.Reason}\n" +
+                                $"Deny the player's play, explain the reason and give them valid options.";
                     maxOutputTokens = 100;
                     break;
                 case AnalyzerResult.RollDice:
@@ -301,34 +303,34 @@ namespace ei_back.Core.Application.UseCase.Play
                     var modifier = realPlayer.GetModifier(skill);
                     var result = (dicesResult + modifier) >= dicesResult ? "SUCCESS" : "FAIL";
 
-                    analysis += $"A nova jogada é crítica pelo seguinte motivo: {analyzerDtoResponse.Reason}\n\n" +
-                                $"O início da sua resposta como mestre deve ser parecida com essa:\n" +
-                                $"'A sua jogada é crítica pois [aqui explique o motivo...]. Por isso é necessário jogar " +
-                                $"um dado d20!\n" +
-                                $"Para isso será necessário uma classe de dificuldade de " +
-                                $"{analyzerDtoResponse.DifficultyClass ?? 12} e você poderá usar a skill {skill}.\n" +
-                                $"Jogando o dado... O resultado foi {dicesResult}!\n" +
-                                $"Para a Skill {skill} seu modificador é {modifier}.\n" +
-                                $"Então sua jogada foi - {result}! - '\n\n" +
-                                $"Na sua narração seguinte, considere o resultado dos dados para ditar o resultado" +
-                                $"da jogada.";
+                    analysis += $"The new play is critical for the following reason: {analyzerDtoResponse.Reason}\n\n" +
+                                $"The beginning of your response as master should be similar to this:\n" +
+                                $"'Your play is critical because [explain the reason here...]. Therefore it is necessary to roll " +
+                                $"a d20 die!\n" +
+                                $"For this, a difficulty class of " +
+                                $"{analyzerDtoResponse.DifficultyClass ?? 12} will be required and you may use the {skill} skill.\n" +
+                                $"Rolling the die... The result was {dicesResult}!\n" +
+                                $"For the {skill} skill your modifier is {modifier}.\n" +
+                                $"So your roll was - {result}! - '\n\n" +
+                                $"In your following narration, consider the dice result to dictate the outcome " +
+                                $"of the play.";
                     break;
                 }
                 case AnalyzerResult.ClarificationNeeded:
-                    analysis += $"A nova jogada do player é insuficiente pela seguinte razão: " +
+                    analysis += $"The player's new play is insufficient for the following reason: " +
                                 $"{analyzerDtoResponse.Reason}\n\n" +
-                                $"Solicite mais informações sobre a ação ou jogada do player, de forma a esclarecer suas " +
-                                $"intenções.";
+                                $"Request more information about the player's action or play in order to clarify their " +
+                                $"intentions.";
                     maxOutputTokens = 100;
                     break;
                 case AnalyzerResult.PlayerDied:
-                    analysis += $"O personagem do player morreu pela seguinte razão: {analyzerDtoResponse.Reason}\n\n" +
-                                $"Finalize o jogo dando um encerramento de acordo com o clima do jogo e com a coerência " +
-                                $"narrativa necessária.\n" +
-                                $"Ao final agradeça ao player e o convide para iniciar um novo jogo.";
+                    analysis += $"The player's character died for the following reason: {analyzerDtoResponse.Reason}\n\n" +
+                                $"End the game with a conclusion that matches the game's mood and the necessary " +
+                                $"narrative coherence.\n" +
+                                $"At the end, thank the player and invite them to start a new game.";
                     break;
                 default:
-                    analysis += "Tudo certo com a jogada do player. Pode prosseguir normalmente.";
+                    analysis += "Everything is fine with the player's play. You may proceed normally.";
                     break;
             }
             analysis += "\n</analysis>";
@@ -352,20 +354,19 @@ namespace ei_back.Core.Application.UseCase.Play
 
         private static string MasterPlayCommand()
         {
-            //Blocked the dices
-            return $"Você é um mestre de mesa (Master table) em um jogo de RPG Dungeons & Dragons. " +
-                   $"Sua função é conduzir a história, desenvolver o enredo, interpretar " +
-                   $"os NPCs, tornar o jogo sempre envolvente e emocionante, bem como quaisquer outras ações " +
-                   $"relativas a uma mestre de Mesa.\n" +
-                   $"IMPORTANTE: Você como Mestre da Mesa, NUNCA deve interpretar o papel do Player! " +
-                   $"Você também NUNCA deve ditar as ações do Player!;\n\n" +
-                   $"Você tem algumas informações importantes que são primordiais para seu papel como Mestre de Mesa:\n" +
-                   $"- Em <world-info> estão todas as informações que você como mestre criou a respeito do mundo do jogo. " +
-                   $"Utilize essas informações de forma estratégica para direcionar a história" +
-                   $"- Em <summary> encontra-se um breve resumo de partidas anteriores.\n" +
-                   $"- Em <analysis> está uma análise que você fez previamente sobre a nova jogada do usuário." +
-                   $"Nela está o resultado da jogada e como você enquanto mestre deve prosseguir.\n\n" +
-                   $"Agora, prossiga com a próxima orientação do Mestre da Mesa!";
+            return $"You are a tabletop master (Master table) in a Dungeons & Dragons RPG game. " +
+                   $"Your role is to drive the story, develop the plot, interpret " +
+                   $"NPCs, make the game always engaging and exciting, as well as any other actions " +
+                   $"related to being a Table Master.\n" +
+                   $"IMPORTANT: As the Table Master, you must NEVER play the role of the Player! " +
+                   $"You must also NEVER dictate the Player's actions!;\n\n" +
+                   $"You have some important information that is essential for your role as Table Master:\n" +
+                   $"- In <world-info> are all the information you as master created about the game world. " +
+                   $"Use this information strategically to drive the story" +
+                   $"- In <summary> you will find a brief summary of previous matches.\n" +
+                   $"- In <analysis> is an analysis you previously made about the user's new play." +
+                   $"It contains the result of the play and how you as master should proceed.\n\n" +
+                   $"Now, proceed with the next Table Master guidance!";
         }
 
         private int CountTokensFromPlays(List<Domain.Entity.Play> plays)

@@ -22,6 +22,7 @@ namespace ei_back.UserInterface.Api
         private readonly IGetGamesUseCase _getGamesUseCase;
         private readonly IGetGameByIdAndUserUseCase _getGameByIdAndUserUseCase;
         private readonly IDeleteGameUseCase _deleteGameUseCase;
+        private readonly IUpdateGameUseCase _updateGameUseCase;
 
         public GameController(
             ILogger<GameController> logger,
@@ -30,7 +31,8 @@ namespace ei_back.UserInterface.Api
             IGetUserNameUseCase getUserNameUseCase,
             IGetGamesUseCase getGamesUseCase, 
             IGetGameByIdAndUserUseCase getGameByIdAndUserUseCase, 
-            IDeleteGameUseCase deleteGameUseCase)
+            IDeleteGameUseCase deleteGameUseCase,
+            IUpdateGameUseCase updateGameUseCase)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
@@ -39,6 +41,7 @@ namespace ei_back.UserInterface.Api
             _getGamesUseCase = getGamesUseCase;
             _getGameByIdAndUserUseCase = getGameByIdAndUserUseCase;
             _deleteGameUseCase = deleteGameUseCase;
+            _updateGameUseCase = updateGameUseCase;
         }
 
         [HttpPost]
@@ -155,6 +158,52 @@ namespace ei_back.UserInterface.Api
             
             _logger.LogDebug("Game '{gameId}' deleted successfully.'", gameId);
             return NoContent();
+        }
+
+        /// <summary>Updates a game's name and/or language</summary>
+        /// <remarks>
+        /// Requires authentication. Roles: Admin, PremiumUser.
+        /// Only non-null fields in the request body are updated.
+        ///
+        /// Request body (all fields optional):
+        ///   - name (string): new game name (2-20 chars)
+        ///   - gameLanguage (enum): new language — 'Portuguese', 'English', or 'Spanish'
+        ///
+        /// Response 200 (GameDtoResponse):
+        ///   - Id, Name, OwnerUserId, GameLanguage, GameStatus, LastPlayedAt
+        ///
+        /// Response 404: Game not found or not owned by the user.
+        /// </remarks>
+        [HttpPatch("{gameId}")]
+        [ProducesResponseType(typeof(GameDtoResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [Authorize(Roles = "Admin, PremiumUser")]
+        public async Task<IActionResult> Update(Guid gameId, [FromBody] UpdateGameDtoRequest request, CancellationToken cancellationToken)
+        {
+            var userName = _getUserNameUseCase.Handler(User);
+
+            if (userName.IsNullOrEmpty())
+            {
+                var errorMessage = "Something went wrong while attempting to get the user logged credential.";
+                _logger.LogError(errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+            }
+
+            _logger.LogInformation("Updating game {gameId} for user {userName}...", gameId, userName);
+
+            var gameDtoResponse = await _updateGameUseCase.Handler(gameId, request, userName, cancellationToken);
+            var changedItems = await _unitOfWork.CommitAsync(cancellationToken);
+
+            if (changedItems == 0)
+            {
+                var errorMessage = "Something went wrong while attempting to update the game.";
+                _logger.LogError(errorMessage);
+                return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+            }
+
+            _logger.LogInformation("Game {gameId} updated.", gameId);
+
+            return Ok(gameDtoResponse);
         }
         
     }

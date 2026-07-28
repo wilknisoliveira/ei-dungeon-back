@@ -25,6 +25,7 @@ namespace ei_back.Core.Domain.Entity
         public User OwnerUser { get; private set; }
         public Guid OwnerUserId { get; private set; }
         public string WorldInfo { get; private set; } = "";
+        public GameLanguage GameLanguage { get; private set; } = GameLanguage.English;
         public GameStatus GameStatus { get; private set; } = GameStatus.Active;
         public DateTimeOffset? LastPlayedAt { get; private set; }
 
@@ -35,6 +36,16 @@ namespace ei_back.Core.Domain.Entity
         {
             OwnerUser = user;
             OwnerUserId = user.Id;
+        }
+
+        public void SetName(string name)
+        {
+            Name = name;
+        }
+
+        public void SetGameLanguage(GameLanguage language)
+        {
+            GameLanguage = language;
         }
 
         public void SetWorldInfo(string worldInfo)

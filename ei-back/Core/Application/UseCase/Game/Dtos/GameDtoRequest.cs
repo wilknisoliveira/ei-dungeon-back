@@ -17,6 +17,8 @@ namespace ei_back.Core.Application.UseCase.Game.Dtos
         [Required]
         public CharacterRace Race { get; set; }
         [Required]
+        public GameLanguage GameLanguage { get; set; }
+        [Required]
         public SkillsDtoRequest Skills { get; set; }
         
     }

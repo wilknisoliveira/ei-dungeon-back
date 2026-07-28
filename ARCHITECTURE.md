@@ -30,10 +30,13 @@ ei-back/
 |---|---|
 | `api/user/auth/signin` | `AuthController.cs` |
 | `api/user` | `UserController.cs` |
-| `api/game` | `GameController.cs` |
+| `api/game` | `GameController.cs` (GET, POST, PATCH `/{gameId}`, DELETE `/{gameId}`) |
 | `api/game/play` | `PlayController.cs` |
 | `api/game/GameInfo` | `GameInfoController.cs` |
 | `api/role` | `RoleController.cs` |
+
+## Game Language
+Each game has a `GameLanguage` (enum: `Portuguese`, `English`, `Spanish`; default `English`) stored in the `game_language` column. The language is set at creation time via `GameDtoRequest.GameLanguage` and can be updated via `PATCH /api/game/{gameId}`. All GenAI system prompts are in English with a `<language>` instruction tag appended per game language, so the Game Master responds in the configured language. Changing the language affects only future responses — existing history is untouched.
 
 ## Conventions
 - Async methods suffix with `Async` only for EF/IO-bound operations; some sync UseCases exist (`Signin`).

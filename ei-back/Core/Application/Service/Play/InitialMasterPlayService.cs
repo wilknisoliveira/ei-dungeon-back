@@ -32,7 +32,7 @@ namespace ei_back.Core.Application.Service.Play
             var promptList = new List<AiPromptRequest>
             {
                 new(AiRole.System, initialPrompt),
-                new(AiRole.User, "Crie uma introdução para o jogo como se fosse o início da campanha.")
+                new(AiRole.User, "Create an introduction for the game as if it were the beginning of the campaign.")
             };
 
             var completedResponse = "";
@@ -70,11 +70,12 @@ namespace ei_back.Core.Application.Service.Play
         {
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
             var playerInfo = realPlayer?.InfoToString() ?? "";
-            return $"<guidance>\nVocê é um mestre de RPG de mesa em uma campanha de Dungeons & Dragons. " +
-                   $"Lembre-se que como Mestre da Mesa, você NÃO deve agir como player ou ditar as ações do player. " +
-                   $"O player da campanha está descrito dentro das tags <player></player>.\n</guidance>\n" +
+            return $"<guidance>\nYou are a tabletop RPG master in a Dungeons & Dragons campaign. " +
+                   $"Remember that as the Table Master, you must NOT act as the player or dictate the player's actions. " +
+                   $"The campaign player is described within the <player></player> tags.\n</guidance>\n" +
                    $"<player>\n{playerInfo}\n</player>\n" +
-                   $"<world-info>\n{game.WorldInfo}\n</world-info>";
+                   $"<world-info>\n{game.WorldInfo}\n</world-info>\n" +
+                   $"<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
         }
     }
 }

@@ -72,7 +72,8 @@ namespace ei_back.Core.Application.UseCase.Game
             
             game.SetPlayers(players);
 
-            game.SetWorldInfo(await _upsertWorldInfoService.Handler(realPlayer.InfoToString(), cancellationToken));
+            game.SetGameLanguage(gameDtoRequest.GameLanguage);
+            game.SetWorldInfo(await _upsertWorldInfoService.Handler(realPlayer.InfoToString(), gameDtoRequest.GameLanguage, cancellationToken));
 
             game.SetCreatedDate(DateTimeOffset.UtcNow);
             var gameResponse = await _gameRepository.CreateAsync(game, cancellationToken);

@@ -3,6 +3,7 @@ using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Domain.Entity;
+using ei_back.Core.Domain.Enums;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using Microsoft.IdentityModel.Tokens;
@@ -21,11 +22,12 @@ public class UpsertWorldInfoService(
     private readonly IGenAi _genAi = genAi;
     private readonly IGameRepository _gameRepository = gameRepository;
 
-    public async Task<string> Handler(string playerInfo, CancellationToken cancellationToken)
+    public async Task<string> Handler(string playerInfo, GameLanguage language, CancellationToken cancellationToken)
     {
         var systemPrompt = GetMasterPersonality();
         systemPrompt += "\n\n<player>\n" + playerInfo + "\n" + @"<\/player>" + "\n";
         systemPrompt += $"\n{GetResponseDetailsPrompt()}";
+        systemPrompt += $"\n<language>\n{LanguageInstructionHelper.GetLanguageInstruction(language)}\n</language>\n";
 
         List<AiPromptRequest> promptList =
         [
@@ -48,6 +50,7 @@ public class UpsertWorldInfoService(
         
         var systemPrompt = $"{GetMasterPersonality()} \n {GetAdditionalUpdatePrompt()}";
         systemPrompt += "\n\n<player>\n" + realPlayer?.InfoToString() + "\n" + @"<\/player>" + "\n";
+        systemPrompt += $"\n<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
         
         var assistantPrompt = $"<world-info>\n{game.WorldInfo}\n</world-info>";
         
@@ -106,65 +109,65 @@ public class UpsertWorldInfoService(
 
     private static string GetMasterPersonality()
     {
-        return "Você é um mestre de RPG de mesa em uma campanha de Dungeons & Dragons. " +
-               "Você gosta de preparar as campanhas sem roteiro, apenas com criação de mundo, " +
-               "utilizando a máxima 'Crie mundos, não histórias'.";
+        return "You are a tabletop RPG master in a Dungeons & Dragons campaign. " +
+               "You like to prepare campaigns without a script, only with world building, " +
+               "using the motto 'Create worlds, not stories'.";
     }
 
     private static string GetAdditionalUpdatePrompt()
     {
-        return "Você é responsável por manter o estado atualizado de um mundo de RPG. \n" +
-               "Analise <plays> enviados pelo usuário e atualize apenas o que for necessário em <world-info>.\n" +
-               "Preserve tudo que estiver correto e atual. Não reescreva o mundo.\n";
+        return "You are responsible for keeping the current state of an RPG world updated. \n" +
+               "Analyze <plays> sent by the user and update only what is necessary in <world-info>.\n" +
+               "Preserve everything that is correct and current. Do not rewrite the world.\n";
     }
 
     private static string GetWorldInfoGenerationPrompt()
     {
-        return "Crie um mundo para uma campanha de Dungeons & Dragons. Precisa ser um mundo de fantasia original, " +
-               "coeso e detalhado. Evite clichês óbvios.";
+        return "Create a world for a Dungeons & Dragons campaign. It must be an original fantasy world, " +
+               "cohesive and detailed. Avoid obvious clichés.";
     }
 
     private static string GetWorldInfoUpdatePrompt()
     {
-        return "Analise cuidadosamente as informações dentro das tags <plays> e compare-as com o conteúdo " +
-               "existente em <world-info>. \nAtualize apenas os trechos de <world-info> que estiverem desatualizados " +
-               "ou que precisem refletir novas informações \nprovenientes de <plays>. \nMantenha todos os demais " +
-               "dados de <world-info> inalterados, preservando sua coerência e consistência narrativa. \nNão " +
-               "reescreva o mundo inteiro — apenas modifique o necessário para que <world-info> permaneça atualizado " +
-               "e fiel aos eventos recentes.\n Caso <world-info> esteja vazio, crie o mundo completamente do zero.";
+        return "Carefully analyze the information within the <plays> tags and compare it with the content " +
+               "existing in <world-info>. \nUpdate only the parts of <world-info> that are outdated " +
+               "or that need to reflect new information \nfrom <plays>. \nKeep all other " +
+               "<world-info> data unchanged, preserving its coherence and narrative consistency. \nDo not " +
+               "rewrite the entire world — only modify what is necessary so that <world-info> remains updated " +
+               "and faithful to recent events.\n If <world-info> is empty, create the world completely from scratch.";
     }
 
     private static string GetResponseDetailsPrompt()
     {
-        return "Abaixo segue uma explicação sobre como o mundo deve ser criado. \n" +
-               "Onde estiver indicando MIN-x, significa que devem ser gerados no mínimo 'x' objetos para o array." +
-               "Ex: MIN-3 - deve gerar no mínimo 3 objetos; MIN-5 - deve gerar no mínimo 5 objetos. \n\n" +
+        return "Below is an explanation of how the world should be created. \n" +
+               "Where it indicates MIN-x, it means that at least 'x' objects must be generated for the array." +
+               "Ex: MIN-3 - must generate at least 3 objects; MIN-5 - must generate at least 5 objects. \n\n" +
                "# CampaignStyle: enum ['Epic', 'Dark', 'Exploration', 'Politic', 'Mystery', 'Horror']\n" +
                "# MagicLevel: enum ['High', 'Medium', 'Low']\n" +
                "# SocietalEntities: MIN-3\n" +
                "## SocietalType: enum ['Faction', 'Alliance', 'Guild', 'Kingdom', 'Priest', 'Organization', 'Peoples']\n" +
-               "## Name: nome da sociedade\n" +
-               "## Background: História, objetivos, motivações internas, conflitos, inimigos e impacto no mundo.\n" +
+               "## Name: name of the society\n" +
+               "## Background: History, goals, internal motivations, conflicts, enemies and impact on the world.\n" +
                "# NPCs: MIN-5\n" +
-               "## Name: nome do NPC\n" +
-               "## Background: Breve história, papel social, origem e eventos marcantes de sua vida.\n" +
-               "## Race: Raça do NPC (humano, elfo, anão, tiefling etc.).\n" +
-               "## Profession: Ocupação atual ou papel que exerce no mundo (mago, comerciante, espião, rei, pesquisador etc.).\n" +
-               "## Personality: Traços de personalidade marcantes: comportamento, vícios, virtudes, medos e objetivos.\n" +
-               "# Events: MIN-5 Lista de eventos relevantes ocorridos no mundo recentemente ou no passado que " +
-               "influenciam a narrativa. Podem ser guerras, desastres, descobertas, assassinatos, aparições mágicas, profecias etc.\n" +
-               "# Consequences: MIN-5 Prevê resultados para possíveis ações do jogador\n" +
-               "## Action: Ação que pode acontecer no futuro\n" +
-               "## Consequence: Consequência caso o jogado realize a ação.\n" +
-               "# Locations: MIN-5 Locais significativos do mundo, pode ser cidades, ruínas, territórios, estabelecimentos e etc...\n" +
-               "## Name: nome da locação\n" +
-               "## Background: Descrição geral, história do local, reputação e importância.\n" +
-               "## MainPoints: MIN-3 Pontos de interesse dentro da localização (marcos, áreas importantes, estruturas, perigos).\n" +
-               "## CurrentEvents: MIN-3 O que está acontecendo no local no momento: conflitos, problemas, rumores, crises, oportunidades.\n" +
-               "# Treasures: MIN-3 Tesouros, relíquias ou artefatos importantes e únicos dentro do mundo.\n" +
-               "## Name: Nome do tesouro.\n" +
-               "## Background: Origem, lenda ou história por trás do item.\n" +
-               "## Location: Onde o tesouro pode ser encontrado atualmente.\n" +
-               "## Properties: Poderes, efeitos, utilidades ou maldições associadas ao item.\n";
+               "## Name: NPC name\n" +
+               "## Background: Brief history, social role, origin and remarkable life events.\n" +
+               "## Race: NPC race (human, elf, dwarf, tiefling etc.).\n" +
+               "## Profession: Current occupation or role in the world (mage, merchant, spy, king, researcher etc.).\n" +
+               "## Personality: Notable personality traits: behavior, vices, virtues, fears and goals.\n" +
+               "# Events: MIN-5 List of relevant events that occurred in the world recently or in the past that " +
+               "influence the narrative. Can be wars, disasters, discoveries, murders, magical apparitions, prophecies etc.\n" +
+               "# Consequences: MIN-5 Predict outcomes for possible player actions\n" +
+               "## Action: Action that may happen in the future\n" +
+               "## Consequence: Consequence if the player performs the action.\n" +
+               "# Locations: MIN-5 Significant world locations, can be cities, ruins, territories, establishments etc...\n" +
+               "## Name: location name\n" +
+               "## Background: General description, location history, reputation and importance.\n" +
+               "## MainPoints: MIN-3 Points of interest within the location (landmarks, important areas, structures, dangers).\n" +
+               "## CurrentEvents: MIN-3 What is happening at the location at the moment: conflicts, problems, rumors, crises, opportunities.\n" +
+               "# Treasures: MIN-3 Treasures, relics or important and unique artifacts within the world.\n" +
+               "## Name: Treasure name.\n" +
+               "## Background: Origin, legend or history behind the item.\n" +
+               "## Location: Where the treasure can currently be found.\n" +
+               "## Properties: Powers, effects, utilities or curses associated with the item.\n";
     }
 }

@@ -20,6 +20,7 @@ public class GetGameByIdAndUserUseCase(IGameRepository gameRepository) : IGetGam
             Id = game.Id,
             Name = game.Name,
             OwnerUserId = game.OwnerUserId,
+            GameLanguage = game.GameLanguage,
             LastPlayedAt = game.LastPlayedAt
         };
     }

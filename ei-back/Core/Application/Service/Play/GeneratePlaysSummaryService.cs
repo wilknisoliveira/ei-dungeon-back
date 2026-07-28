@@ -57,7 +57,8 @@ namespace ei_back.Core.Application.Service.Play
             
             var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
             var systemPrompt = $"<player-info>\n{realPlayer?.InfoToString()}\n</player-info> \n\n " +
-                               $"{GetAssistantPersonality()}";
+                               $"{GetAssistantPersonality()}\n" +
+                               $"<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
             promptList.Add(new AiPromptRequest(AiRole.System, systemPrompt));
             
             var lastPlays = "# Last Plays\n";
@@ -105,19 +106,19 @@ namespace ei_back.Core.Application.Service.Play
 
         private static string GetAssistantPersonality()
         {
-            return "Você está observando uma partida de RPG de mesa e é responsável por fazer resumos das partidas.";
+            return "You are observing a tabletop RPG match and are responsible for creating match summaries.";
         }
 
         private static string PromptCommand()
         {
             const int minOutputTokens = 500;
             // LLMs better understand characters instead of tokens. So it's why we convert it by inference.
-            return $"Faça um resumo de todas as informações passadas, inclusive das últimas jogadas localizadas " +
-                   $"dentro das tags <play>. O resumo gerado deve ter no mínimo {minOutputTokens * 4} caracteres. " +
-                   $"O texto a ser gerado será utilizado posteriormente por uma IA generativa como base de dados " +
-                   $"para geração de novos resumos, ou seja, a linguagem e síntese utilizada deve ser direcionado " +
-                   $"para leitura por IA. Não se preocupe em economizar tokens, priorizando o registro da história " +
-                   $"e os detalhes importantes.";
+            return $"Create a summary of all the information provided, including the recent plays located " +
+                   $"within the <play> tags. The generated summary must have at least {minOutputTokens * 4} characters. " +
+                   $"The text to be generated will later be used by a generative AI as a database " +
+                   $"for generating new summaries, meaning the language and synthesis used should be directed " +
+                   $"toward AI reading. Don't worry about saving tokens, prioritize recording the story " +
+                   $"and important details.";
         }
     }
 }

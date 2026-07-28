@@ -21,7 +21,8 @@ public class PlayAnalyzerService(ILogger<PlayAnalyzerService> logger, IGenAi gen
 
         var systemPrompt = $"<master-instruction>\n{GetAssistantPersonality()}\n</master-instruction>\n" +
                            $"<player-info>\n{realPlayer!.InfoToString()}\n</player-info>\n" + 
-                           $"<world-info>\n{game.WorldInfo}\n</world-info>\n";
+                           $"<world-info>\n{game.WorldInfo}\n</world-info>\n" +
+                           $"<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
         
         var newPlay = plays.Where(x => x.Player.Type.Equals(PlayerType.RealPlayer))
             .OrderByDescending(x => x.CreatedAt).First();
@@ -66,45 +67,45 @@ public class PlayAnalyzerService(ILogger<PlayAnalyzerService> logger, IGenAi gen
     private string GetAssistantPersonality()
     {
         return
-            "Você é responsável por analisar a jogada do usuário em uma partida de Dungeons & Dragons. Sua resposta" +
-            "deve corresponder a uma das seguintes opções:\n" +
-            "- Ok: Jogada válida, plausível, segue as regras e a lógica narrativa;\n" +
-            "- InvalidPlay: Jogada que tenta quebrar as regras fundamentais, como controlar NPCs, definir " +
-            "consequências diretamente, alterar o mundo sem permissão, assumir poderes irreais, burlar a " +
-            "coerência narrativa;\n" +
-            "- RollDice: Jogada possível, mas com risco e incerteza. Exige rolagem de dados;\n" +
-            "- ClarificationNeeded: Quando a jogada é ambígua ou incompleta. Ex: “Tento me esconder” <- onde? " +
-            "como? de quem? | “Ataco ele” <- qual arma? qual alvo? | “Procuro coisas úteis” <- onde? " +
-            "como você procura?\n" +
-            "- PlayerDied: Quando a jogada do player irá levar o personagem a morte, seja por auto sacrifício, " +
-            "ou devido as circunstâncias da história.\n\n" +
-            "Além de responder o resultado, esclareça o motivo da sua análise. Ex:\n" +
-            "{'Result': 'InvalidPlay', 'Reason': 'É impossível para o personagem viajar entre cidades " +
-            "em apenas 5 minutos.'}\n\n" +
-            "Caso a escolha seja RollDice, a resposta também deverá indicar a habilidade necessária para a ação e" +
-            "o valor referente a classe de dificuldade. Ex:\n" +
-            "{'result': 'RollDice', 'reason': 'Um ataque ao inimigo sob estas circustâncias é uma jogada " +
-            "arriscada', 'skill': 'Strength', 'difficultyClass': 15}\n\n" +
-            "Segue abaixo uma relação para facilitar a escolha da skill:" +
-            "Força física -> Strength\n" +
-            "Precisão, reflexo, furtividade -> Dexterity\n" +
-            "Resistência do corpo -> Constitution\n" +
-            "Lógica, conhecimento -> Intelligence\n" +
-            "Percepção, intuição -> Wisdom\n" +
-            "Interação social -> Charisma\n\n" +
-            "Segue abaixo uma relação para facilitar a escolha do valor do DC(difficultyClass):" +
-            "5 -> Muito fácil -> Tarefas triviais, quase impossível falhar\n" +
-            "10 -> Fácil -> Desafios leves, maioria dos personagens consegue.\n" +
-            "12 -> Razoável -> Exige alguma habilidade.\n" +
-            "15 -> Médio -> Desafio significativo, heróis conseguem às vezes.\n" +
-            "18 -> Difícil -> Requer alta habilidade, planejamento ou sorte.\n" +
-            "20 -> Muito difícil -> Sucesso raro.\n" +
-            "25 -> Extremamente difícil -> Algo extraordinário.\n";
+            "You are responsible for analyzing the user's play in a Dungeons & Dragons match. Your response" +
+            " must correspond to one of the following options:\n" +
+            "- Ok: Valid play, plausible, follows the rules and narrative logic;\n" +
+            "- InvalidPlay: Play that tries to break fundamental rules, such as controlling NPCs, directly " +
+            "defining consequences, altering the world without permission, assuming unrealistic powers, " +
+            "bypassing narrative coherence;\n" +
+            "- RollDice: Possible play, but with risk and uncertainty. Requires dice rolling;\n" +
+            "- ClarificationNeeded: When the play is ambiguous or incomplete. Ex: \"I try to hide\" <- where? " +
+            "how? from whom? | \"I attack him\" <- which weapon? which target? | \"I look for useful things\" <- where? " +
+            "how do you search?\n" +
+            "- PlayerDied: When the player's play will lead the character to death, either by self-sacrifice " +
+            "or due to the circumstances of the story.\n\n" +
+            "Besides responding with the result, explain the reason for your analysis. Ex:\n" +
+            "{'Result': 'InvalidPlay', 'Reason': 'It is impossible for the character to travel between cities " +
+            "in just 5 minutes.'}\n\n" +
+            "If the choice is RollDice, the response must also indicate the skill needed for the action and " +
+            "the difficulty class value. Ex:\n" +
+            "{'result': 'RollDice', 'reason': 'An attack on the enemy under these circumstances is a risky " +
+            "play', 'skill': 'Strength', 'difficultyClass': 15}\n\n" +
+            "Below is a reference to help choose the skill:" +
+            "Physical strength -> Strength\n" +
+            "Precision, reflexes, stealth -> Dexterity\n" +
+            "Body endurance -> Constitution\n" +
+            "Logic, knowledge -> Intelligence\n" +
+            "Perception, intuition -> Wisdom\n" +
+            "Social interaction -> Charisma\n\n" +
+            "Below is a reference to help choose the DC (difficultyClass) value:" +
+            "5 -> Very easy -> Trivial tasks, almost impossible to fail\n" +
+            "10 -> Easy -> Light challenges, most characters can handle.\n" +
+            "12 -> Moderate -> Requires some skill.\n" +
+            "15 -> Medium -> Significant challenge, heroes sometimes succeed.\n" +
+            "18 -> Hard -> Requires high skill, planning or luck.\n" +
+            "20 -> Very hard -> Rare success.\n" +
+            "25 -> Extremely hard -> Something extraordinary.\n";
     }
 
     private string GetUserPrompt()
     {
-        return "Analise a jogada do usuário abaixo em <user-play>, considerando as informações do mundo <world-info>, o resumo das" +
-               "jogadas antigas em '# Summary', bem como as últimas jogadas em <last-plays>.";
+        return "Analyze the user's play below in <user-play>, considering the world information in <world-info>, the summary of " +
+               "previous plays in '# Summary', as well as the recent plays in <last-plays>.";
     }
 }

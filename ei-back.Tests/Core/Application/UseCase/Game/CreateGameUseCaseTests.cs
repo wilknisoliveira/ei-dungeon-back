@@ -66,7 +66,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Game
 
             A.CallTo(() => _userRepository.FindByUserName("testuser", CancellationToken.None))
                 .Returns(Task.FromResult<UserEntity?>(user));
-            A.CallTo(() => _upsertWorldInfoService.Handler(A<string>._, CancellationToken.None))
+            A.CallTo(() => _upsertWorldInfoService.Handler(A<string>._, A<GameLanguage>._, CancellationToken.None))
                 .Returns(Task.FromResult("World info text"));
             A.CallTo(() => _gameRepository.CreateAsync(A<ei_back.Core.Domain.Entity.Game>._, CancellationToken.None))
                 .Returns(Task.FromResult(createdGame));
