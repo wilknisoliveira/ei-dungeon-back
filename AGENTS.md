@@ -1,11 +1,5 @@
 # EI Dungeon Backend — AGENTS.md
 
-## MANDATORY — Read Constitution First
-**Always read `.specify/memory/constitution.md` before any task, implementation, or analysis.**
-
-## MANDATORY — Keep Constitution Updated
-**After any implementation, review and update `.specify/memory/constitution.md` if any information is outdated.**
-
 ## MANDATORY — Read Architecture First
 **Always read `ARCHITECTURE.md` before any task, implementation, or analysis.**
 
@@ -72,10 +66,4 @@ dotnet test .\ei-back.Tests\ei-back.Tests.csproj --filter "FullyQualifiedName~Us
 - `AddInfraHttpClients` is a no-op stub.
 - `appsettings.*.json` contains placeholder values — use User Secrets or env vars in development.
 
-<!-- SPECKIT START -->
-Active plan: `specs/002-auth-improvements/plan.md`
-Feature: Auth improvements — BCrypt password hashing, refresh token rotation, session
-logout, redesigned password change, rate limiting, and bug fixes. See the plan for
-detailed context, constitution gates, project structure, and implementation quickstart.
-[x] All 41 tasks complete. Build 0 errors/0 warnings, 5/5 tests pass.
-<!-- SPECKIT END -->
+

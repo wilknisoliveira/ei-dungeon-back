@@ -491,6 +491,7 @@ LOCAL_GUIDES.md
 .opencode/
 specs/*
 .specify/feature.json
+.aipartner
 
 # Compliance
 non-conformities.md
