@@ -1,19 +1,12 @@
-﻿using ei_back.Core.Domain.Entity;
+﻿using ei_back.Core.Domain.Enums;
 
 namespace ei_back.Core.Application.UseCase.Play.Dtos
 {
     public record PlayDtoResponse
     {
         public Guid Id { get; set; }
-        public PlayerDtoResponse PlayerDtoResponse { get; set; }
-        public string Prompt { get; set; }
+        public PlayType PlayType { get; set; }
+        public string Response { get; set; }
         public DateTimeOffset CreatedAt { get; set; }
-    }
-
-    public record PlayerDtoResponse
-    {
-        public Guid Id { get; set; }
-        public string name { get; set; }
-        public PlayerType Type { get; set; }
     }
 }

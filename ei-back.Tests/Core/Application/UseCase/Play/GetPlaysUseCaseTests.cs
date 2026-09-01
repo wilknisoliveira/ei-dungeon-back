@@ -4,6 +4,7 @@ using ei_back.Core.Application.UseCase.Play;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
 using ei_back.Core.Application.Utils;
+using ei_back.Core.Domain.Enums;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using PlayEntity = ei_back.Core.Domain.Entity.Play;
 using UserEntity = ei_back.Core.Domain.Entity.User;
@@ -35,46 +36,34 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             var user = new UserEntity("testuser", "Test User", "test@test.com", "hash", ei_back.Core.Domain.Enums.UserRole.CommonUser);
             typeof(ei_back.Core.Domain.Entity.Base).GetProperty(nameof(ei_back.Core.Domain.Entity.Base.Id))!.SetValue(user, userId);
 
-            var player = new ei_back.Core.Domain.Entity.Player("Hero", "A hero", ei_back.Core.Domain.Entity.PlayerType.RealPlayer);
-            typeof(ei_back.Core.Domain.Entity.Base).GetProperty(nameof(ei_back.Core.Domain.Entity.Base.Id))!.SetValue(player, Guid.NewGuid());
-
             var game = new ei_back.Core.Domain.Entity.Game(gameId, "Test Game");
             var plays = new List<PlayEntity>
             {
-                new(game, player, "First play"),
-                new(game, player, "Second play")
+                new(game, PlayType.Protagonist, "First play"),
+                new(game, PlayType.GameMaster, "Second play")
             };
 
             var playDtos = plays.Select(p => new PlayDtoResponse
             {
                 Id = Guid.NewGuid(),
-                Prompt = p.Prompt,
-                CreatedAt = p.CreatedAt,
-                PlayerDtoResponse = new PlayerDtoResponse
-                {
-                    Id = player.Id,
-                    name = player.Name,
-                    Type = player.Type
-                }
+                PlayType = p.PlayType,
+                Response = p.Response,
+                CreatedAt = p.CreatedAt
             }).ToList();
 
             A.CallTo(() => _userRepository.FindByUserName("testuser", CancellationToken.None))
                 .Returns(Task.FromResult<UserEntity?>(user));
             A.CallTo(() => _gameRepository.CheckIfExistGameByUser(gameId, userId, CancellationToken.None))
                 .Returns(Task.FromResult(true));
-            A.CallTo(() => _playRepository.GetPlaysByGameAndSizeButSystemPlay(gameId, 10, 0, "asc", CancellationToken.None))
+            A.CallTo(() => _playRepository.GetPlaysByGameAndSizeButSummaryPlay(gameId, 10, 0, "asc", CancellationToken.None))
                 .Returns(Task.FromResult(plays));
-            A.CallTo(() => _playRepository.CountPlaysByGameButSystemPlay(gameId, CancellationToken.None))
+            A.CallTo(() => _playRepository.CountPlaysByGameButSummaryPlay(gameId, CancellationToken.None))
                 .Returns(Task.FromResult(2));
 
             A.CallTo(() => _mapper.Map<PlayDtoResponse>(plays[0]))
                 .Returns(playDtos[0]);
             A.CallTo(() => _mapper.Map<PlayDtoResponse>(plays[1]))
                 .Returns(playDtos[1]);
-            A.CallTo(() => _mapper.Map<PlayerDtoResponse>(plays[0].Player))
-                .Returns(playDtos[0].PlayerDtoResponse);
-            A.CallTo(() => _mapper.Map<PlayerDtoResponse>(plays[1].Player))
-                .Returns(playDtos[1].PlayerDtoResponse);
 
             var result = await _useCase.Handler(gameId, "asc", 10, 1, "testuser", CancellationToken.None);
 

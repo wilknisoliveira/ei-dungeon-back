@@ -86,7 +86,7 @@ namespace ei_back.Core.Application.UseCase.Play
                 yield break;
             }
 
-            var lastSummary = await _playRepository.GetLastPlayByPlayerTypeAndGameId(game.Id, PlayerType.System, cancellationToken);
+            var lastSummary = await _playRepository.GetLastPlayByPlayTypeAndGameId(game.Id, PlayType.Summary, cancellationToken);
             if (lastSummary != null)
             {
                 List<Domain.Entity.Play> nextPlays = await _playRepository.GetPlayWhereCreatedAtIsUpperThan(game.Id, lastSummary.CreatedAt, cancellationToken);
@@ -155,10 +155,7 @@ namespace ei_back.Core.Application.UseCase.Play
                 yield break;
             }
 
-            var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer)) ??
-                throw new InternalServerErrorException($"Something went wrong while attempting to get the real player info");
-
-            var newPlay = new Domain.Entity.Play(game, realPlayer, playDtoRequest.Prompt);
+            var newPlay = new Domain.Entity.Play(game, PlayType.Protagonist, playDtoRequest.Prompt);
             _ = await _playRepository.CreateAsync(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the play");
             plays.Add(newPlay);
@@ -171,9 +168,6 @@ namespace ei_back.Core.Application.UseCase.Play
             {
                 game.KillPlayer();
             }
-            
-            var masterPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
-                throw new NotFoundException($"No Master player was found to the game {game.Id}");
             
             var completedMasterResponse = "";
 
@@ -202,7 +196,7 @@ namespace ei_back.Core.Application.UseCase.Play
                 }
             }
 
-            var masterPlay = new Domain.Entity.Play(game, masterPlayer, completedMasterResponse);
+            var masterPlay = new Domain.Entity.Play(game, PlayType.GameMaster, completedMasterResponse);
 
             _ = await _playRepository.CreateAsync(masterPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");
@@ -234,21 +228,10 @@ namespace ei_back.Core.Application.UseCase.Play
                     using var cancellationTokenService = new CancellationTokenSource(timeSpan);
 
                     using var summaryScope = _serviceProvider.CreateScope();
-                    //using var worldInfoScope = _serviceProvider.CreateScope();
                     var newGeneratePlaysSummaryService = summaryScope.ServiceProvider.GetRequiredService<IGeneratePlaysSummaryService>();
-                    //var upsertWorldInfoService = worldInfoScope.ServiceProvider.GetRequiredService<IUpsertWorldInfoService>();
                         
                     await newGeneratePlaysSummaryService.Handler(game.Id, plays, cancellationTokenService.Token);
-                    //var worldInfoTask = upsertWorldInfoService.Handler(game.Id, plays, cancellationTokenService.Token);
-                        
-                    //await Task.WhenAll(summaryTask, worldInfoTask);
                 }, cancellationTokenTask.Token);
-
-                // Other ways to use async operations without create a new context:
-                // For cpu heavy operations
-                // _ = Task.Run(async () => await _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, CancellationToken.None), CancellationToken.None);
-                // For operatons with external services like http or DbContext:
-                // _ = _generatePlaysResumeService.Handler(game.Plays, game, playerList.Content, ctsg.Token);
             }
         }
 
@@ -258,10 +241,8 @@ namespace ei_back.Core.Application.UseCase.Play
             AnalyzerDtoResponse analyzerDtoResponse,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
-
             var systemPrompt = $"<master-instruction>\n{MasterPlayCommand()}\n</master-instruction>\n" +
-                               $"<player-info>\n{realPlayer!.InfoToString()}\n</player-info>\n" + 
+                               $"<player-info>\n{game.InfoToString()}\n</player-info>\n" + 
                                $"<world-info>\n{game.WorldInfo}\n</world-info>\n" +
                                $"<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
             
@@ -269,18 +250,16 @@ namespace ei_back.Core.Application.UseCase.Play
 
             foreach (var play in plays)
             {
-                var playerType = play.Player.Type;
-
-                switch (playerType)
+                switch (play.PlayType)
                 {
-                    case PlayerType.System:
-                        systemPrompt += $"\n<summary>\n{play.Prompt}\n</summary>";
+                    case PlayType.Summary:
+                        systemPrompt += $"\n<summary>\n{play.Response}\n</summary>";
                         break;
-                    case PlayerType.RealPlayer:
-                        promptList.Add(new AiPromptRequest(AiRole.User, play.Prompt));
+                    case PlayType.Protagonist:
+                        promptList.Add(new AiPromptRequest(AiRole.User, play.Response));
                         break;
-                    case PlayerType.Master:
-                        promptList.Add(new AiPromptRequest(AiRole.Assistant, play.Prompt));
+                    case PlayType.GameMaster:
+                        promptList.Add(new AiPromptRequest(AiRole.Assistant, play.Response));
                         break;
                 }
             }
@@ -300,7 +279,7 @@ namespace ei_back.Core.Application.UseCase.Play
                     // Dice d20
                     var dicesResult = random.Next(1, 21);
                     var skill = analyzerDtoResponse.Skill ?? Skill.Intelligence;
-                    var modifier = realPlayer.GetModifier(skill);
+                    var modifier = game.GetModifier(skill);
                     var result = (dicesResult + modifier) >= dicesResult ? "SUCCESS" : "FAIL";
 
                     analysis += $"The new play is critical for the following reason: {analyzerDtoResponse.Reason}\n\n" +
@@ -388,7 +367,7 @@ namespace ei_back.Core.Application.UseCase.Play
 
             var prompts = "";
                 
-            plays.ForEach(x => prompts += x.Prompt + " ");
+            plays.ForEach(x => prompts += x.Response + " ");
 
             return encoder.CountTokens(prompts);
         }

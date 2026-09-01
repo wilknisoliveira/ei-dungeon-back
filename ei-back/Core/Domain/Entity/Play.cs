@@ -1,33 +1,33 @@
-﻿namespace ei_back.Core.Domain.Entity
+﻿using ei_back.Core.Domain.Enums;
+
+namespace ei_back.Core.Domain.Entity
 {
     public class Play : Base
     {
-        public Play(Guid gameId, Guid playerId, string prompt)
+        public Play(Guid gameId, PlayType playType, string response)
         {
             GameId = gameId;
-            PlayerId = playerId;
-            Prompt = prompt;
+            PlayType = playType;
+            Response = response;
         }
 
-        public Play(Game game, Player player, string prompt)
+        public Play(Game game, PlayType playType, string response)
         {
             GameId = game.Id;
             Game = game;
-            PlayerId = player.Id;
-            Player = player;
-            Prompt = prompt;
+            PlayType = playType;
+            Response = response;
             SetCreatedDate(DateTimeOffset.UtcNow);
         }
 
         public Game Game { get; private set; }
         public Guid GameId { get; private set; }
-        public Player Player { get; private set; }
-        public Guid PlayerId { get; private set; }
-        public string Prompt { get; private set; }
+        public PlayType PlayType { get; private set; }
+        public string Response { get; private set; }
 
-        public void SetPrompt(string prompt)
+        public void SetResponse(string response)
         {
-            Prompt = prompt;
+            Response = response;
         }
     }
 }

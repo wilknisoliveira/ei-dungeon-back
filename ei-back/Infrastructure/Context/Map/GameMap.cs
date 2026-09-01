@@ -21,6 +21,18 @@ namespace ei_back.Infrastructure.Context.Map
                 .HasColumnName("last_played_at")
                 .HasColumnType("timestamp with time zone");
 
+            builder.Property(x => x.ProtagonistName).HasColumnName("protagonist_name").IsRequired();
+            builder.Property(x => x.ProtagonistDescription).HasColumnName("protagonist_description").IsRequired();
+            builder.Property(x => x.ProtagonistRace)
+                .HasColumnName("protagonist_race")
+                .HasConversion<string>();
+            builder.Property(x => x.ProtagonistStrength).HasColumnName("protagonist_strength");
+            builder.Property(x => x.ProtagonistDexterity).HasColumnName("protagonist_dexterity");
+            builder.Property(x => x.ProtagonistIntelligence).HasColumnName("protagonist_intelligence");
+            builder.Property(x => x.ProtagonistConstitution).HasColumnName("protagonist_constitution");
+            builder.Property(x => x.ProtagonistCharisma).HasColumnName("protagonist_charisma");
+            builder.Property(x => x.ProtagonistWisdom).HasColumnName("protagonist_wisdom");
+
             builder.HasOne(x => x.OwnerUser)
                 .WithMany(x => x.Games)
                 .HasForeignKey(x => x.OwnerUserId)

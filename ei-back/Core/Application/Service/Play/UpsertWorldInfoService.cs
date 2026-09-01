@@ -46,23 +46,22 @@ public class UpsertWorldInfoService(
     public async Task Handler(Guid gameId, List<Domain.Entity.Play> plays, CancellationToken cancellationToken)
     {
         var game = await _gameRepository.FindByIdAsync(gameId, cancellationToken: cancellationToken);
-        var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
         
         var systemPrompt = $"{GetMasterPersonality()} \n {GetAdditionalUpdatePrompt()}";
-        systemPrompt += "\n\n<player>\n" + realPlayer?.InfoToString() + "\n" + @"<\/player>" + "\n";
+        systemPrompt += "\n\n<player>\n" + game.InfoToString() + "\n" + @"<\/player>" + "\n";
         systemPrompt += $"\n<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
         
         var assistantPrompt = $"<world-info>\n{game.WorldInfo}\n</world-info>";
         
         var lastPlays = "# Last Plays\n";
-        foreach (var play in plays.Where(x => !x.Player.Type.Equals(PlayerType.System)))
+        foreach (var play in plays.Where(x => !x.PlayType.Equals(PlayType.Summary)))
         {
-            if (play.Player.Type.Equals(PlayerType.Master))
+            if (play.PlayType.Equals(PlayType.GameMaster))
                 lastPlays += $"## Master Table: \n";
             else
-                lastPlays += $"## {play.Player.Name}(player): \n";
+                lastPlays += $"## {game.ProtagonistName}(player): \n";
 
-            lastPlays += play.Prompt + "\n\n";
+            lastPlays += play.Response + "\n\n";
         }
         
         var userPrompt = $"<plays>\n{lastPlays}\n</plays> \n\n {GetWorldInfoUpdatePrompt()}";

@@ -2,6 +2,7 @@
 using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Domain.Entity;
+using ei_back.Core.Domain.Enums;
 using ei_back.Infrastructure.Context.Interfaces;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using Microsoft.Extensions.Configuration;
@@ -43,33 +44,29 @@ namespace ei_back.Core.Application.Service.Play
             CancellationToken cancellationToken)
         {
             var game = await _gameRepository.FindByIdAsync(gameId, cancellationToken: cancellationToken);
-            
-            var systemPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.System)) ??
-                throw new InternalServerErrorException("Something went wrong while attempting to get the system player entity");
 
             // It's necessary instantiate the Play at the beginning to ensure the createdAt date
-            var newPlay = new Domain.Entity.Play(game, systemPlayer, "");
+            var newPlay = new Domain.Entity.Play(game, PlayType.Summary, "");
             
             List<AiPromptRequest> promptList = [];
-            var lastSystemPlay = plays.FirstOrDefault(x => x.Player.Type.Equals(PlayerType.System));
+            var lastSystemPlay = plays.FirstOrDefault(x => x.PlayType.Equals(PlayType.Summary));
             if (lastSystemPlay != null)
-                promptList.Add(new AiPromptRequest(AiRole.Assistant, lastSystemPlay.Prompt));
+                promptList.Add(new AiPromptRequest(AiRole.Assistant, lastSystemPlay.Response));
             
-            var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
-            var systemPrompt = $"<player-info>\n{realPlayer?.InfoToString()}\n</player-info> \n\n " +
+            var systemPrompt = $"<player-info>\n{game.InfoToString()}\n</player-info> \n\n " +
                                $"{GetAssistantPersonality()}\n" +
                                $"<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
             promptList.Add(new AiPromptRequest(AiRole.System, systemPrompt));
             
             var lastPlays = "# Last Plays\n";
-            foreach (var play in plays.Where(x => !x.Player.Type.Equals(PlayerType.System)))
+            foreach (var play in plays.Where(x => !x.PlayType.Equals(PlayType.Summary)))
             {
-                if (play.Player.Type.Equals(PlayerType.Master))
+                if (play.PlayType.Equals(PlayType.GameMaster))
                     lastPlays += $"## Master Table: \n";
                 else
-                    lastPlays += $"## {play.Player.Name}(player): \n";
+                    lastPlays += $"## {game.ProtagonistName}(player): \n";
 
-                lastPlays += play.Prompt + "\n\n";
+                lastPlays += play.Response + "\n\n";
             }
 
             var userPrompt = $"<plays>\n{lastPlays}\n</plays> \n\n {PromptCommand()}";
@@ -92,7 +89,7 @@ namespace ei_back.Core.Application.Service.Play
                 return;
             }
 
-            newPlay.SetPrompt(iaResponse);
+            newPlay.SetResponse(iaResponse);
 
             _ = await _playRepository.CreateAsync(newPlay, cancellationToken) ??
                 throw new InternalServerErrorException($"Something went wrong while attempting to create the master play");

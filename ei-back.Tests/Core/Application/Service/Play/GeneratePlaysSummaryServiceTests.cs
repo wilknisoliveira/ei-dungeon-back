@@ -38,10 +38,9 @@ namespace ei_back.Tests.Core.Application.Service.Play
         {
             var gameId = Guid.NewGuid();
             var game = CreateGameWithPlayers(gameId, GameLanguage.English);
-            var realPlayer = game.Players.First(x => x.Type == PlayerType.RealPlayer);
 
-            var userPlay = new PlayEntity(game, realPlayer, "I search the treasure room");
-            var masterPlay = new PlayEntity(game, game.Players.First(x => x.Type == PlayerType.Master), "You find a chest");
+            var userPlay = new PlayEntity(game, PlayType.Protagonist, "I search the treasure room");
+            var masterPlay = new PlayEntity(game, PlayType.GameMaster, "You find a chest");
             var plays = new List<PlayEntity> { userPlay, masterPlay };
 
             var summaryText = "The player searched the treasure room and found a chest with gold.";
@@ -66,9 +65,8 @@ namespace ei_back.Tests.Core.Application.Service.Play
         {
             var gameId = Guid.NewGuid();
             var game = CreateGameWithPlayers(gameId);
-            var realPlayer = game.Players.First(x => x.Type == PlayerType.RealPlayer);
 
-            var userPlay = new PlayEntity(game, realPlayer, "I look around");
+            var userPlay = new PlayEntity(game, PlayType.Protagonist, "I look around");
             var plays = new List<PlayEntity> { userPlay };
 
             A.CallTo(() => _gameRepository.FindByIdAsync(gameId, A<CancellationToken>._))
@@ -87,9 +85,8 @@ namespace ei_back.Tests.Core.Application.Service.Play
         {
             var gameId = Guid.NewGuid();
             var game = CreateGameWithPlayers(gameId);
-            var realPlayer = game.Players.First(x => x.Type == PlayerType.RealPlayer);
 
-            var userPlay = new PlayEntity(game, realPlayer, "I open the door");
+            var userPlay = new PlayEntity(game, PlayType.Protagonist, "I open the door");
             var plays = new List<PlayEntity> { userPlay };
 
             A.CallTo(() => _gameRepository.FindByIdAsync(gameId, A<CancellationToken>._))
@@ -108,9 +105,8 @@ namespace ei_back.Tests.Core.Application.Service.Play
         {
             var gameId = Guid.NewGuid();
             var game = CreateGameWithPlayers(gameId, GameLanguage.Portuguese);
-            var realPlayer = game.Players.First(x => x.Type == PlayerType.RealPlayer);
 
-            var userPlay = new PlayEntity(game, realPlayer, "Eu procuro tesouros");
+            var userPlay = new PlayEntity(game, PlayType.Protagonist, "Eu procuro tesouros");
             var plays = new List<PlayEntity> { userPlay };
 
             var summaryText = "Resumo da partida.";
@@ -140,20 +136,7 @@ namespace ei_back.Tests.Core.Application.Service.Play
             typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(game, gameId);
             game.SetWorldInfo("A fantasy world");
             game.SetGameLanguage(language);
-
-            var realPlayer = new Player(
-                "Hero", "Brave adventurer", CharacterRace.Human, PlayerType.RealPlayer);
-            typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(realPlayer, Guid.NewGuid());
-
-            var master = new Player(
-                "Table Master", "RPG Table Master", PlayerType.Master);
-            typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(master, Guid.NewGuid());
-
-            var system = new Player(
-                "System", "System", PlayerType.System);
-            typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(system, Guid.NewGuid());
-
-            game.SetPlayers(new List<Player> { realPlayer, master, system });
+            game.SetProtagonistInfo("Hero", "Brave adventurer", CharacterRace.Human);
 
             return game;
         }

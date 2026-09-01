@@ -75,9 +75,8 @@ namespace ei_back.Tests.Core.Application.Service.Play
         {
             var gameId = Guid.NewGuid();
             var game = CreateGameWithPlayers(gameId, GameLanguage.English);
-            var realPlayer = game.Players.First(x => x.Type == PlayerType.RealPlayer);
 
-            var play = new PlayEntity(game, realPlayer, "I explore the forest");
+            var play = new PlayEntity(game, PlayType.Protagonist, "I explore the forest");
             var plays = new List<PlayEntity> { play };
 
             var updatedWorldInfo = "{\"CampaignStyle\":\"Exploration\"}";
@@ -101,9 +100,8 @@ namespace ei_back.Tests.Core.Application.Service.Play
         {
             var gameId = Guid.NewGuid();
             var game = CreateGameWithPlayers(gameId);
-            var realPlayer = game.Players.First(x => x.Type == PlayerType.RealPlayer);
 
-            var play = new PlayEntity(game, realPlayer, "I look around");
+            var play = new PlayEntity(game, PlayType.Protagonist, "I look around");
             var plays = new List<PlayEntity> { play };
 
             A.CallTo(() => _gameRepository.FindByIdAsync(gameId, A<CancellationToken>._))
@@ -122,9 +120,8 @@ namespace ei_back.Tests.Core.Application.Service.Play
         {
             var gameId = Guid.NewGuid();
             var game = CreateGameWithPlayers(gameId);
-            var realPlayer = game.Players.First(x => x.Type == PlayerType.RealPlayer);
 
-            var play = new PlayEntity(game, realPlayer, "I open the door");
+            var play = new PlayEntity(game, PlayType.Protagonist, "I open the door");
             var plays = new List<PlayEntity> { play };
 
             A.CallTo(() => _gameRepository.FindByIdAsync(gameId, A<CancellationToken>._))
@@ -144,20 +141,7 @@ namespace ei_back.Tests.Core.Application.Service.Play
             typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(game, gameId);
             game.SetWorldInfo("A fantasy world");
             game.SetGameLanguage(language);
-
-            var realPlayer = new Player(
-                "Hero", "Brave adventurer", CharacterRace.Human, PlayerType.RealPlayer);
-            typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(realPlayer, Guid.NewGuid());
-
-            var master = new Player(
-                "Table Master", "RPG Table Master", PlayerType.Master);
-            typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(master, Guid.NewGuid());
-
-            var system = new Player(
-                "System", "System", PlayerType.System);
-            typeof(Base).GetProperty(nameof(Base.Id))!.SetValue(system, Guid.NewGuid());
-
-            game.SetPlayers(new List<Player> { realPlayer, master, system });
+            game.SetProtagonistInfo("Hero", "Brave adventurer", CharacterRace.Human);
 
             return game;
         }

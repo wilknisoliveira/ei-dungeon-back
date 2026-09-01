@@ -4,7 +4,7 @@ using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Game.Dtos;
 using ei_back.Core.Application.UseCase.Game.Interfaces;
-using ei_back.Core.Domain.DomainExceptions.Player;
+using ei_back.Core.Domain.DomainExceptions.Game;
 using ei_back.Core.Domain.Entity;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 
@@ -41,21 +41,14 @@ namespace ei_back.Core.Application.UseCase.Game
             
             game.SetOwnerUser(user);
 
-            var players = new List<Player>();
-            var systemPlayer = new Player("System", "System", PlayerType.System);
-            players.Add(systemPlayer);
-            
-            Player master = new("Table Master", "RPG Table Master", PlayerType.Master);
-            players.Add(master);
-            
-            var realPlayer = new Player(
-                gameDtoRequest.CharacterName, 
-                gameDtoRequest.CharacterDescription, 
-                gameDtoRequest.Race, 
-                PlayerType.RealPlayer);
+            game.SetProtagonistInfo(
+                gameDtoRequest.ProtagonistName,
+                gameDtoRequest.ProtagonistDescription,
+                gameDtoRequest.ProtagonistRace);
+
             try
             {
-                realPlayer.SetSkillPoints(
+                game.SetSkillPoints(
                     gameDtoRequest.Skills.Strength,
                     gameDtoRequest.Skills.Dexterity,
                     gameDtoRequest.Skills.Intelligence, 
@@ -67,13 +60,9 @@ namespace ei_back.Core.Application.UseCase.Game
             {
                 throw new BadRequestException(ex.Message);
             }
-            
-            players.Add(realPlayer);
-            
-            game.SetPlayers(players);
 
             game.SetGameLanguage(gameDtoRequest.GameLanguage);
-            game.SetWorldInfo(await _upsertWorldInfoService.Handler(realPlayer.InfoToString(), gameDtoRequest.GameLanguage, cancellationToken));
+            game.SetWorldInfo(await _upsertWorldInfoService.Handler(game.InfoToString(), gameDtoRequest.GameLanguage, cancellationToken));
 
             game.SetCreatedDate(DateTimeOffset.UtcNow);
             var gameResponse = await _gameRepository.CreateAsync(game, cancellationToken);

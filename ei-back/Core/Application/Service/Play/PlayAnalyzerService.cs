@@ -2,6 +2,7 @@
 using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Domain.Entity;
+using ei_back.Core.Domain.Enums;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,37 +18,35 @@ public class PlayAnalyzerService(ILogger<PlayAnalyzerService> logger, IGenAi gen
         Domain.Entity.Game game, 
         CancellationToken cancellationToken)
     {
-        var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
-
         var systemPrompt = $"<master-instruction>\n{GetAssistantPersonality()}\n</master-instruction>\n" +
-                           $"<player-info>\n{realPlayer!.InfoToString()}\n</player-info>\n" + 
+                           $"<player-info>\n{game.InfoToString()}\n</player-info>\n" + 
                            $"<world-info>\n{game.WorldInfo}\n</world-info>\n" +
                            $"<language>\n{LanguageInstructionHelper.GetLanguageInstruction(game.GameLanguage)}\n</language>\n";
         
-        var newPlay = plays.Where(x => x.Player.Type.Equals(PlayerType.RealPlayer))
+        var newPlay = plays.Where(x => x.PlayType.Equals(PlayType.Protagonist))
             .OrderByDescending(x => x.CreatedAt).First();
         
         var playsWithoutTheLastPlay = plays.Where(x => 
-            !x.Player.Type.Equals(PlayerType.RealPlayer) && !x.Player.CreatedAt.Equals(newPlay.CreatedAt))
+            !x.PlayType.Equals(PlayType.Protagonist) && !x.CreatedAt.Equals(newPlay.CreatedAt))
             .OrderByDescending(x => x.CreatedAt);
 
         var lastPlays = "<last-plays>\n";
         foreach (var play in playsWithoutTheLastPlay)
         {
-            lastPlays += play.Player.Type switch
+            lastPlays += play.PlayType switch
             {
-                PlayerType.System => $"# Summary: \n",
-                PlayerType.Master => $"# Master Table: \n",
-                _ => $"# {play.Player.Name}(player): \n"
+                PlayType.Summary => $"# Summary: \n",
+                PlayType.GameMaster => $"# Master Table: \n",
+                _ => $"# {game.ProtagonistName}(player): \n"
             };
 
-            lastPlays += play.Prompt + "\n\n";
+            lastPlays += play.Response + "\n\n";
         }
         lastPlays += "\n</last-plays>\n";
 
         systemPrompt += lastPlays;
 
-        var userPrompt = $"{GetUserPrompt()}\n<user-play># {newPlay.Player.Name}(player):\n{newPlay.Prompt}</user-play>\n>";
+        var userPrompt = $"{GetUserPrompt()}\n<user-play># {game.ProtagonistName}(player):\n{newPlay.Response}</user-play>\n>";
 
         List<AiPromptRequest> promptList = [
             new(AiRole.System, systemPrompt),

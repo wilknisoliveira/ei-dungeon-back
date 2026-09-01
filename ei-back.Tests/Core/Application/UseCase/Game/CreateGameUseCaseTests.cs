@@ -39,10 +39,10 @@ namespace ei_back.Tests.Core.Application.UseCase.Game
 
             var request = new GameDtoRequest
             {
-                CharacterName = "Hero",
-                CharacterDescription = "A brave hero",
+                ProtagonistName = "Hero",
+                ProtagonistDescription = "A brave hero",
                 Name = "My Campaign",
-                Race = CharacterRace.Human,
+                ProtagonistRace = CharacterRace.Human,
                 Skills = new SkillsDtoRequest
                 {
                     Strength = 13,
@@ -85,10 +85,10 @@ namespace ei_back.Tests.Core.Application.UseCase.Game
         {
             var request = new GameDtoRequest
             {
-                CharacterName = "Hero",
-                CharacterDescription = "A brave hero",
+                ProtagonistName = "Hero",
+                ProtagonistDescription = "A brave hero",
                 Name = "My Campaign",
-                Race = CharacterRace.Human,
+                ProtagonistRace = CharacterRace.Human,
                 Skills = new SkillsDtoRequest()
             };
 
@@ -108,10 +108,10 @@ namespace ei_back.Tests.Core.Application.UseCase.Game
 
             var request = new GameDtoRequest
             {
-                CharacterName = "Hero",
-                CharacterDescription = "A brave hero",
+                ProtagonistName = "Hero",
+                ProtagonistDescription = "A brave hero",
                 Name = "My Campaign",
-                Race = CharacterRace.Human,
+                ProtagonistRace = CharacterRace.Human,
                 Skills = new SkillsDtoRequest
                 {
                     Strength = 8,

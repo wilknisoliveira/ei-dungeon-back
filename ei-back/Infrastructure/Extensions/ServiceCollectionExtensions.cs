@@ -34,7 +34,7 @@ namespace ei_back.Infrastructure.Extensions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-            services.AddScoped<IPlayerRepository, PlayerRepository>();
+
             services.AddScoped<IGameRepository, GameRepository>();
             services.AddScoped<IPlayRepository, PlayRepository>();
             services.AddScoped<IGameInfoRepository, GameInfoRepository>();

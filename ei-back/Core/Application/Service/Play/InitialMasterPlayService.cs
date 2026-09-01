@@ -58,18 +58,14 @@ namespace ei_back.Core.Application.Service.Play
                 };
             }
 
-            var masterPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.Master)) ??
-                throw new NotFoundException($"No Master player was found to the game {game.Id}");
-
-            var masterPlay = new Domain.Entity.Play(game, masterPlayer, completedResponse);
+            var masterPlay = new Domain.Entity.Play(game, PlayType.GameMaster, completedResponse);
             _ = await _playRepository.CreateAsync(masterPlay, cancellationToken) ??
                 throw new InternalServerErrorException("Something went wrong while attempting to create the master play");
         }
 
         private static string BuildInitialMasterPrompt(Domain.Entity.Game game)
         {
-            var realPlayer = game.Players.FirstOrDefault(x => x.Type.Equals(PlayerType.RealPlayer));
-            var playerInfo = realPlayer?.InfoToString() ?? "";
+            var playerInfo = game.InfoToString();
             return $"<guidance>\nYou are a tabletop RPG master in a Dungeons & Dragons campaign. " +
                    $"Remember that as the Table Master, you must NOT act as the player or dictate the player's actions. " +
                    $"The campaign player is described within the <player></player> tags.\n</guidance>\n" +

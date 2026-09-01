@@ -7,15 +7,15 @@ namespace ei_back.Core.Application.UseCase.Game.Dtos
     {
         [Required]
         [StringLength(50, MinimumLength = 4)]
-        public required string CharacterName { get; set; }
+        public required string ProtagonistName { get; set; }
         [Required]
         [StringLength(2000, MinimumLength = 4)]
-        public required string CharacterDescription { get; set; }
+        public required string ProtagonistDescription { get; set; }
         [Required]
         [StringLength(20, MinimumLength = 2)]
         public required string Name { get; set; }
         [Required]
-        public CharacterRace Race { get; set; }
+        public CharacterRace ProtagonistRace { get; set; }
         [Required]
         public GameLanguage GameLanguage { get; set; }
         [Required]

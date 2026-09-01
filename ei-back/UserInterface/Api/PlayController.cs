@@ -53,7 +53,7 @@ namespace ei_back.UserInterface.Api
         ///   - PageSize (int)
         ///   - TotalResults (int)
         ///   - SortDirection (string)
-        ///   - Items (PlayDtoResponse[]): Id, Prompt, CreatedAt, Player (PlayerDtoResponse)
+        ///   - Items (PlayDtoResponse[]): Id, PlayType, Response, CreatedAt
         ///
         /// Response 400: Invalid sort direction, page size, or page number.
         /// Response 404: Game not found or not owned by the authenticated user.

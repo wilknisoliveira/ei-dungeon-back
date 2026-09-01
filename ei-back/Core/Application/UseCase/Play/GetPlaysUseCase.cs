@@ -2,7 +2,6 @@
 using ei_back.Core.Application.Repository;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
-using ei_back.Core.Domain.Enums;
 using ei_back.Core.Application.Utils;
 using ei_back.Infrastructure.Exceptions.ExceptionTypes;
 
@@ -45,15 +44,14 @@ namespace ei_back.Core.Application.UseCase.Play
             var size = PaginationHelper.ValidateSize(pageSize);
             var offset = PaginationHelper.ValidateOffset(page, size);
 
-            var plays = await _playRepository.GetPlaysByGameAndSizeButSystemPlay(gameId, size, offset, sort, cancellationToken);
+            var plays = await _playRepository.GetPlaysByGameAndSizeButSummaryPlay(gameId, size, offset, sort, cancellationToken);
 
-            int totalResults = await _playRepository.CountPlaysByGameButSystemPlay(gameId, cancellationToken);   
+            int totalResults = await _playRepository.CountPlaysByGameButSummaryPlay(gameId, cancellationToken);   
 
             List<PlayDtoResponse> playDtoResponseList = [];
             foreach (var play in plays)
             {
                 var playDtoResponse = _mapper.Map<PlayDtoResponse>(play);
-                playDtoResponse.PlayerDtoResponse = _mapper.Map<PlayerDtoResponse>(play.Player);
                 playDtoResponseList.Add(playDtoResponse);
             }
 

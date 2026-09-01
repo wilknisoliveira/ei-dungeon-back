@@ -23,15 +23,11 @@ namespace ei_back.Infrastructure.Mappings
             //Game
             CreateMap<GameDtoRequest, Game>()
                 .ForMember(dest => dest.OwnerUser, opt => opt.Ignore())
-                .ForMember(dest => dest.Players, opt => opt.Ignore())
                 .ForMember(dest => dest.Plays, opt => opt.Ignore());
             CreateMap<Game, GameDtoResponse>();
 
             //Play
             CreateMap<Play, PlayDtoResponse>();
-
-            //Player
-            CreateMap<Player, PlayerDtoResponse>();
 
             //GameInfo
             CreateMap<GameInfo, GameInfoDto>();

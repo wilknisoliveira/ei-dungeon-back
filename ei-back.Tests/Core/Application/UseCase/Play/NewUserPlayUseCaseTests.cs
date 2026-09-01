@@ -5,6 +5,7 @@ using ei_back.Core.Application.Service.Play.Interfaces;
 using ei_back.Core.Application.UseCase.Play;
 using ei_back.Core.Application.UseCase.Play.Dtos;
 using ei_back.Core.Application.UseCase.Play.Interfaces;
+using ei_back.Core.Domain.Enums;
 using ei_back.Infrastructure.Context.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -63,7 +64,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
-                .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
+                .GetLastPlayByPlayTypeAndGameId(gameId, PlayType.Summary, cancellationToken))
                 .Returns(Task.FromResult<PlayEntity?>(null));
             A.CallTo(() => _playRepository.GetAllByGameId(gameId, cancellationToken))
                 .Returns(Task.FromResult<List<PlayEntity>>([]));
@@ -101,7 +102,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
-                .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
+                .GetLastPlayByPlayTypeAndGameId(gameId, PlayType.Summary, cancellationToken))
                 .Returns(Task.FromResult<PlayEntity?>(null));
             A.CallTo(() => _playRepository.GetAllByGameId(gameId, cancellationToken))
                 .Returns(Task.FromResult<List<PlayEntity>>([]));
@@ -133,7 +134,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
-                .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
+                .GetLastPlayByPlayTypeAndGameId(gameId, PlayType.Summary, cancellationToken))
                 .Returns(Task.FromResult<PlayEntity?>(null));
             A.CallTo(() => _playRepository.GetAllByGameId(gameId, cancellationToken))
                 .Returns(Task.FromResult<List<PlayEntity>>([]));
@@ -164,18 +165,16 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             var cancellationToken = CancellationToken.None;
 
             var game = CreateGameWithPlayers(gameId);
-            var systemPlayer = game.Players[2];
-            var realPlayer = game.Players[0];
-            var systemSummary = new PlayEntity(game, systemPlayer, "summary");
+            var systemSummary = new PlayEntity(game, PlayType.Summary, "summary");
 
             A.CallTo(() => _gameRepository.GetGameByIdAndOwnerUserName(gameId, userName, cancellationToken))
                 .Returns(Task.FromResult(game));
             A.CallTo(() => _playRepository
-                .GetLastPlayByPlayerTypeAndGameId(gameId, ei_back.Core.Domain.Entity.PlayerType.System, cancellationToken))
+                .GetLastPlayByPlayTypeAndGameId(gameId, PlayType.Summary, cancellationToken))
                 .Returns(Task.FromResult<PlayEntity?>(systemSummary));
             A.CallTo(() => _playRepository.GetPlayWhereCreatedAtIsUpperThan(gameId, systemSummary.CreatedAt, cancellationToken))
                 .Returns(Task.FromResult<List<PlayEntity>>([
-                    new PlayEntity(game, realPlayer, "user action")
+                    new PlayEntity(game, PlayType.Protagonist, "user action")
                 ]));
             A.CallTo(() => _playRepository.GetLastNBeforeDate(gameId, 3, systemSummary.CreatedAt, cancellationToken))
                 .Returns(Task.FromResult<List<PlayEntity>>([]));
@@ -211,24 +210,7 @@ namespace ei_back.Tests.Core.Application.UseCase.Play
             typeof(ei_back.Core.Domain.Entity.Base).GetProperty(nameof(ei_back.Core.Domain.Entity.Base.Id))!
                 .SetValue(game, gameId);
             game.SetWorldInfo("A fantasy world");
-
-            var realPlayer = new ei_back.Core.Domain.Entity.Player(
-                "Hero", "Brave adventurer", ei_back.Core.Domain.Enums.CharacterRace.Human,
-                ei_back.Core.Domain.Entity.PlayerType.RealPlayer);
-            typeof(ei_back.Core.Domain.Entity.Base).GetProperty(nameof(ei_back.Core.Domain.Entity.Base.Id))!
-                .SetValue(realPlayer, Guid.NewGuid());
-
-            var master = new ei_back.Core.Domain.Entity.Player(
-                "Table Master", "RPG Table Master", ei_back.Core.Domain.Entity.PlayerType.Master);
-            typeof(ei_back.Core.Domain.Entity.Base).GetProperty(nameof(ei_back.Core.Domain.Entity.Base.Id))!
-                .SetValue(master, Guid.NewGuid());
-
-            var system = new ei_back.Core.Domain.Entity.Player(
-                "System", "System", ei_back.Core.Domain.Entity.PlayerType.System);
-            typeof(ei_back.Core.Domain.Entity.Base).GetProperty(nameof(ei_back.Core.Domain.Entity.Base.Id))!
-                .SetValue(system, Guid.NewGuid());
-
-            game.SetPlayers(new List<ei_back.Core.Domain.Entity.Player> { realPlayer, master, system });
+            game.SetProtagonistInfo("Hero", "Brave adventurer", CharacterRace.Human);
 
             return game;
         }

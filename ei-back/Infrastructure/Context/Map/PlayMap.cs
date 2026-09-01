@@ -13,17 +13,14 @@ namespace ei_back.Infrastructure.Context.Map
             base.Configure(builder);
 
             builder.Property(x => x.GameId).HasColumnName("game_id").IsRequired();
-            builder.Property(x => x.PlayerId).HasColumnName("player_id").IsRequired();
-            builder.Property(x => x.Prompt).HasColumnName("prompt").IsRequired();
+            builder.Property(x => x.PlayType)
+                .HasColumnName("play_type")
+                .HasConversion<string>();
+            builder.Property(x => x.Response).HasColumnName("response").IsRequired();
 
             builder.HasOne(x=> x.Game)
                 .WithMany(x => x.Plays)
                 .HasForeignKey(x => x.GameId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(x => x.Player)
-                .WithMany(x => x.Plays)
-                .HasForeignKey(x => x.PlayerId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
