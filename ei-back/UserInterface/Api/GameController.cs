@@ -177,7 +177,7 @@ namespace ei_back.UserInterface.Api
         [HttpPatch("{gameId}")]
         [ProducesResponseType(typeof(GameDtoResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [Authorize(Roles = "Admin, PremiumUser")]
+        [Authorize(Roles = "Admin, CommonUser, PremiumUser")]
         public async Task<IActionResult> Update(Guid gameId, [FromBody] UpdateGameDtoRequest request, CancellationToken cancellationToken)
         {
             var userName = _getUserNameUseCase.Handler(User);
