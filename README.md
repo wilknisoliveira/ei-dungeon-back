@@ -15,7 +15,7 @@ EI Dungeon is an ASP.NET Core API for a role-playing game simulator with players
 - PostgreSQL with EF Core migrations
 - CORS
 - File and console logging
-- Health checks and dashboard
+- Health checks
 - Repository and Unit of Work patterns
 - Central exception handling
 - Localization
@@ -74,7 +74,6 @@ docker compose logs -f
 With the default environment values, open:
 
 - API health: <http://localhost:8080/health>
-- Health dashboard: <http://localhost:8080/healthDashboard>
 - Swagger UI in the `Development` environment: <http://localhost:8080/swagger>
 
 If port `8080` or `5432` is already occupied, change `BACKEND_PORT` or `POSTGRES_PORT` in `.env` and start the stack again.

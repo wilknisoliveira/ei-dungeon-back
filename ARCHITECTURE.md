@@ -7,7 +7,7 @@
 - **SignalR** hub at `/hubs` — JWT passed via `?access_token=` query param for WebSocket connections
 - **GenAI**: Gemini via `GeminiDotnet` (key: `keys:GeminiApiKey`), also has OpenAIApiToken unused
 - **xUnit** + **FakeItEasy** + **FluentAssertions** for tests
-- **Swagger** at `/swagger` (dev only), **Health** at `/health`, dashboard at `/healthDashboard`
+- **Swagger** at `/swagger` (dev only), **Health** at `/health`
 - **AutoMapper**, **Serilog** (file + console), **IStringLocalizer** for multi-language
 
 ## Project Layout (single-project Clean Architecture)
@@ -44,10 +44,10 @@ Each game has a `GameLanguage` (enum: `Portuguese`, `English`, `Spanish`; defaul
 - Enums serialized as strings (`JsonStringEnumConverter`).
 - All responses include `application/json` content type.
 
-## Deployment (Railway)
-- `railway.toml` at root — Docker build, start command `dotnet ei-back.dll`
-- Multi-stage Dockerfile uses .NET 9 SDK and ASP.NET Core runtime images
-- Final image runs as the non-root `app` user and exposes HTTP port 8080
+## Container Deployment
+- Multi-stage Dockerfile uses .NET 9 SDK and ASP.NET Core runtime images.
+- Final image runs as the non-root `app` user and exposes HTTP port 8080.
+- The target hosting platform is not yet defined.
 
 ## Local Docker Compose
 
@@ -68,5 +68,4 @@ The root `compose.yaml` defines two services:
 - PostgreSQL has a database-aware health check. Compose starts the backend only after that check passes.
 - Both Compose services use `restart: unless-stopped`, so Docker restarts them after failures or daemon restarts unless a user stopped them explicitly.
 - The backend retains `dbContext.Database.Migrate()` at application startup, so it applies pending migrations after the database becomes ready.
-- The Compose health dashboard URL is overridden to `http://localhost:<BACKEND_PORT>/health` inside the backend container because its JSON default is relative.
 - Service-scoped Compose commands manage `backend` without recreating or removing PostgreSQL. `docker compose down -v` is the explicit destructive database reset.

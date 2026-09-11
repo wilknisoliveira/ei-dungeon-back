@@ -30,22 +30,14 @@
 
 ### 1.2 PostgreSQL (Database)
 
-- **Provider:** Self-hosted or Railway-managed PostgreSQL
+- **Provider:** Self-hosted or managed by a provider that has not yet been selected
 - **Service:** Primary data store
 - **Authentication:** Connection string (`PostgresConnection:PostgresConnectionString`)
 - **Data stored:** All application entities (users, games, plays, players, refresh tokens, game info)
 - **Evidence:** `Program.cs:126`, `EIContext.cs`
-- **Deployment:** Railway platform (from `railway.toml`)
+- **Deployment:** Hosting platform not yet selected
 
-### 1.3 Railway (Hosting Platform)
-
-- **Provider:** Railway (`railway.app`)
-- **Service:** PaaS hosting for Docker container
-- **Configuration:** `railway.toml`
-- **Data:** Application runs within Railway's infrastructure; all data flows through the container
-- **Evidence:** `railway.toml`
-
-### 1.4 Microsoft Container Registry (Docker Images)
+### 1.3 Microsoft Container Registry (Docker Images)
 
 - **Provider:** Microsoft (`mcr.microsoft.com`)
 - **Service:** .NET runtime and SDK Docker images
@@ -115,5 +107,5 @@ The OpenRouter integration is the highest-risk third-party relationship because:
 |------------|-----------|-------------------|-------------------|
 | OpenRouter | Game content to LLM | NOT_VERIFIABLE | NOT_VERIFIABLE |
 | PostgreSQL | All app data | N/A (self-managed) | N/A |
-| Railway | Container hosting | NOT_VERIFIABLE | NOT_VERIFIABLE |
+| Hosting provider to be selected | Container hosting | NOT_VERIFIABLE | NOT_VERIFIABLE |
 | MCR | Build images only | N/A | N/A |

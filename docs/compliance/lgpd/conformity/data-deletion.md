@@ -123,10 +123,10 @@ Play (plays.game_id)
 - **Evidence:** The application sends data to OpenRouter during play interactions. There is no mechanism to request deletion of data previously sent to the LLM provider. OpenRouter's retention policies are external to the codebase.
 - **Note:** OpenRouter and OpenAI have their own data retention policies. The application has no control over or visibility into how long the provider retains prompts and completions.
 
-### 4.2 Railway Hosting
+### 4.2 Application Hosting
 
 - **Status:** NOT_VERIFIABLE
-- **Evidence:** Railway is the deployment platform. Data deletion would depend on Railway's infrastructure and the organization's management of the deployment.
+- **Evidence:** The future deployment platform has not been selected. Data deletion requirements must be evaluated when a hosting provider is chosen.
 
 ---
 

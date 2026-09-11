@@ -1,7 +1,0 @@
-[build]
-builder = "dockerfile"
-dockerfilePath = "./ei-back/Dockerfile"
-
-[deploy]
-startCommand = "dotnet ei-back.dll"
-restartPolicyType = "never"

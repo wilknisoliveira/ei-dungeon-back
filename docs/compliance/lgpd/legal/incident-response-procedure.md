@@ -15,7 +15,7 @@ The following are already available in the codebase:
 |-----------|---------------|----------|
 | Application logging | Serilog (console + rolling file) | `Infrastructure/Logs/logs.txt`, 7-day retention |
 | Exception logging | `AppExceptionHandler` logs stack traces at Error level | `Infrastructure/Exceptions/AppExceptionHandler.cs:30` |
-| Health monitoring | PostgreSQL health check + UI dashboard | `GET /health`, `/healthDashboard` |
+| Health monitoring | PostgreSQL health check | `GET /health` |
 | Rate limiting | IP-based sliding window (5 policies) | `Infrastructure/Extensions/ServiceCollectionExtensions.cs:97-160` |
 | HTTPS enforcement | `UseHttpsRedirection()` | `Program.cs:196` |
 | CORS | Configurable allowed origins | `Program.cs:103-113` |
@@ -41,7 +41,7 @@ The following are already available in the codebase:
 | **Unauthorized Access** | Account compromise, privilege escalation, bypass of auth controls | Art. 48 — assess if personal data was exposed |
 | **Service Disruption** | DDoS, infrastructure failure, database outage | Art. 48 — assess if availability of personal data is affected |
 | **Data Integrity** | Unauthorized modification of personal data | Art. 48 — assess scope of modified data |
-| **Third-Party Incident** | Security event at OpenRouter, Railway, or PostgreSQL provider | Art. 48 — assess if user data was affected |
+| **Third-Party Incident** | Security event at OpenRouter or the PostgreSQL/application hosting provider | Art. 48 — assess if user data was affected |
 | **Internal Misconfiguration** | Secrets exposed, CORS too permissive, logging PII | Assess exposure; may require notification |
 
 ---
@@ -254,7 +254,7 @@ Per ANPD guidance, notification may not be required when:
 | ANPD notification | Official submission | _[fill in email/form]_ |
 | Data subject notification | Email / in-app notification | _[fill in]_ |
 | Law enforcement | If criminal activity suspected | _[fill in]_ |
-| Third-party providers | OpenRouter, Railway support | _[fill in]_ |
+| Third-party providers | OpenRouter and hosting-provider support | _[fill in]_ |
 
 ---
 
@@ -424,10 +424,10 @@ During an incident, preserve:
 
 - [ ] Application logs (`Infrastructure/Logs/logs.txt`)
 - [ ] Database access logs (PostgreSQL logs)
-- [ ] Health check history (`/healthDashboard`)
+- [ ] Health check responses (`/health`)
 - [ ] Rate limiting logs (HTTP 429 responses)
 - [ ] Exception logs (`AppExceptionHandler` output)
-- [ ] Network logs (Railway platform logs)
+- [ ] Network logs from the hosting platform
 - [ ] Configuration snapshots (before and after changes)
 - [ ] Database backup (point-in-time if possible)
 - [ ] Access logs from third-party providers (OpenRouter)

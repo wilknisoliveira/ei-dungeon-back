@@ -28,7 +28,7 @@
 
 | Field | Value | Source |
 |-------|-------|--------|
-| **Provider** | PostgreSQL (self-hosted or Railway-managed) | `Program.cs:126` |
+| **Provider** | PostgreSQL (hosting provider not yet defined) | `Program.cs:126` |
 | **Service** | Primary data store | `EIContext.cs` |
 | **Data Stored** | All application entities | All Map files |
 | **Authentication** | Connection string | `Program.cs:126` |
@@ -36,17 +36,7 @@
 | **Contract/DPA** | NOT_VERIFIABLE | Depends on hosting arrangement |
 | **Data Location** | NOT_VERIFIABLE | Depends on deployment |
 
-### 1.3 Railway (Hosting Platform)
-
-| Field | Value | Source |
-|-------|-------|--------|
-| **Provider** | Railway (`railway.app`) | `railway.toml` |
-| **Service** | PaaS hosting for Docker container | `railway.toml` |
-| **Data** | Application runs within Railway infrastructure | `railway.toml` |
-| **Contract/DPA** | NOT_VERIFIABLE | No evidence in repository |
-| **Data Location** | NOT_VERIFIABLE | Railway infrastructure location unknown |
-
-### 1.4 Microsoft Container Registry
+### 1.3 Microsoft Container Registry
 
 | Field | Value | Source |
 |-------|-------|--------|
@@ -87,7 +77,6 @@
 |----------|------------------|--------------|-----------------|---------------------|
 | OpenRouter | NOT_VERIFIABLE | NOT_VERIFIABLE | NOT_VERIFIABLE | NOT_VERIFIABLE |
 | PostgreSQL | NOT_VERIFIABLE | NOT_VERIFIABLE | NOT_VERIFIABLE | NOT_VERIFIABLE |
-| Railway | NOT_VERIFIABLE | NOT_VERIFIABLE | NOT_VERIFIABLE | NOT_VERIFIABLE |
 
 ---
 
@@ -106,7 +95,8 @@ To complete this document, the following information is needed:
    - If managed, which provider?
    - Is there a DPA with the database provider?
 
-3. **Railway:**
-   - Is there a contract with Railway?
-   - Where are Railway's servers located?
-   - What are Railway's data handling policies?
+3. **Hosting platform:**
+   - Which provider will host the application?
+   - Is there a contract and DPA with that provider?
+   - Where are the provider's servers located?
+   - What are the provider's data handling policies?

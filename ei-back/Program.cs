@@ -3,10 +3,8 @@ using ei_back.Infrastructure.Exceptions;
 using ei_back.Infrastructure.Mappings;
 using ei_back.Infrastructure.Swagger;
 using ei_back.Infrastructure.Token;
-using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -128,9 +126,6 @@ builder.Services.AddDbContext<EIContext>(options => options.UseNpgsql(
 builder.Services.AddHealthChecks()
     .AddNpgSql(connection, name: "Postgres Check", tags: new string[] { "db", "data" });
 
-builder.Services.AddHealthChecksUI()
-    .AddInMemoryStorage();
-
 //AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingsProfile));
 
@@ -171,16 +166,7 @@ if (app.Environment.IsDevelopment())
 }
 
 //Health Check
-app.UseHealthChecks("/health", new HealthCheckOptions()
-{
-    Predicate = _ => true,
-    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-});
-
-app.UseHealthChecksUI(options =>
-{
-    options.UIPath = "/healthDashboard";
-});
+app.UseHealthChecks("/health");
 
 //Map Web Socket
 app.MapHub<ExampleHub>("/hubs");

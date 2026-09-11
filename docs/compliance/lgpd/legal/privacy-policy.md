@@ -91,14 +91,14 @@ Based on technical evidence:
 |-------------|---------------------|-------------------|
 | OpenRouter (API) | Informações do personagem, texto de jogadas, world info, resumos | Geração de conteúdo por IA |
 | OpenAI (via OpenRouter) | Mesmos dados acima | Modelo de linguagem |
-| Railway | Hospedagem da aplicação | Infraestrutura |
+| Provedor de hospedagem a definir | Hospedagem da aplicação | Infraestrutura |
 | PostgreSQL | Todos os dados da aplicação | Armazenamento |
 
 **NOT_VERIFIABLE:** Contractual terms, DPAs, and data handling policies with these providers.
 
 ### 7. Transferência Internacional de Dados / International Data Transfer
 
-**NOT_VERIFIABLE** — The servers of OpenRouter, OpenAI, and Railway may be located outside Brazil. This must be verified.
+**NOT_VERIFIABLE** — The servers of OpenRouter, OpenAI, and the future hosting provider may be located outside Brazil. This must be verified.
 
 ### 8. Retenção de Dados / Data Retention
 

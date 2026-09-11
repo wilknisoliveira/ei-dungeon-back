@@ -253,7 +253,7 @@ PostgreSQL Database (ei_db schema)
 |-------------|-----------|---------|----------------|----------|
 | OpenRouter API → OpenAI | Player info, WorldInfo, play history, summaries | Every play interaction | API key (`keys:OpenRouterApiKey`) | `GenAi.cs:30-36` |
 | PostgreSQL | All application data | All CRUD operations | Connection string | `Program.cs:126` |
-| Railway PaaS | Application container | Deployment | Railway platform auth | `railway.toml` |
+| Hosting platform to be selected | Application container | Deployment | NOT_VERIFIABLE | No provider configuration yet |
 
 ---
 

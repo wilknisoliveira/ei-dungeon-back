@@ -124,7 +124,7 @@ The application implements solid technical security controls:
 1. No organizational security policy document
 2. No incident response procedure
 3. No access control policy beyond RBAC
-4. No vendor assessment for OpenRouter/Railway
+4. No vendor assessment for OpenRouter or the future hosting provider
 5. No backup policy visible in repository
 6. No HSTS headers
 7. No account lockout mechanism

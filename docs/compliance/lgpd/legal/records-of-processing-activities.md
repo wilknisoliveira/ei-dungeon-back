@@ -145,7 +145,7 @@ The following information is required to complete the ROPA but cannot be determi
 2. **Organizational purposes:** What are the stated purposes for each processing activity?
 3. **Legal bases:** Which legal basis has been selected for each processing activity?
 4. **DPO information:** Who is the Data Protection Officer?
-5. **Contracts with processors:** Are there DPAs with OpenRouter, Railway, PostgreSQL hosting?
+5. **Contracts with processors:** Are there DPAs with OpenRouter and the future PostgreSQL or application hosting providers?
 6. **Organizational retention decisions:** What are the official retention periods?
 7. **Backup policies:** Are there database backups outside the repository?
 8. **Incident history:** Have there been any data security incidents?
