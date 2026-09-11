@@ -1,7 +1,7 @@
 # EI Dungeon Backend — Architecture
 
 ## Stack
-- **.NET 9** ASP.NET Core (csproj: `net9.0`, but Dockerfile uses `mcr.microsoft.com/dotnet/aspnet:8.0` — mismatch)
+- **.NET 9** ASP.NET Core (`net9.0`; Docker SDK and runtime images also use .NET 9)
 - **PostgreSQL** + EF Core 8 + Npgsql
 - **JWT** auth with roles: `Admin`, `CommonUser`, `PremiumUser`
 - **SignalR** hub at `/hubs` — JWT passed via `?access_token=` query param for WebSocket connections
@@ -46,5 +46,27 @@ Each game has a `GameLanguage` (enum: `Portuguese`, `English`, `Spanish`; defaul
 
 ## Deployment (Railway)
 - `railway.toml` at root — Docker build, start command `dotnet ei-back.dll`
-- Dockerfile uses .NET 8 (note: project targets .NET 9)
-- Exposes 8080/8081
+- Multi-stage Dockerfile uses .NET 9 SDK and ASP.NET Core runtime images
+- Final image runs as the non-root `app` user and exposes HTTP port 8080
+
+## Local Docker Compose
+
+The root `compose.yaml` defines two services:
+
+```text
+.env
+  └─> Docker Compose substitutions
+        ├─> backend (ASP.NET Core environment variables)
+        │     └─> depends on postgres: service_healthy
+        └─> postgres (database, user, password)
+              └─> postgres_data named volume
+```
+
+- Developers copy `.env.example` to the Git-ignored `.env`. Compose explicitly maps those values to nested ASP.NET Core keys using double underscores; container environment values override `appsettings.json`.
+- The backend connects to host `postgres` on the internal Compose network. Host ports for the backend and PostgreSQL remain configurable through `.env`.
+- PostgreSQL 16 runs `docker/postgres/init-uuid-ossp.sql` only when initializing a fresh named volume. This makes `uuid_generate_v4()` available to the historical EF migrations.
+- PostgreSQL has a database-aware health check. Compose starts the backend only after that check passes.
+- Both Compose services use `restart: unless-stopped`, so Docker restarts them after failures or daemon restarts unless a user stopped them explicitly.
+- The backend retains `dbContext.Database.Migrate()` at application startup, so it applies pending migrations after the database becomes ready.
+- The Compose health dashboard URL is overridden to `http://localhost:<BACKEND_PORT>/health` inside the backend container because its JSON default is relative.
+- Service-scoped Compose commands manage `backend` without recreating or removing PostgreSQL. `docker compose down -v` is the explicit destructive database reset.

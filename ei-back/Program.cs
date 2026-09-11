@@ -13,7 +13,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Globalization;
-using System.Reflection;
 using System.Text;
 using ei_back.UserInterface.Hubs;
 using ei_back.Infrastructure.Extensions;
@@ -36,10 +35,6 @@ var logger = new LoggerConfiguration()
 
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
-
-//Environment
-builder.Configuration.AddEnvironmentVariables()
-    .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 //Deploy
 //var port = Environment.GetEnvironmentVariable("PORT") ?? "8081";
