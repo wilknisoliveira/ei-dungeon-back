@@ -178,6 +178,21 @@ dotnet build .\ei-back\ei-back.csproj
 dotnet test .\ei-back.Tests\ei-back.Tests.csproj
 ```
 
+## Container image pipeline
+
+The [GitHub Actions workflow](.github/workflows/container.yml) builds the application, runs unit tests, and builds the Linux AMD64 Docker image on pull requests targeting `main` and pushes to `main`. A failed build or test prevents the container job from running.
+
+Only pushes to `main` publish to GitHub Container Registry:
+
+- `ghcr.io/wilknisoliveira/ei-dungeon-back:latest`
+- `ghcr.io/wilknisoliveira/ei-dungeon-back:sha-<full-commit-sha>`
+
+Use the commit tag to select a specific build. The workflow uses the built-in `GITHUB_TOKEN` with package write permission; no Docker Hub account or custom registry secret is required. GitHub Actions and package publishing must be allowed by repository or organization policies. Package visibility and access are managed separately in GitHub package settings.
+
+Pull requests never log in to the registry or publish images. Database credentials, the JWT secret, and AI API keys are only needed when running the application. This workflow does not deploy the application or change the local Docker Compose setup.
+
+To require these checks before merging, configure a branch protection rule or ruleset for `main` requiring `Build and test` and `Build container (publish on main)`.
+
 
 ## Author
 

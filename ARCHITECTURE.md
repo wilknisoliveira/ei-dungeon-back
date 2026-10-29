@@ -49,6 +49,13 @@ Each game has a `GameLanguage` (enum: `Portuguese`, `English`, `Spanish`; defaul
 - Final image runs as the non-root `app` user and exposes HTTP port 8080.
 - The target hosting platform is not yet defined.
 
+## Container CI
+- `.github/workflows/container.yml` runs on pull requests targeting `main` and pushes to `main`.
+- A .NET 9 job restores dependencies, builds the application and tests in Release mode, and runs unit tests. The container job requires this job to pass.
+- Docker Buildx builds `ei-back/Dockerfile` with the repository root as context for Linux AMD64, reusing GitHub Actions build cache.
+- Pull requests build without publishing or registry login. Pushes to `main` publish `ghcr.io/<owner>/<repository>:sha-<full-commit-sha>` and `:latest` using the built-in `GITHUB_TOKEN` with `packages: write` permission.
+- Database credentials, JWT secrets, and AI keys are supplied at runtime, not during CI. Deployment remains outside this workflow.
+
 ## Local Docker Compose
 
 The root `compose.yaml` defines two services:
