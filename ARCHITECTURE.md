@@ -47,7 +47,8 @@ Each game has a `GameLanguage` (enum: `Portuguese`, `English`, `Spanish`; defaul
 ## Container Deployment
 - Multi-stage Dockerfile uses .NET 9 SDK and ASP.NET Core runtime images.
 - Final image runs as the non-root `app` user and exposes HTTP port 8080.
-- The target hosting platform is not yet defined.
+- The deployment target is an Ubuntu 24.04 VPS. Host Nginx terminates HTTPS for `dungeon.wildforges.com` and `api.dungeon.wildforges.com`; Certbot's Nginx plugin manages certificates and automatic renewal. Infrastructure bootstrap and deployment instructions live in the sibling `../infra` repository.
+- The sibling `../infra/compose.yaml` defines the `dungeon-production` stack using versioned GHCR image references supplied through a Git-ignored `.env`, frontend `127.0.0.1:8000`, and backend `127.0.0.1:8080`. PostgreSQL 16 has a persistent named volume, no published port, and an internal network shared only with the backend. A second backend network allows outbound AI requests. Database health gates backend startup; fresh volumes initialize `uuid-ossp`. Container logs rotate. `../infra/DEPLOYMENT.md` documents manual deployment, backups, and independent application updates. The local Compose remains unchanged. `AddTrustedReverseProxy` configures one-hop `X-Forwarded-For`/`X-Forwarded-Proto` processing; `UseForwardedHeaders` runs first in the request pipeline. `ReverseProxy:KnownProxies` adds explicit comma-separated IPs to framework loopback trust and rejects malformed addresses. Production Compose supplies the backend bridge gateway through `ReverseProxy__KnownProxies` and configures a predictable bridge subnet/gateway. A new backend image is required to deploy this behavior.
 
 ## Container CI
 - `.github/workflows/container.yml` runs on pull requests targeting `main` and pushes to `main`.

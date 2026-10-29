@@ -17,6 +17,7 @@ using ei_back.Infrastructure.Extensions;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddTrustedReverseProxy(builder.Configuration);
 
 //Logs
 builder.Logging.ClearProviders();
@@ -157,6 +158,9 @@ builder.Services.AddInfraHttpClients();
 builder.Services.AddGenAiClient();
 
 var app = builder.Build();
+
+// Restore the original scheme and client IP before request processing.
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
